@@ -23,7 +23,7 @@ Revision B.1, engineering validation (EVT). All dimensions are in mm.
 
 ## Case board
 
-40 × 26 mm rounded rectangle (R3), 2-layer 1.0 mm FR-4. Charge path: USB-C, BQ24075, LP602525 300 mAh cell, TPS61099 5 V boost, SY6280 current limit, two pogo pins. A DRV5032 hall sensor and the lid magnet switch the pins off when the lid is open.
+40 × 26 mm rounded rectangle (R3), 2-layer 1.0 mm FR-4. Charge path: USB-C, BQ24073, LP602525 300 mAh cell, TPS61099 5 V boost, SY6280 current limit, two pogo pins. A DRV5032 hall sensor and the lid magnet switch the pins off when the lid is open, and a TLV803 supervisor holds the boost off below 2.93 V.
 
 ## Open items (EVT)
 
