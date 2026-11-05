@@ -1,0 +1,74 @@
+{
+ "green, as drawn, slot": {
+  "nominal": 8.714520309817288e-12,
+  "low_scatter": 2.510556490762977e-10
+ },
+ "green, turned, open, 6 mm": {
+  "nominal": 9.31365518358381e-11,
+  "low_scatter": 1.8759472063990227e-09
+ },
+ "green, turned, open, 3.5 mm": {
+  "nominal": 3.84686369917716e-08,
+  "low_scatter": 1.760824425170905e-07
+ },
+ "IR near slot 50 mA": {
+  "nominal": 6.647661222170073e-07,
+  "low_scatter": 1.4517951536835206e-06
+ },
+ "IR far 50 mA": {
+  "nominal": 5.602021464882696e-09,
+  "low_scatter": 4.002997198618196e-08
+ },
+ "led_Oe1.6 on package centre (spec)": {
+  "green": 3.880414503901818e-08,
+  "f_led": 0.3985921434796026,
+  "far": 5.122840576099455e-09,
+  "f_led_ir": 0.4045728206208301
+ },
+ "led_Oe1.6 on the green chip": {
+  "green": 8.863046950459234e-08,
+  "f_led": 0.43506888670030763,
+  "far": 4.317610778348606e-09,
+  "f_led_ir": 0.3093481151072715
+ },
+ "led_Oe2.0 on package centre": {
+  "green": 6.768785626999371e-08,
+  "f_led": 0.5038858556082726,
+  "far": 6.365106719199866e-09,
+  "f_led_ir": 0.5077926493799716
+ },
+ "led_Oe2.0 on package centre, LED 0.2 mm nearer window": {
+  "green": 8.596153667742254e-08,
+  "f_led": 0.6109466667683398,
+  "far": 7.599307171023967e-09,
+  "f_led_ir": 0.6162922611755187
+ },
+ "led_Oe1.6 on the green chip, LED 0.2 mm nearer window": {
+  "green": 1.0832827521587318e-07,
+  "f_led": 0.5569303601629347,
+  "far": 5.186183719074243e-09,
+  "f_led_ir": 0.3830854704253779
+ },
+ "pd_2.8 x 2.8, 0.15 mm gap (spec)": {
+  "green": 3.861642004260035e-08,
+  "vign": 0.3651159831240705
+ },
+ "pd_3.4 x 3.4, 0.15 mm gap": {
+  "green": 7.465694123589492e-08,
+  "vign": 0.2704121030605748
+ },
+ "pd_3.4 x 3.4, 0.05 mm gap": {
+  "green": 7.767498182186897e-08,
+  "vign": 0.2799480377507809
+ },
+ "pd_2.8 x 2.8, 0.05 mm gap": {
+  "green": 4.121602021454369e-08,
+  "vign": 0.386262840841196
+ },
+ "needs_light|nominal": 2.103406630866886,
+ "needs_medium|nominal": 4.4439945495242155,
+ "needs_dark|nominal": 17.51669322070312,
+ "needs_very_dark|nominal": 65.46646343863142,
+ "needs_medium|high": 47.99284985952066,
+ "needs_very_dark|high": 696.9544629783651
+}
