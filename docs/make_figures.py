@@ -49,6 +49,7 @@ FONT_STACK = "'Helvetica Neue', Helvetica, Arial, sans-serif"
 plt.rcParams.update({
     "font.family": ["Helvetica Neue", "DejaVu Sans"],
     "svg.fonttype": "none",
+    "svg.hashsalt": "atrium",
     "text.color": INK,
     "savefig.facecolor": PAPER,
     "figure.facecolor": PAPER,
@@ -59,7 +60,7 @@ def save(fig, name):
     import os
 
     path = OUT / name
-    fig.savefig(path, bbox_inches="tight", pad_inches=0.3)
+    fig.savefig(path, bbox_inches="tight", pad_inches=0.3, metadata={"Date": None})
     if os.environ.get("ATRIUM_PREVIEW"):
         fig.savefig(Path(os.environ["ATRIUM_PREVIEW"]) / name.replace(".svg", ".png"), bbox_inches="tight", pad_inches=0.3, dpi=110)
     plt.close(fig)
@@ -379,7 +380,7 @@ def system():
     wire(ax, [(prot["r"], 4.48), (buck["l"], 4.48)], "VBAT")
 
     usb = tile(ax, 0.9, 0.75, 1.9, 1.0, "USB-C", "5 V in", IO)
-    cc = tile(ax, 3.2, 0.75, 2.4, 1.0, "BQ24075", "charger · power path", Pw)
+    cc = tile(ax, 3.2, 0.75, 2.4, 1.0, "BQ24073", "charger · power path", Pw)
     cb = tile(ax, 6.0, 0.75, 2.0, 1.0, "LP602525", "300 mAh", Pw)
     bo = tile(ax, 8.4, 0.75, 2.0, 1.0, "TPS61099", "5 V boost", Pw)
     li = tile(ax, 10.8, 0.75, 2.0, 1.0, "SY6280", "current limit", Pw)
