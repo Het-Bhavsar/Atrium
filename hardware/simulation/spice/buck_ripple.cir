@@ -1,0 +1,32 @@
+* S5c. Behavioural PFM buck 1.8 V from VBAT with L1 = 2.2 uH, C4 derated, under radio and AFE load steps.
+* TPS62840 is DCS-Control, here a simple comparator-driven valley PFM with a fixed on-time. No vendor model runs in ngspice, so this
+* checks ripple scale and droop only: it is not a stability proof. On-time follows Ton ~ Vout/Vin * 1/fsw, fsw about 1.8 MHz [VERIFY].
+.param Vin=3.7 L=2.2u Cout=6u ESR=6m Vref=1.8 Ton=270n Rdson=0.5
+Vin vin 0 {Vin}
+* one-shot on comparator: on when vout < Vref, stays on for Ton via an RC timer
+Bcmp cmp 0 V = (v(vo) < {Vref}) ? 1 : 0
+Bset ton 0 V = (v(cmp)>0.5 || v(tmr)>0.5) ? 1 : 0
+Rt tmr_in tmr 1k
+Ct tmr 0 {Ton/1k/0.693} ic=0
+Bt tmr_in 0 V = v(cmp)>0.5 ? 1 : 0
+Sh vin sw ton 0 hs
+.model hs sw(vt=0.5 vh=0.05 ron={Rdson} roff=1e8)
+Dl 0 sw dfly
+.model dfly d(is=1e-9 n=1.02 rs=0.3 cjo=5p)
+L1 sw vo {L} ic=0
+Cout vo x {Cout} ic=1.8
+Resr x 0 {ESR}
+* load: idle 150 uA, AFE 1 mA burst, radio 8 mA burst, 2 ms and 3 ms
+Iidle vo 0 150u
+Iafe vo 0 PULSE(0 1m 1m 5u 5u 400u 5m)
+Irf vo 0 PULSE(0 8m 2m 5u 5u 1.5m 10m)
+.tran 10n 12m uic
+.control
+run
+meas tran vmin MIN v(vo) from=1m to=12m
+meas tran vmax MAX v(vo) from=1m to=12m
+meas tran ipk MAX i(L1) from=1m to=12m
+echo "buck_done"
+quit
+.endc
+.end

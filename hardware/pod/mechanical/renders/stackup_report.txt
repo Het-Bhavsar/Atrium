@@ -1,0 +1,46 @@
+ATRIUM REV B.1 MECHANICAL STACK-UP CHECK
+================================================================
+Pod z-stack (skin face z = 0), mm:
+  top shell                     0.50  +/-0.05
+  window plate                  0.50  +/-0.03
+  rib / rim height              1.00  +/-0.03
+  PCB 0.6 (JLC +/-10 %)         0.60  +/-0.06
+  top-part zone (allocated)     0.90  +/-0.00
+  PI tape                       0.05  +/-0.01
+  cell (nominal)                3.00  +/-0.20  [ASSUMED tol]
+  gap above cell (PORON)        0.45
+  outer height                  7.00
+  tallest top part under the cell: U3 0.83 (zone allocates 0.9)
+
+Cell swell 10 % vs gap above the cell (PORON free 0.50, solid 0.10):
+[PASS] swell nominal 3.0, zone 0.9: gap 0.450 - swell 0.300 - PORON solid 0.10 = +0.050 mm (PORON at 70 % compression)
+[PASS] swell nominal 3.0, cell on U3 0.83: gap 0.520 - swell 0.300 - PORON solid 0.10 = +0.120 mm (PORON at 56 % compression)
+[FAIL] swell RSS tolerances: gap 0.225 - swell 0.300 - PORON solid 0.10 = -0.175 mm
+[FAIL] swell worst-case tolerances: gap 0.020 - swell 0.300 - PORON solid 0.10 = -0.380 mm
+[FAIL] swell sheet max 3.5: gap -0.050 - swell 0.350 - PORON solid 0.10 = -0.500 mm
+  -> worst-case pass needs outer height >= 7.38 mm (3.0 cell)
+  -> sheet-max cell needs outer height >= 7.50 mm (nominal tolerances)
+[FAIL] cell footprint vs battery zone: sheet max 20.5 x 11.0 vs zone 20 x 10; parts under the larger footprint tallest U3 0.83 (<= 0.9), end at x 23.5 (< 24)
+
+Skin side:
+[PASS] skin part D2: h 0.55, clearance to window 0.42 at rib -0.03
+[PASS] skin part PD1: h 0.90, clearance to window 0.07 at rib -0.03
+[PASS] skin part U4: h 0.80, clearance to window 0.17 at rib -0.03
+[PASS] skin part C20: h 0.30, clearance to window 0.67 at rib -0.03
+[PASS] skin part PD2: h 0.90, clearance to window 0.07 at rib -0.03
+[PASS] skin part D1: h 0.30, clearance to window 0.67 at rib -0.03
+[FAIL] LED|PD1 rib width: 0.45 mm between D2 and PD1 bodies (window-plane frame 0.80); PC micro-moulding wants >= 0.6 [VERIFY with moulder]
+[PASS] TMP gap pad, U4 typ 0.75: gap 0.25, pad 0.3 free -> 17 % compression
+[PASS] TMP gap pad, U4 max 0.8: gap 0.20, pad 0.3 free -> 33 % compression
+
+Antenna and metal keep-out:
+[PASS] raised antenna room: top 5.20 vs ceiling 6.50
+[PASS] shell material: plastic only, no inserts (by construction)
+[PASS] x < 24: thermal_button_316L: max x 15.50
+[PASS] x < 24: cell_insulator_pi_tape: max x 23.00
+[PASS] x < 24: cell_301020: max x 23.00
+[PASS] x < 24: tab_pos: max x 4.30
+[PASS] x < 24: tab_neg: max x 4.30
+[PASS] x < 24: poron_swell_pad: max x 22.50
+
+FAILED: swell RSS tolerances, swell worst-case tolerances, swell sheet max 3.5, cell footprint vs battery zone, LED|PD1 rib width

@@ -1,0 +1,25 @@
+ATRIUM CASE FIT CHECK
+================================================================
+Case:
+[PASS] pogo engagement: cradle floor 11.62, barrel top 11.50, plunger tip 13.10 = pad face 13.10
+[PASS] pogo stroke: working compression 0.6 vs max stroke 1.2 [VERIFY part drawing]
+[PASS] plunger in window hole: radial 0.30 vs pocket float 0.15
+[FAIL] USB-C J1 vs docked pod: overlap 9.69 mm3: J1 rear y 6.8, top 12.50; pod skin y 5.5, z 11.62. Needs pod/pins +1.6 mm in y, or J1 1.2 mm lower
+[PASS] case cell swell (6.3 max +10 %): pocket 7.2 - 6.93 - foam solid 0.24 = +0.03
+[PASS] case cell footprint (max): x 12.6-39.6 in -0.2-41.2, w 25.5 in 26.4
+[PASS] hall closed: magnet face 1.40 mm above die: 169 mT vs BOP max 4.8 mT x2
+[PASS] hall open (lid 100 deg): 58.9 mm: 0.015 mT vs BRP min 0.5 mT (on-axis bound)
+    lid 10 deg:   8.0 mm,   4.41 mT
+    lid 20 deg:  14.5 mm,   0.87 mT
+    lid 30 deg:  21.0 mm,   0.31 mT
+
+    lid at  10 deg: overlap 0.0007 mm3
+    lid at  30 deg: overlap 0.0000 mm3
+    lid at  60 deg: overlap 0.0000 mm3
+    lid at  90 deg: overlap 0.0000 mm3
+    lid at 110 deg: overlap 0.0000 mm3
+[PASS] lid swing 10-110 deg: max overlap 0.0007 mm3 with base, cradle and pod
+
+Case outer: 44.4 x 29.4 x 19.9 mm (hinge knuckles add 1.5 mm)
+
+FAILED: USB-C J1 vs docked pod

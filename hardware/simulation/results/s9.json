@@ -1,0 +1,255 @@
+{
+ "buck": {
+  "ton": 2.7048648648648643e-07,
+  "ipk": 0.23360196560196556,
+  "pulse": 5.559999999999998e-07,
+  "q": 6.49413464373464e-08,
+  "rows": {
+   "1.5": {
+    "M_pH": 237.037037037037,
+    "v_uV": 204.7138047138047,
+    "q_fC": 13.306397306397304,
+    "i_pA": 113.63276948247058,
+    "i_shield_pA": 34.08983084474117
+   },
+   "2": {
+    "M_pH": 99.99999999999999,
+    "v_uV": 86.36363636363636,
+    "q_fC": 5.613636363636363,
+    "i_pA": 47.93882462541728,
+    "i_shield_pA": 14.381647387625183
+   },
+   "3": {
+    "M_pH": 29.629629629629626,
+    "v_uV": 25.589225589225588,
+    "q_fC": 1.663299663299663,
+    "i_pA": 14.204096185308822,
+    "i_shield_pA": 4.2612288555926465
+   },
+   "4": {
+    "M_pH": 12.499999999999998,
+    "v_uV": 10.795454545454545,
+    "q_fC": 0.7017045454545454,
+    "i_pA": 5.99235307817716,
+    "i_shield_pA": 1.7977059234531478
+   },
+   "5": {
+    "M_pH": 6.399999999999999,
+    "v_uV": 5.5272727272727264,
+    "q_fC": 0.3592727272727272,
+    "i_pA": 3.068084776026705,
+    "i_shield_pA": 0.9204254328080116
+   },
+   "7": {
+    "M_pH": 2.332361516034985,
+    "v_uV": 2.014312218393851,
+    "q_fC": 0.1309302941956003,
+    "i_pA": 1.1181066968027351,
+    "i_shield_pA": 0.33543200904082054
+   }
+  }
+ },
+ "cpwg": {
+  "3313 0.0994 mm, er 4.1 g0.1": {
+   "w": 0.1890930831591088,
+   "ee": 3.0038126088077344
+  },
+  "3313 0.0994 mm, er 4.1 g0.127": {
+   "w": 0.19564865391138178,
+   "ee": 3.0577079590997878
+  },
+  "3313 0.0994 mm, er 4.1 g0.15": {
+   "w": 0.19964162521653148,
+   "ee": 3.094927673643146
+  },
+  "3313 0.0994 mm, er 4.1 g0.2": {
+   "w": 0.20574171515187328,
+   "ee": 3.157701834280293
+  },
+  "2116 0.1164 mm, er 4.16 g0.1": {
+   "w": 0.21323357654411454,
+   "ee": 3.003344693886362
+  },
+  "2116 0.1164 mm, er 4.16 g0.127": {
+   "w": 0.2217511122690044,
+   "ee": 3.0581979790101803
+  },
+  "2116 0.1164 mm, er 4.16 g0.15": {
+   "w": 0.22689845849490786,
+   "ee": 3.0964691012794567
+  },
+  "2116 0.1164 mm, er 4.16 g0.2": {
+   "w": 0.23461407503987033,
+   "ee": 3.1616854669567536
+  },
+  "1080 0.0764 mm, er 3.91 g0.1": {
+   "w": 0.1562084973417085,
+   "ee": 2.945789055561486
+  },
+  "1080 0.0764 mm, er 3.91 g0.127": {
+   "w": 0.16056266236220407,
+   "ee": 2.995529669791429
+  },
+  "1080 0.0764 mm, er 3.91 g0.15": {
+   "w": 0.1632907892507229,
+   "ee": 3.0293503216545807
+  },
+  "1080 0.0764 mm, er 3.91 g0.2": {
+   "w": 0.16760230978126528,
+   "ee": 3.0855940583604045
+  }
+ },
+ "link": {
+  "datasheet-style free space|0|phone in hand": {
+   "margin_at_1m": 42.8,
+   "range_m": 51.52286445817565
+  },
+  "datasheet-style free space|0|phone in far pocket": {
+   "margin_at_1m": 23.799999999999997,
+   "range_m": 8.953647655495935
+  },
+  "datasheet-style free space|0|phone on desk, 5 m office": {
+   "margin_at_1m": 36.8,
+   "range_m": 29.648313895243422
+  },
+  "datasheet-style free space|4|phone in hand": {
+   "margin_at_1m": 46.8,
+   "range_m": 74.47319739059888
+  },
+  "datasheet-style free space|4|phone in far pocket": {
+   "margin_at_1m": 27.799999999999997,
+   "range_m": 12.941958414499856
+  },
+  "datasheet-style free space|4|phone on desk, 5 m office": {
+   "margin_at_1m": 40.8,
+   "range_m": 42.85485203974394
+  },
+  "on head, as designed|0|phone in hand": {
+   "margin_at_1m": 32.975241361772916,
+   "range_m": 20.84537222346658
+  },
+  "on head, as designed|0|phone in far pocket": {
+   "margin_at_1m": 13.975241361772923,
+   "range_m": 3.622510512552945
+  },
+  "on head, as designed|0|phone on desk, 5 m office": {
+   "margin_at_1m": 26.975241361772916,
+   "range_m": 11.99525968604132
+  },
+  "on head, as designed|4|phone in hand": {
+   "margin_at_1m": 36.975241361772916,
+   "range_m": 30.130730047801055
+  },
+  "on head, as designed|4|phone in far pocket": {
+   "margin_at_1m": 17.975241361772923,
+   "range_m": 5.236120764789242
+  },
+  "on head, as designed|4|phone on desk, 5 m office": {
+   "margin_at_1m": 30.975241361772916,
+   "range_m": 17.33842541062943
+  },
+  "on head, cell ends at x=21|0|phone in hand": {
+   "margin_at_1m": 34.36797155510031,
+   "range_m": 23.69839108596872
+  },
+  "on head, cell ends at x=21|0|phone in far pocket": {
+   "margin_at_1m": 15.367971555100304,
+   "range_m": 4.118308366922322
+  },
+  "on head, cell ends at x=21|0|phone on desk, 5 m office": {
+   "margin_at_1m": 28.36797155510031,
+   "range_m": 13.637000681501279
+  },
+  "on head, cell ends at x=21|4|phone in hand": {
+   "margin_at_1m": 38.36797155510031,
+   "range_m": 34.25459697834995
+  },
+  "on head, cell ends at x=21|4|phone in far pocket": {
+   "margin_at_1m": 19.367971555100304,
+   "range_m": 5.952766701745237
+  },
+  "on head, cell ends at x=21|4|phone on desk, 5 m office": {
+   "margin_at_1m": 32.36797155510031,
+   "range_m": 19.71146313873126
+  },
+  "on head, cell tied to ground at the antenna end|0|phone in hand": {
+   "margin_at_1m": 33.684923894891725,
+   "range_m": 22.253429793623045
+  },
+  "on head, cell tied to ground at the antenna end|0|phone in far pocket": {
+   "margin_at_1m": 14.684923894891732,
+   "range_m": 3.867202873787419
+  },
+  "on head, cell tied to ground at the antenna end|0|phone on desk, 5 m office": {
+   "margin_at_1m": 27.684923894891725,
+   "range_m": 12.80551224597926
+  },
+  "on head, cell tied to ground at the antenna end|4|phone in hand": {
+   "margin_at_1m": 37.684923894891725,
+   "range_m": 32.16599245920508
+  },
+  "on head, cell tied to ground at the antenna end|4|phone in far pocket": {
+   "margin_at_1m": 18.684923894891732,
+   "range_m": 5.589808835315278
+  },
+  "on head, cell tied to ground at the antenna end|4|phone on desk, 5 m office": {
+   "margin_at_1m": 31.684923894891725,
+   "range_m": 18.509596685112434
+  },
+  "on head, antenna raised 2.5 mm into the shell|0|phone in hand": {
+   "margin_at_1m": 37.482627205923464,
+   "range_m": 31.572217663748887
+  },
+  "on head, antenna raised 2.5 mm into the shell|0|phone in far pocket": {
+   "margin_at_1m": 18.482627205923464,
+   "range_m": 5.486622602151849
+  },
+  "on head, antenna raised 2.5 mm into the shell|0|phone on desk, 5 m office": {
+   "margin_at_1m": 31.482627205923464,
+   "range_m": 18.167914954022738
+  },
+  "on head, antenna raised 2.5 mm into the shell|4|phone in hand": {
+   "margin_at_1m": 41.482627205923464,
+   "range_m": 45.6357390618297
+  },
+  "on head, antenna raised 2.5 mm into the shell|4|phone in far pocket": {
+   "margin_at_1m": 22.482627205923464,
+   "range_m": 7.930582516223793
+  },
+  "on head, antenna raised 2.5 mm into the shell|4|phone on desk, 5 m office": {
+   "margin_at_1m": 35.482627205923464,
+   "range_m": 26.26062682607413
+  },
+  "free space, cell tied to ground|0|phone in hand": {
+   "margin_at_1m": 38.79391279205855,
+   "range_m": 35.62513441934175
+  },
+  "free space, cell tied to ground|0|phone in far pocket": {
+   "margin_at_1m": 19.79391279205855,
+   "range_m": 6.190938811823998
+  },
+  "free space, cell tied to ground|0|phone on desk, 5 m office": {
+   "margin_at_1m": 32.79391279205855,
+   "range_m": 20.500125117893806
+  },
+  "free space, cell tied to ground|4|phone in hand": {
+   "margin_at_1m": 42.79391279205855,
+   "range_m": 51.493986127886174
+  },
+  "free space, cell tied to ground|4|phone in far pocket": {
+   "margin_at_1m": 23.79391279205855,
+   "range_m": 8.948629176864946
+  },
+  "free space, cell tied to ground|4|phone on desk, 5 m office": {
+   "margin_at_1m": 36.79391279205855,
+   "range_m": 29.63169615067125
+  }
+ },
+ "i2c_tr_30": 1.194693e-07,
+ "i2c_tr_50": 1.9911550000000003e-07,
+ "i2c_tr_80": 3.1858480000000003e-07,
+ "fifo_full, 3 LEDs x 2 PDs at 50 Hz": 0.8533333333333334,
+ "fifo_smart": 1.7066666666666668,
+ "fifo_lite": 5.12,
+ "fifo_sleep": 3.4594594594594597
+}

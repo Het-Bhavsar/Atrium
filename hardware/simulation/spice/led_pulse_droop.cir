@@ -1,0 +1,22 @@
+* S5b. LED pulse droop on VBAT. Common-anode LED rail is on VBAT directly (C7 10 uF + C8 100 nF), cell behind protection FET.
+* Why: the LED rail droop during an IR pulse sets AFE headroom and rail noise. Cell R_int and DC-bias derated C7 are parameters.
+.param R_cell=1.2 R_fet=0.075 C_led=3.5u V_ocv=3.45 ESL=0.5n I_ir=50m I_red=40m I_grn=15m T_on=129u
+Vcell cell 0 {V_ocv}
+R1 cell a {R_cell}
+R2 a vbat_fet {R_fet}
+L1 vbat_fet vbat 5n
+C7 vbat 0 {C_led} ic={V_ocv}
+C8 vbat 0 90n ic={V_ocv}
+* three exposures per 20 ms frame: IR, red, green, 200 us apart
+ILED1 vbat 0 PULSE(0 {I_ir} 1m 2u 2u {T_on} 20m)
+ILED2 vbat 0 PULSE(0 {I_red} 1.2m 2u 2u {T_on} 20m)
+ILED3 vbat 0 PULSE(0 {I_grn} 1.4m 2u 2u {T_on} 20m)
+.tran 1u 60m uic
+.control
+run
+meas tran vmin MIN v(vbat) from=40m to=60m
+meas tran vmax MAX v(vbat) from=40m to=60m
+echo "droop_done"
+quit
+.endc
+.end

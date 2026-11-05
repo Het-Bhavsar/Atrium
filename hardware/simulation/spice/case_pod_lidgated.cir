@@ -1,0 +1,32 @@
+* S5a2. Lid-gated sequence: pod seated first at 0.5 ms, 5 V enabled at 2 ms.
+* S5a. Case boost output, SY6280 style limit, pogo contact and pod input at the moment the pod lands in the case.
+* Behavioural: the boost is a stiff 5 V source behind its output cap ESR. Pogo pin L and R are [ASSUMED], contact closes at 1 ms.
+* What it checks: the voltage spike at BQ25101 IN (abs max checked by hand against the datasheet) and the inrush the pod's C1 draws.
+.param L_pogo=20n R_pogo=0.15 C_in=1u R_esr=8m V5=5.0 ILIM=0.11
+V5 v5 0 {V5}
+* current-limited switch: limits at ILIM with about 60 us soft start
+B1 sw_out 0 I = -min(max((v(v5)-v(sw_out))/0.25, 0), {ILIM})*(1-exp(-max(time-2m,0)/60u))
+C5 sw_out 0 1u ic=0
+R5 sw_out 0 1Meg
+* pogo contact, closes at 1 ms with two bounces, then stays closed
+S1 sw_out pogo_a ctl 0 swmod
+.model swmod sw(vt=0.5 vh=0.05 ron=0.05 roff=1e7)
+Vctl ctl 0 PWL(0 0 0.5m 0 0.5001m 1 8m 1)
+L1 pogo_a pod_in {L_pogo}
+R1 pod_in pod_c {R_pogo}
+Cin pod_c 0 {C_in} ic=0
+Resr pod_c pod_in2 {R_esr}
+Cp pod_in2 0 100p
+* charger load: 41 mA after the BQ25101 start delay, modelled as a current ramp after contact
+B2 pod_c 0 I = 0.041*(1-exp(-max(time-3m,0)/1m))*(v(pod_c)>3.9)
+.tran 0.1u 8m uic
+.control
+run
+meas tran vmax MAX v(pod_c)
+meas tran vmin_after MIN v(pod_c) from=4m to=8m
+meas tran ipk MAX i(L1)
+wrdata /tmp/atrium_hotplug2.dat v(pod_c) i(L1)
+echo "hotplug_done"
+quit
+.endc
+.end
