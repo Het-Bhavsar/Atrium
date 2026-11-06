@@ -43,4 +43,19 @@ Antenna and metal keep-out:
 [PASS] x < 24: tab_neg: max x 4.30
 [PASS] x < 24: poron_swell_pad: max x 22.50
 
+Mass (pod without adhesive):
+  cell                    2.00 g
+  pod_top_shell           0.77 g
+  pod_pcb                 0.39 g
+  window_frame            0.27 g
+  components              0.19 g
+  antenna_riser           0.04 g
+  poron                   0.02 g
+  thermal_button          0.02 g
+  cell_insulator          0.01 g
+  clear_                  0.01 g
+  tab_                    0.01 g
+  total                   3.76 g
+[PASS] comfort dummy can match mass: resin 2.73 g + ballast 1.03 g (40 % of the pocket at 4.5 g/cm3)
+
 FAILED: swell RSS tolerances, swell worst-case tolerances, swell sheet max 3.5, cell footprint vs battery zone, LED|PD1 rib width

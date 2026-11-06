@@ -5,7 +5,7 @@
 
 Slices every leaf solid of the pod assembly at y = SECTION_Y, fills each cut face in
 its part colour, and dimensions the z-stack and the aperture/rib positions. Writes
-renders/pod_section_y7.png and .svg.
+renders/pod_section_y7.png.
 
 Usage: cad run checks/section.py
 """
@@ -105,7 +105,6 @@ def main():
     OUT.mkdir(exist_ok=True)
     fig.tight_layout()
     fig.savefig(OUT / "pod_section_y7.png")
-    fig.savefig(OUT / "pod_section_y7.svg")
     print("wrote", OUT / "pod_section_y7.png")
 
 

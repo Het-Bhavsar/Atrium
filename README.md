@@ -2,6 +2,10 @@
   <img src="docs/images/atrium-hero.svg" alt="Atrium pod, isometric line drawing with internals" width="100%">
 </p>
 
+<p align="center">
+  <img src="docs/images/atrium-mark.svg" alt="Atrium mark" width="96">
+</p>
+
 <h1 align="center">Atrium</h1>
 
 <p align="center">
@@ -10,6 +14,7 @@
 </p>
 
 <p align="center">
+  <a href="#why-atrium">Why Atrium</a> ·
   <a href="#at-a-glance">At a glance</a> ·
   <a href="#how-it-senses">How it senses</a> ·
   <a href="#inside">Inside</a> ·
@@ -31,6 +36,25 @@ the numbers, and, as it is written, the firmware. You can read it, build it, and
 <p align="center">
   <img src="docs/images/atrium-skin.svg" alt="Skin side of the pod with the optical layout" width="88%">
 </p>
+
+## Why Atrium
+
+<p align="center">
+  <img src="docs/images/atrium-story-card.svg" alt="Atrium: open to the sky, open to everyone" width="100%">
+</p>
+
+Every great building has a centre. In a Roman house it was the atrium: an open hall with the sky for a roof. Light came in there, people gathered there, and nothing was hidden.
+
+Your heart has one too. The atrium is the chamber where blood arrives before every beat. Every pulse you've ever felt started there.
+
+We named our wearable after both. Atrium reads your pulse with light, and like the hall it's named after, it's open. Every schematic, every line of firmware and every data format is public, for anyone to read, build and improve.
+
+**Atrium. Open to the sky. Open to everyone.**
+
+**The mark**
+- **Building:** an open hall whose roof is the two lobes of a heart.
+- **Gap at the centre:** the open roof, where a soft red beam of light falls in.
+- **Floor:** a pulse waveform, the real PPG shape Atrium measures, not a hospital ECG spike.
 
 ## At a glance
 

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="130 180 340 300" width="340" height="300" role="img" aria-label="Atrium mark">
+  <title>Atrium mark</title>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M292 270 L308 270 L362 438 L238 438 Z" fill="#B4372A" fill-opacity="0.08" stroke="none"/>
+    <path d="M300 276 V430" stroke="#B4372A" stroke-width="1.5" stroke-opacity="0.45" stroke-dasharray="3 7"/>
+    <path d="M178 452 V306 C178 226 246 198 290 262" stroke="#111110" stroke-width="7"/>
+    <path d="M422 452 V306 C422 226 354 198 310 262" stroke="#111110" stroke-width="7"/>
+    <path d="M214 452 V318" stroke="#111110" stroke-width="3" stroke-opacity="0.55"/>
+    <path d="M386 452 V318" stroke="#111110" stroke-width="3" stroke-opacity="0.55"/>
+    <path d="M150 452 H450" stroke="#111110" stroke-width="7"/>
+    <path d="M232 420 H258 C270 420 276 368 290 368 C304 368 306 404 314 402 C322 400 324 390 332 393 C341 397 344 420 356 420 H368" stroke="#B4372A" stroke-width="5"/>
+  </g>
+</svg>

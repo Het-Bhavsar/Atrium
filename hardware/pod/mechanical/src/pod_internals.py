@@ -127,20 +127,38 @@ def adhesive_holes(grow):
     ]
 
 
-ADHESIVE_OUTLINE = (P.POD_L - 0.6, P.POD_W - 0.6)    # DXF CUT_OUTLINE, 0.3 inset
+# The patch covers only the flat of the skin face, so no adhesive hangs under the edge round.
+_INSET = P.SKIN_EDGE_FILLET + P.ADHESIVE_EDGE_INSET
+ADHESIVE_OUTLINE = (P.POD_L - 2 * _INSET, P.POD_W - 2 * _INSET)
 ADHESIVE_HOLE_GROW = 0.2                             # +0.2 per side over each aperture
-LINER_TAB = (-5.0, 4.0, -0.2, 10.0)                  # DXF LINER_TAB in PCB coordinates
+LINER_TAB = (-5.0, 4.0, 1.0, 10.0)                   # pull tab at the low-x end, PCB coordinates
+
+
+def adhesive_body(t, label):
+    face = stadium(*ADHESIVE_OUTLINE)
+    for h in adhesive_holes(ADHESIVE_HOLE_GROW):
+        face = face - h
+    body = bd.extrude(bd.Pos(0, 0, -t) * face, t)
+    body.label = label
+    body.color = P.ADHESIVE_COLOR
+    return body
 
 
 @model
 def pod_adhesive():
-    face = stadium(*ADHESIVE_OUTLINE)
-    for h in adhesive_holes(ADHESIVE_HOLE_GROW):
-        face = face - h
-    body = bd.extrude(bd.Pos(0, 0, -P.ADHESIVE_T) * face, P.ADHESIVE_T)
-    body.label = "adhesive_diecut"
-    body.color = P.ADHESIVE_COLOR
-    return body
+    return adhesive_body(P.ADHESIVE_T, "adhesive_diecut")
+
+
+@model
+def pod_adhesive_foam05():
+    """Wear-test option: 0.5 mm black medical foam tape, same die-cut."""
+    return adhesive_body(P.ADHESIVE_FOAM_T[0], "adhesive_foam_0p5")
+
+
+@model
+def pod_adhesive_foam08():
+    """Wear-test option: 0.8 mm black medical foam tape, same die-cut."""
+    return adhesive_body(P.ADHESIVE_FOAM_T[1], "adhesive_foam_0p8")
 
 
 @model
@@ -161,4 +179,6 @@ if __name__ == "__main__":
     pod_cell()
     pod_poron()
     pod_adhesive()
+    pod_adhesive_foam05()
+    pod_adhesive_foam08()
     pod_liner()
