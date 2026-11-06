@@ -744,6 +744,122 @@
    }
   }
  },
+ "spo2_ptt": {
+  "run": {
+   "bursts": 335,
+   "passed_share": 0.0,
+   "records_with_3_passed": 0,
+   "within_record_cv_median": null,
+   "r_median": null,
+   "r_range": null
+  },
+  "sit": {
+   "bursts": 335,
+   "passed_share": 0.833,
+   "records_with_3_passed": 21,
+   "within_record_cv_median": 0.024,
+   "r_median": 0.43,
+   "r_range": [
+    0.357,
+    0.546
+   ]
+  },
+  "walk": {
+   "bursts": 332,
+   "passed_share": 0.0,
+   "records_with_3_passed": 0,
+   "within_record_cv_median": null,
+   "r_median": null,
+   "r_range": null
+  }
+ },
+ "mlc_st_head": {
+  "stationary": {
+   "windows": 15,
+   "level_counts": [
+    14,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "variance_median_g2": 3.58e-06,
+   "truth": "still",
+   "class_correct": 0.923,
+   "records": 13
+  },
+  "nod": {
+   "windows": 15,
+   "level_counts": [
+    0,
+    1,
+    12,
+    2,
+    0,
+    0,
+    0,
+    0
+   ],
+   "variance_median_g2": 0.00236,
+   "truth": "other",
+   "class_correct": 1.0,
+   "records": 13
+  },
+  "shake": {
+   "windows": 15,
+   "level_counts": [
+    0,
+    0,
+    2,
+    12,
+    1,
+    0,
+    0,
+    0
+   ],
+   "variance_median_g2": 0.00535,
+   "truth": "other",
+   "class_correct": 1.0,
+   "records": 13
+  },
+  "swing": {
+   "windows": 16,
+   "level_counts": [
+    0,
+    0,
+    6,
+    10,
+    0,
+    0,
+    0,
+    0
+   ],
+   "variance_median_g2": 0.00432,
+   "truth": "other",
+   "class_correct": 1.0,
+   "records": 14
+  },
+  "walk": {
+   "windows": 14,
+   "level_counts": [
+    0,
+    0,
+    1,
+    1,
+    12,
+    0,
+    0,
+    0
+   ],
+   "variance_median_g2": 0.0134,
+   "truth": "walk",
+   "class_correct": 0.833,
+   "records": 12
+  }
+ },
  "sleep_accel": {
   "wake_sleep_motion_only": {
    "epochs": 26773,

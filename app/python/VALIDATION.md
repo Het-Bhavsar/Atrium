@@ -56,8 +56,8 @@ Pass marks are [ASSUMED] proposals. Fix them before the first session and do not
 - Within the V1 treadmill stages, count steps by video.
 - Then 10 min of free walking outdoors, including stairs, with a hand-tally.
 - 2 min each of confounders: chewing, nodding, talking while seated.
-- **Analysis:** pedometer count error per stage; false steps per minute in the confounders; confusion matrix of the activity class.
-- **Pass [ASSUMED]:** step count within 5 % on the treadmill and 10 % outdoors; under 5 false steps per minute in the confounders.
+- **Analysis:** step count error per stage (steps = logged step rhythm × time); false steps per minute in the confounders; confusion matrix of the activity class (`atrium_ml.mlc`) against the cue sheet. Read MLC0_SRC on the bench first: still on a table = level 0, shaken = 5–7. Re-set `mlc.ATRIUM_THRESHOLDS` from the raw accelerometer stream of this session only.
+- **Pass [ASSUMED]:** step count within 5 % on the treadmill and 10 % outdoors; under 5 false steps per minute in the confounders; activity class ≥ 90 % correct for still and walk, ≥ 80 % for run.
 
 ### V3: HRV (#2)
 
@@ -88,12 +88,26 @@ Pass marks are [ASSUMED] proposals. Fix them before the first session and do not
   | Position agreement | ≥ 90 % |
   | Side-lying vs back confusion | ≤ 5 % of epochs |
 
-### V5: Oxygen-saturation trend (#8, Later)
+### V5: Blood-oxygen calibration (#8, Later)
 
-- On V4 nights, the finger oximeter runs alongside.
-- **Analysis:** correlate the pod's ratio trend (ΔR, from the night median) with the oximeter's 1 Hz series, lag-aligned. Count dips found by each.
-- **Pass [ASSUMED]:** the trends move together (r ≥ 0.6 over dips) before the feature is even planned.
-- No percentage is ever shown, and no claim follows.
+The nightly percentage needs a calibration fitted on Atrium pods. Until this passes, the app shows only the trend.
+
+- **People:** at least 20 adults, 2 nights each, with at least a third at Monk 7–10. Ratio-of-ratios readings are known to drift with skin pigmentation, so this group decides the result.
+- **Reference:** a finger pulse oximeter logging at 1 Hz, with a published accuracy of 3 % or better [VERIFY the device].
+- **Pairs:** each burst R against the reference mean over the same 30 s, lag-aligned (the reference averages over several seconds).
+- **Fit:** `spo2.fit_calibration` on half the people, split by person, not by night. Test on the other half.
+- **Report:**
+  - held-out Arms, bias and the covered range, overall and per skin-tone group;
+  - the share of bursts that pass the gates;
+  - the night-to-night repeatability of the nightly value.
+- **Pass [ASSUMED]:**
+  - held-out Arms ≤ 3.5 %;
+  - every skin-tone group's bias within ±2 %;
+  - the nightly average within 2 % of the reference night's average on ≥ 80 % of nights.
+
+  3.5 % is the accuracy limit regulators use for reflectance oximeters; it is a yardstick here, not a claim.
+- **Then:** set `Calibration.validated`, and record the covered range in `pct_min`.
+- **Range:** normal sleep covers only about 90–99 %, and there is no controlled desaturation in this programme. Below the covered range the app shows "lower than your usual", never a number.
 
 ### V6: Eating detection, with jaw-clench and talking confounders (#11, Later)
 

@@ -2,7 +2,7 @@
 
 Usage (from the repo root; download the records first, see app/python/README.md):
     python3 app/python/benchmark.py --ptt DATA/pulse-transit-time-ppg --wrist DATA/wrist \
-        --sleep DATA/sleep-accel --out app/python/results/benchmark.json
+        --sleep DATA/sleep-accel --st-head DATA/st_head_gestures --out app/python/results/benchmark.json
 Every PPG is resampled to the pod rate before it is processed. Results are wellness-algorithm checks, not
 clinical validation.
 """
@@ -14,7 +14,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from atrium_ml import datasets, dsp, hr, hrv, position, sleep, synth, wear  # noqa: E402
+from atrium_ml import datasets, dsp, hr, hrv, mlc, position, sleep, spo2, synth, wear  # noqa: E402
 
 FS_HR = 25.0
 
@@ -222,11 +222,69 @@ def bench_sleep(nights):
     return res
 
 
+def bench_spo2(records, burst_s=30.0):
+    """Ratio of ratios on the PTT red and IR channels, cut into 30 s bursts at the pod's 25 Hz.
+    The finger is not the temple, and SpO2 only varied 94-99 % between people, so this checks repeatability
+    and gating, not accuracy."""
+    out = {}
+    for rec in records:
+        red = -dsp.resample(rec.red, rec.fs, FS_HR)     # back to raw intensity
+        ir = -dsp.resample(rec.ir, rec.fs, FS_HR)
+        ppg, acc = _prep(rec, FS_HR)
+        raw = hr.spectral_hr(ppg, acc, motion=False)
+        pres = np.r_[np.zeros(8, bool), wear.pulse_present(raw.conf, raw.peak_bpm, raw.acc_peak_bpm)]
+        mot = np.r_[np.full(8, np.nan), raw.motion_mg]
+        n = int(burst_s * FS_HR)
+        rs, cs = [], []
+        for b0 in range(int(16 * FS_HR), len(red) - n + 1, n):
+            sec = slice(b0 // int(FS_HR), (b0 + n) // int(FS_HR))
+            r, c, _, _ = spo2.burst(red[b0:b0 + n], ir[b0:b0 + n], mot[sec], pres[sec])
+            rs.append(r); cs.append(c)
+        rs, cs = np.array(rs), np.array(cs)
+        d = out.setdefault(rec.activity, {"bursts": 0, "passed": 0, "cv": [], "r": []})
+        d["bursts"] += len(rs)
+        ok = np.isfinite(rs) & (cs >= 0.3)
+        d["passed"] += int(ok.sum())
+        if ok.sum() >= 3:
+            d["cv"].append(float(np.std(rs[ok]) / np.mean(rs[ok])))
+            d["r"].append(float(np.median(rs[ok])))
+    res = {}
+    for act, d in out.items():
+        res[act] = {"bursts": d["bursts"], "passed_share": round(d["passed"] / max(d["bursts"], 1), 3),
+                    "records_with_3_passed": len(d["cv"]),
+                    "within_record_cv_median": round(float(np.median(d["cv"])), 3) if d["cv"] else None,
+                    "r_median": round(float(np.median(d["r"])), 3) if d["r"] else None,
+                    "r_range": [round(min(d["r"]), 3), round(max(d["r"]), 3)] if d["r"] else None}
+    return res
+
+
+def bench_mlc(st_head_dir):
+    """MLC level and activity class on ST's head-mounted LSM6DSOX logs (26 Hz, resampled to the MLC's 12.5 Hz).
+    The thresholds were set from these same logs, so this is a consistency check, not a held-out test."""
+    from scipy import signal
+    truth = {"stationary": "still", "nod": "other", "shake": "other", "swing": "other", "walk": "walk"}
+    res = {}
+    for name, want in truth.items():
+        a = np.loadtxt(Path(st_head_dir) / f"{name}.csv", delimiter=",", skiprows=1)[:, :3] / 1000.0
+        a12 = signal.resample_poly(a, 25, 52, axis=0)
+        lv, var = mlc.levels(a12)
+        got = []
+        for i in range(len(lv) - 2):            # 3 MLC windows = a 9.4 s record
+            seg = a12[i * mlc.WINDOW:(i + 3) * mlc.WINDOW]
+            spm, share = mlc.step_rhythm(seg[-100:], mlc.FS)
+            got.append(mlc.activity_class(lv[i:i + 3], spm, share))
+        res[name] = {"windows": int(len(lv)), "level_counts": np.bincount(lv, minlength=8).tolist(),
+                     "variance_median_g2": float(f"{np.median(var):.3g}"), "truth": want,
+                     "class_correct": round(float(np.mean(np.array(got) == want)), 3), "records": len(got)}
+    return res
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ptt", required=True)
     ap.add_argument("--wrist")
     ap.add_argument("--sleep", help="sleep-accel folder (labels/, motion/, heart_rate/)")
+    ap.add_argument("--st-head", help="ST head_gestures/lsm6dsox/datalogs folder (BSD-3)")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
     ptt = datasets.load_ptt(args.ptt)
@@ -239,6 +297,9 @@ def main():
     res["hrv_ptt_sit"] = bench_hrv(ptt)
     res["wear_ptt"] = bench_wear(ptt)
     res["position_mc"] = bench_position()
+    res["spo2_ptt"] = bench_spo2(ptt)
+    if args.st_head:
+        res["mlc_st_head"] = bench_mlc(args.st_head)
     if args.sleep:
         res["sleep_accel"] = bench_sleep(datasets.load_sleep_accel(args.sleep))
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)

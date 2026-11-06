@@ -9,8 +9,16 @@ Synthetic signals only (atrium_ml.synth), so the files carry no dataset licence.
    unweighted spectrum: t_s, bpm, conf, peak_bpm, acc_peak_bpm, raw_conf, raw_peak_bpm, pulse_present.
  - <case>_hrv.csv: beat times and interval cleaning: beat_s, rr_ms, clean (first beat has no interval).
  - <case>_rmssd.csv: per 15 s log record: start_s, rmssd_ms (empty below 5 differences), n_diffs.
-Port tolerances [ASSUMED]: bpm within 0.5, beat times within 2 ms, RMSSD within 1 ms, flags equal except within
-2 s of a threshold crossing.
+MLC and activity class (mlc.py):
+ - mlc_config.csv: the LSM6DSOX register program (addr, data, in order) for INT2.
+ - mlc_<case>_input.csv: t_s, ax_mg, ay_mg, az_mg at 12.5 Hz.
+ - mlc_<case>_levels.csv: window, variance_g2, level (one per 39 samples); then per 3-window record the class
+   and step rhythm in mlc_<case>_class.csv: record, spm, share, class.
+SpO2 trend (spo2.py), one 30 s burst per case:
+ - spo2_<case>_input.csv: t_s, red_counts, ir_counts, motion_mg, pulse_ok (motion and pulse per second).
+ - spo2_<case>_windows.csv: t_s, r, corr, pi_ir, good; spo2_<case>_burst.csv: r, confidence, n_good, n_windows.
+Port tolerances [ASSUMED]: bpm within 0.5, beat times within 2 ms, RMSSD within 1 ms, variance within 1 %, R within
+0.5 %, flags, levels and classes equal except next to a threshold.
 """
 import csv
 import sys
@@ -19,7 +27,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from atrium_ml import hr, hrv, synth, wear  # noqa: E402
+from atrium_ml import hr, hrv, mlc, spo2, synth, wear  # noqa: E402
 
 FS = 25.0
 DC_COUNTS = 200000.0      # [ASSUMED] mid-range on-skin DC for the 19-bit ADC
@@ -86,7 +94,95 @@ def write(out):
             w.writerow(["start_s", "rmssd_ms", "n_diffs"])
             for t0, val, n in hrv.windowed_rmssd(beats, 0.0, t[-1], 15.0, hrv.HrvConfig(min_diffs=5)):
                 w.writerow([f"{t0:.0f}", "" if val is None else f"{val:.2f}", n])
-    return [s[0] for s in specs]
+    names = [s[0] for s in specs]
+    names += _write_mlc(out)
+    names += _write_spo2(out)
+    return names
+
+
+MLC_CASES = [("still", 0.0, 1.0), ("head_motion", 0.06, 1.0), ("walk", 0.16, 1.75), ("run", 0.5, 2.75)]
+
+
+def _write_mlc(out):
+    with open(out / "mlc_config.csv", "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(["addr", "data"])
+        for a, d in mlc.atrium_config():
+            w.writerow([f"0x{a:02X}", f"0x{d:02X}"])
+    names = []
+    for i, (name, amp, hz) in enumerate(MLC_CASES):
+        rng = np.random.default_rng(200 + i)
+        t = np.arange(int(39 * 8)) / mlc.FS
+        a = np.tile([0.0, 0.0, 1.0], (len(t), 1))
+        a[:, 2] += amp * np.sin(2 * np.pi * hz * t)
+        a[:, 0] += 0.3 * amp * np.sin(np.pi * hz * t + 0.4)
+        a_mg = np.round((a + 0.001 * rng.standard_normal(a.shape)) * 1000.0).astype(int)
+        acc = a_mg / 1000.0
+        with open(out / f"mlc_{name}_input.csv", "w", newline="") as f:
+            w = csv.writer(f)
+            w.writerow(["t_s", "ax_mg", "ay_mg", "az_mg"])
+            for row in zip(np.round(t, 3), *a_mg.T):
+                w.writerow(row)
+        lv, var = mlc.levels(acc)
+        with open(out / f"mlc_{name}_levels.csv", "w", newline="") as f:
+            w = csv.writer(f)
+            w.writerow(["window", "variance_g2", "level"])
+            for k, (v, l) in enumerate(zip(var, lv)):
+                w.writerow([k, f"{v:.6g}", int(l)])
+        with open(out / f"mlc_{name}_class.csv", "w", newline="") as f:
+            w = csv.writer(f)
+            w.writerow(["record", "spm", "share", "class"])
+            for k in range(len(lv) - 2):
+                seg = acc[k * mlc.WINDOW:(k + 3) * mlc.WINDOW][-100:]
+                spm, share = mlc.step_rhythm(seg, mlc.FS)
+                w.writerow([k, f"{spm:.2f}", f"{share:.4f}", mlc.activity_class(lv[k:k + 3], spm, share)])
+        names.append(f"mlc_{name}")
+    return names
+
+
+SPO2_CASES = [("r045", 0.45, 0.004, None), ("r070", 0.70, 0.004, None), ("moved", 0.5, 0.004, (12, 20)),
+              ("low_perfusion", 0.5, 5e-5, None)]
+
+
+def _write_spo2(out):
+    names = []
+    for i, (name, r_true, pi_ir, moved) in enumerate(SPO2_CASES):
+        rng = np.random.default_rng(300 + i)
+        n = int(30 * FS)
+        t = np.arange(n) / FS
+        beats = synth.beat_times(30, 62.0, 30.0, seed=300 + i)
+        bv = synth.ppg_from_beats(beats, FS, 30, amp=1.0, dc=0.0)
+        bv = (bv - bv.mean()) / bv.std()
+        ir = DC_COUNTS * (1 - pi_ir * bv)
+        red = 0.8 * DC_COUNTS * (1 - r_true * pi_ir * bv)
+        motion = np.full(30, 3.0)
+        if moved:
+            motion[moved[0]:moved[1]] = 60.0
+            k = (t >= moved[0]) & (t < moved[1])
+            art = 0.01 * np.sin(2 * np.pi * 1.8 * t[k])
+            ir[k] *= 1 + art
+            red[k] *= 1 + 1.6 * art
+        red = np.round(red + 20 * rng.standard_normal(n)).astype(int)
+        ir = np.round(ir + 20 * rng.standard_normal(n)).astype(int)
+        pulse = np.ones(30, bool)
+        with open(out / f"spo2_{name}_input.csv", "w", newline="") as f:
+            w = csv.writer(f)
+            w.writerow(["t_s", "red_counts", "ir_counts", "motion_mg", "pulse_ok"])
+            for k in range(n):
+                w.writerow([f"{t[k]:.2f}", red[k], ir[k], f"{motion[int(t[k])]:.1f}", int(pulse[int(t[k])])])
+        ws = spo2.windows(red, ir, motion, pulse)
+        with open(out / f"spo2_{name}_windows.csv", "w", newline="") as f:
+            w = csv.writer(f)
+            w.writerow(["t_s", "r", "corr", "pi_ir", "good"])
+            for x in ws:
+                w.writerow([f"{x.t_s:.1f}", f"{x.r:.5f}", f"{x.corr:.4f}", f"{x.pi_ir:.6f}", int(x.good)])
+        r, conf, ng, nw = spo2.burst(red, ir, motion, pulse)
+        with open(out / f"spo2_{name}_burst.csv", "w", newline="") as f:
+            w = csv.writer(f)
+            w.writerow(["r", "confidence", "n_good", "n_windows"])
+            w.writerow(["" if np.isnan(r) else f"{r:.5f}", f"{conf:.4f}", ng, nw])
+        names.append(f"spo2_{name}")
+    return names
 
 
 if __name__ == "__main__":

@@ -13,9 +13,12 @@ Wellness and research use only. These are estimates, not medical measurements. N
 | `atrium_ml/wear.py` | #18 wear | pod | DC per mA, steady pulse peak, skin NTC level and slope, in a state machine |
 | `atrium_ml/position.py` | #5 sleep position | app (from the logged pitch and roll of the mean accelerometer vector) | "Skin-normal head frame": the pod normal is the head's lateral axis; vertical learned from walking |
 | `atrium_ml/sleep.py` | #4 sleep | app | 6 features from the existing log fields, logistic regression |
+| `atrium_ml/mlc.py` | #6 activity | IMU (motion level), pod (class) | LSM6DSOX MLC program: variance of \|a\| over 3.1 s against a 7-step ladder, plus a step-rhythm test |
+| `atrium_ml/spo2.py` | #8 blood oxygen (Later) | pod (bursts), app (nightly value) | Red/IR ratio of ratios in gated 4 s windows. A nightly percentage once a calibration passes V5; until then a relative trend |
+| `atrium_ml/logrec.py` | log | pod (writes), app (reads) | The EVT baseline's compact log: 12 bytes per 30 s epoch in time-stamped, page-packed blocks; 8.5–11.3 h in 16 KB, 19.8–22.6 h in 32 KB |
 | `atrium_ml/synth.py` | — | tests | Synthetic PPG, beats and head motion with known truth |
 | `benchmark.py` | — | desktop | Runs all of the above on public PhysioNet records |
-| `make_test_vectors.py` | — | desktop | Synthetic input and expected-output CSVs for porting hr, hrv and wear pulse presence to firmware |
+| `make_test_vectors.py` | — | desktop | Synthetic input and expected-output CSVs for porting hr, hrv, wear, the MLC program and spo2 to firmware |
 
 ## Run
 
@@ -25,7 +28,7 @@ From the repo root:
 pip install -r app/python/requirements.txt
 python3 -m pytest app/python
 python3 app/python/benchmark.py --ptt DATA/ptt --wrist DATA/wrist --sleep DATA/sleep-accel \
-    --out app/python/results/benchmark.json
+    --st-head DATA/st_head_gestures --out app/python/results/benchmark.json
 python3 app/python/make_test_vectors.py OUT_DIR    # firmware port references, no dataset needed
 ```
 
@@ -34,6 +37,7 @@ Getting the data (about 3.5 GB in all; keep it outside the repo). Use each Physi
 - `DATA/ptt`: `python3 -c "import wfdb; wfdb.dl_database('pulse-transit-time-ppg', 'DATA/ptt')"`
 - `DATA/wrist`: `python3 -c "import wfdb; wfdb.dl_database('wrist', 'DATA/wrist')"`
 - `DATA/sleep-accel`: the `labels/`, `motion/` and `heart_rate/` folders (not WFDB, so ZIP only).
+- `DATA/st_head_gestures`: the five CSVs in ST's `examples/head_gestures/lsm6dsox/datalogs`.
 
 Check that every `.hea` has its `.dat` and `.atr`: a broken download skips a record silently.
 
@@ -123,6 +127,33 @@ Each night is scored by a model trained on the other 30.
 
 Pulse adds little here: the dataset's pulse is sparse. Stage estimates are weak, so the app must label them as estimates (FEATURES.md #4).
 
+### #6 Motion level and activity class (LSM6DSOX MLC)
+
+The register program is ST's BSD-3 `motion_intensity` example for this part (12.5 Hz, ±2 g, one 7-node tree on the variance of |a| over 39 samples). Atrium replaces its 7 thresholds and routes the interrupt to INT2. Decoding ST's tree gives a 9e-3 to 0.31 g² ladder, which would put a still head, nodding and slow walking all at level 0. Atrium's ladder is 1e-4, 1e-3, 4e-3, 1e-2, 3e-2, 8e-2 and 0.25 g².
+
+On ST's head-mounted LSM6DSOX logs (BSD-3, about 50 s per class), from records of 3 windows:
+
+| Log | Median variance (g²) | Levels seen | Class correct |
+|---|---|---|---|
+| Stationary | 3.6e-6 | 0 (one window at 2) | 92 % still |
+| Nod | 2.4e-3 | 1–3 | 100 % other |
+| Swing | 4.3e-3 | 2–3 | 100 % other |
+| Shake | 5.4e-3 | 2–4 | 100 % other |
+| Walk | 1.3e-2 | 2–4, mostly 4 | 83 % walk |
+
+The thresholds were set from these same logs, so this is a consistency check, not a held-out result. No head-mounted running data exists, so the run class is [ASSUMED] until bench test V2.
+
+### #8 Blood oxygen (ratio of ratios)
+
+PTT red and IR, finger, cut into 30 s bursts at 25 Hz:
+- **At rest:** 83 % of bursts passed the gates. R repeats within a record with a median CV of 2.4 %. R spans 0.36–0.55 across 21 people.
+- **Walking and running:** every burst is rejected by the motion gate.
+- **Sampling:** R at 25 Hz equals R at 500 Hz.
+
+Against the dataset's spot oximeter readings (96–98.5 %, whole percent), R shows no relationship (r −0.1, 22 people). The range is too narrow to fit or test a calibration.
+
+The nightly percentage therefore waits for the V5 calibration study on Atrium pods (`VALIDATION.md`). `spo2.nightly_percent` returns nothing until a calibration is marked validated, so until then the app shows only the change from the user's own usual nights.
+
 ## Datasets and licences
 
 | Dataset | Licence | Use here |
@@ -130,5 +161,6 @@ Pulse adds little here: the dataset's pulse is sparse. Stage estimates are weak,
 | [Pulse Transit Time PPG 1.1.0](https://physionet.org/content/pulse-transit-time-ppg/1.1.0/) | ODbL 1.0 | HR, HRV, wear. Any database derived from it that we publish must be ODbL. None is in this repo |
 | [Wrist PPG During Exercise 1.0.0](https://physionet.org/content/wrist/1.0.0/) | ODC-By 1.0 | HR, held out |
 | [sleep-accel 1.0.0](https://physionet.org/content/sleep-accel/1.0.0/) | ODC-By 1.0 | Sleep |
+| [ST st-mems-machine-learning-core](https://github.com/STMicroelectronics/st-mems-machine-learning-core) `motion_intensity` program and `head_gestures/lsm6dsox` logs | BSD-3-Clause (notice in `atrium_ml/mlc.py`) | MLC program base, threshold setting |
 
 No dataset files are in the repo. The code is Apache-2.0 (`app/LICENSE`).
