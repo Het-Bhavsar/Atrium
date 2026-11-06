@@ -11,7 +11,6 @@ cad run pod_assembly.py          # pod, and pod as docked (no adhesive)
 cad run checks/interference.py   # pairwise overlap, expect 0
 cad run checks/stackup.py        # z-stack, 10 % cell swell, skin clearances, metal keep-out
 cad run checks/design_rules.py   # visible form rules
-cad run checks/section.py        # renders/pod_section_y7.png
 cad run exports.py               # STEP/ STL/ 3MF/ DXF/
 ```
 

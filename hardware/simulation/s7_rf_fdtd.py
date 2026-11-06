@@ -7,7 +7,9 @@ ground and cell currents, so body loss and detuning trends carry over; absolute 
 Tissue at 2.45 GHz, Gabriel 1996 values: skin 38.0/1.46, fat 5.28/0.105, muscle 52.7/1.74, cortical bone 11.4/0.394,
 grey matter 48.9/1.81 (eps_r / S/m).
 
-Usage: python3 -I s7_rf_fdtd.py <case|all|dipole> <out.json>
+Usage (from the repo root):
+       python3 hardware/simulation/s7_rf_fdtd.py all hardware/simulation/results/s7_rf.json
+       python3 hardware/simulation/s7_rf_fdtd.py dipole hardware/simulation/results/s7_dipole.json
 """
 import json, math, sys, time
 import numpy as np

@@ -2,7 +2,8 @@
 
 The ILU preconditioned CG in s6 did not converge, so its self-heating and slot numbers are not usable. The problem is linear, so here
 each load is solved on its own: the base field and each electronics load are separate Jacobi-CG solves, checked by true residual.
-Usage: python3 s6b_thermal_fine.py <pod_placement.csv> <out.json>
+Usage (from the repo root):
+       python3 hardware/simulation/s6b_thermal_fine.py hardware/pod/pcb/placement/pod_placement.csv hardware/simulation/results/s6b.json
 """
 import json, os, sys, time
 import numpy as np
