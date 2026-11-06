@@ -27,9 +27,10 @@ Revision B.1, engineering validation (EVT). All dimensions are in mm.
 
 ## Open items (EVT)
 
-1. **USB-C vs docked pod.** The case receptacle J1 (3.3 mm tall, rear edge at y 6.8) overlaps the docked pod by 1.3 mm. Fix one of two ways:
-   - move the pogo pins and the pod +1.6 mm in y;
-   - use a mid-mount USB-C about 1.2 mm lower.
+1. **USB-C vs docked pod: resolved.**
+   - The pod and the pogo pins now sit 1.8 mm further in y (pins at y 20.3), which leaves 0.50 mm to J1 (0.35 mm with the pod's float in its pocket).
+   - The hall sensor U4 moves to (36.6, 22.4) and the lid magnet to (37.55, 23.55), 1.5 mm outboard, so its pocket clears the pod pocket. |Bz| at the die is 88 mT with the lid closed.
+   - Keep-outs for the case layout: `case/mechanical/DXF/atrium_case_pcb_keepouts_revB1-1.dxf`.
 2. **Light barrier between the LED and the near detector.** Only 0.55 mm separates the two parts, so the rib above the window is 0.45 mm. That is thin for PC moulding. Fix one of two ways:
    - a black dispensed dam or gasket;
    - the near detector at x ≥ 6.0.

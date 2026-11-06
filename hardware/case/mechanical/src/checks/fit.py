@@ -69,8 +69,9 @@ lift = P.Z_CASE_PCB_TOP + j1r["z"] + 0.3 - P.Z_CRADLE_FLOOR
 check(
     "USB-C J1 vs docked pod",
     ov < 1e-4,
-    f"overlap {ov:.2f} mm3: J1 rear y {j1r['y'] + j1r['h'] / 2:.1f}, top {P.Z_CASE_PCB_TOP + j1r['z']:.2f}; "
-    f"pod skin y {pod_ymin:.1f}, z {P.Z_CRADLE_FLOOR:.2f}. Needs pod/pins +{shift:.1f} mm in y, or J1 {lift:.1f} mm lower",
+    f"overlap {ov:.2f} mm3; J1 rear y {j1r['y'] + j1r['h'] / 2:.1f}, pod skin y {pod_ymin:.1f}: "
+    + (f"clearance {pod_ymin - (j1r['y'] + j1r['h'] / 2):.2f} mm nominal, {pod_ymin - (j1r['y'] + j1r['h'] / 2) - P.CRADLE_POCKET_CLEAR:.2f} with pocket float"
+       if ov < 1e-4 else f"needs pod/pins +{shift:.1f} mm in y, or J1 {lift:.1f} mm lower"),
 )
 cell_t, cell_tmax = P.CASE_CELL[2], P.CASE_CELL_MAX[2]
 foam_solid = P.CASE_CELL_FOAM_T * P.PORON_SOLID_FRAC
@@ -84,22 +85,27 @@ check(
 )
 
 die_z = P.Z_CASE_PCB_TOP + P.HALL_DIE_Z
-d_closed = C.Z_MAGNET_BOT - die_z
-b_closed = C.magnet_field(d_closed)
-check("hall closed", b_closed >= 2 * P.HALL_BOP_MAX, f"magnet face {d_closed:.2f} mm above die: {b_closed * 1e3:.0f} mT vs BOP max {P.HALL_BOP_MAX * 1e3:.1f} mT x2")
+hx, hy = P.HALL_XY
 mx, my = P.MAGNET_XY
-ang = math.radians(100)
+b_closed = abs(C.magnet_bz(hx, hy, die_z, mx, my, C.Z_MAGNET_BOT))
+check(
+    "hall closed",
+    b_closed >= 2 * P.HALL_BOP_MAX,
+    f"magnet {math.hypot(mx - hx, my - hy):.2f} mm beside, face {C.Z_MAGNET_BOT - die_z:.2f} mm above the die: "
+    f"|Bz| {b_closed * 1e3:.0f} mT vs BOP max {P.HALL_BOP_MAX * 1e3:.1f} mT x2",
+)
+pod_cx = P.PCB_CX + P.POD_DOCK_OFFSET[0] + (P.POD_L - P.POD_W) / 2
+pod_cy = P.PCB_CY + P.POD_DOCK_OFFSET[1]
+wall = math.hypot(mx - pod_cx, my - pod_cy) - (P.POD_W / 2 + P.CRADLE_POCKET_CLEAR) - (C.MAG_BOSS_D / 2 + C.MAG_BOSS_CLEAR)
+check("magnet pocket vs pod pocket", wall >= 0.3, f"cradle wall between them {wall:.2f} mm")
 rx, rz = mx - C.HINGE_X, C.Z_MAGNET_BOT - C.HINGE_Z
-ox = C.HINGE_X + rx * math.cos(ang) - rz * math.sin(ang)
-oz = C.HINGE_Z + rx * math.sin(ang) + rz * math.cos(ang)
-d_open = math.hypot(ox - mx, oz - die_z)
-b_open = C.magnet_field(d_open)
-check("hall open (lid 100 deg)", b_open <= P.HALL_BRP_MIN, f"{d_open:.1f} mm: {b_open * 1e3:.3f} mT vs BRP min {P.HALL_BRP_MIN * 1e3:.1f} mT (on-axis bound)")
-for ang_deg in (10, 20, 30):
-    a = math.radians(ang_deg)
-    px = C.HINGE_X + rx * math.cos(a) - rz * math.sin(a)
-    pz = C.HINGE_Z + rx * math.sin(a) + rz * math.cos(a)
-    say(f"    lid {ang_deg:2d} deg: {math.hypot(px - mx, pz - die_z):5.1f} mm, {C.magnet_field(math.hypot(px - mx, pz - die_z)) * 1e3:6.2f} mT")
+for ang_deg in (10, 20, 30, 100):
+    a_ = math.radians(ang_deg)
+    px = C.HINGE_X + rx * math.cos(a_) - rz * math.sin(a_)
+    pz = C.HINGE_Z + rx * math.sin(a_) + rz * math.cos(a_)
+    b = abs(C.magnet_field(math.hypot(px - hx, my - hy, pz - die_z)))
+    say(f"    lid {ang_deg:3d} deg: {math.hypot(px - hx, my - hy, pz - die_z):5.1f} mm, {b * 1e3:6.3f} mT (on-axis bound)")
+check("hall open (lid 100 deg)", b <= P.HALL_BRP_MIN, f"{b * 1e3:.3f} mT vs BRP min {P.HALL_BRP_MIN * 1e3:.1f} mT")
 say()
 from case import case_base, case_cradle, case_lid  # noqa: E402
 
