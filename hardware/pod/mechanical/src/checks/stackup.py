@@ -160,6 +160,41 @@ for part in world_parts(pod):
         check(f"x < 24: {part.label}", xmax < P.ANT_KEEPOUT_X, f"max x {xmax:.2f}")
 say()
 
+# ------------------------------------------------------------------ mass
+say("Mass (pod without adhesive):")
+DENSITY = (  # g/cm3 [ASSUMED typical values]
+    ("pod_top_shell", 1.20), ("window_frame", 1.20), ("clear_", 1.20), ("thermal_button", 8.00),
+    ("thermal_gap_pad", 2.60), ("pogo_seal", 1.15), ("pod_pcb", 1.85), ("antenna_riser", 1.85),
+    ("poron", 0.32), ("cell_insulator", 1.40), ("tab_", 8.90), ("adhesive", 0.0), ("liner", 0.0),
+)
+CELL_G = 2.0                 # LP301020 sheet: "Approx: 2g"
+PART_RHO = 2.5               # component envelope boxes (overestimates: boxes are max envelopes)
+total, rows_m = 0.0, {}
+for part in world_parts(pod):
+    lab = part.label or ""
+    if lab == "cell_301020":
+        g = CELL_G
+    else:
+        rho = next((r for k, r in DENSITY if k in lab), PART_RHO)
+        g = part.volume / 1000.0 * rho
+    key = next((k for k, _ in DENSITY if k in lab), "cell" if lab == "cell_301020" else "components")
+    rows_m[key] = rows_m.get(key, 0.0) + g
+    total += g
+for k, g in sorted(rows_m.items(), key=lambda kv: -kv[1]):
+    if g > 0.005:
+        say(f"  {k:22s} {g:5.2f} g")
+say(f"  {'total':22s} {total:5.2f} g")
+from pod_shell import pod_comfort_dummy  # noqa: E402
+
+RESIN_RHO, BALLAST_RHO = 1.15, 4.5   # SLA resin; steel shot in epoxy [ASSUMED]
+dummy = pod_comfort_dummy().shape
+resin_g = dummy.volume / 1000.0 * RESIN_RHO
+need_g = total - resin_g
+pocket_cc = 18.0 * 8.0 * 4.0 / 1000.0
+fill = need_g / BALLAST_RHO / pocket_cc
+check("comfort dummy can match mass", 0 <= fill <= 1.0, f"resin {resin_g:.2f} g + ballast {need_g:.2f} g ({fill * 100:.0f} % of the pocket at {BALLAST_RHO} g/cm3)")
+say()
+
 say(f"FAILED: {', '.join(fails) if fails else 'none'}")
 OUT.parent.mkdir(exist_ok=True)
 OUT.write_text("\n".join(lines) + "\n")

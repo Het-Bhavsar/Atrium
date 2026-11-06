@@ -21,12 +21,15 @@ HOLD_DOWN_LEN = 2.0
 HOLD_DOWN_SIDE_X = (9.0, 19.0)
 
 
-def shell_body(height=P.POD_H):
+def shell_outer(height=P.POD_H):
+    """The pod's outer envelope: flat top, straight walls, rounded top and skin edges."""
     outer = stadium_prism(P.POD_L, P.POD_W, 0, height)
-    top_edges = outer.edges().group_by(bd.Axis.Z)[-1]
-    outer = bd.fillet(top_edges, P.TOP_EDGE_FILLET)
-    bottom_edges = outer.edges().group_by(bd.Axis.Z)[0]
-    outer = bd.fillet(bottom_edges, P.SKIN_EDGE_FILLET)
+    outer = bd.fillet(outer.edges().group_by(bd.Axis.Z)[-1], P.TOP_EDGE_FILLET)
+    return bd.fillet(outer.edges().group_by(bd.Axis.Z)[0], P.SKIN_EDGE_FILLET)
+
+
+def shell_body(height=P.POD_H):
+    outer = shell_outer(height)
 
     cavity_top = height - P.SHELL_TOP_T
     skirt = stadium_prism(P.POD_L - 2 * P.SKIRT_T, P.POD_W - 2 * P.SKIRT_T, -0.1, P.Z_WINDOW_TOP)
@@ -53,6 +56,26 @@ def shell_body(height=P.POD_H):
     return body
 
 
+DUMMY_POCKET = (18.0, 8.0, 4.0)   # ballast pocket from the top, over the cell zone
+
+
+@model
+def pod_comfort_dummy():
+    """Wear-test dummy: the outer envelope as one solid, with a top pocket for ballast.
+
+    Print in SLA resin; fill the pocket with steel shot in epoxy until the dummy weighs what
+    checks/stackup.py reports for the real pod; seal flush. The skin face is the real one.
+    """
+    body = shell_outer()
+    l, w, d = DUMMY_POCKET
+    x0, y0 = P.CELL_X0 + (P.CELL_L - l) / 2, P.CELL_Y0 + (P.CELL_W - w) / 2
+    pocket = bd.extrude(bd.Pos(x0 + l / 2, y0 + w / 2, P.POD_H - d) * bd.RectangleRounded(l, w, 1.5), d + 0.1)
+    body = body - pocket
+    body.label = "pod_comfort_dummy"
+    body.color = "#d9d4cb"
+    return body
+
+
 @model
 def pod_top_shell():
     body = shell_body()
@@ -64,3 +87,4 @@ def pod_top_shell():
 
 if __name__ == "__main__":
     pod_top_shell()
+    pod_comfort_dummy()

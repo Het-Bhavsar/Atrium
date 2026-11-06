@@ -23,10 +23,10 @@ POD_H = 7.0                  # outer height (raised from 6.8 for swelling margin
 SHELL_TOP_T = 0.5            # top shell thickness
 SHELL_WALL_T = 1.0           # nominal side wall (outer to the 28 x 14 PCB line)
 PCB_WALL_CLEAR = 0.10        # PCB to inner wall per side; wall is 0.9 at the PCB band
-SKIRT_T = 0.5                # shell skirt that wraps the window plate edge
+SKIRT_T = SHELL_WALL_T - PCB_WALL_CLEAR   # 0.9: straight bore, window plate flush with the rim
 WINDOW_FIT_CLEAR = 0.05      # window plate to skirt, per side
 TOP_EDGE_FILLET = 1.2        # outer top edge, comfort
-SKIN_EDGE_FILLET = 0.3       # outer bottom edge of the skirt
+SKIN_EDGE_FILLET = 0.8       # outer skin-contact edge; <= SKIRT_T, avoids a pressure line
 
 PCB_L = 28.0
 PCB_W = 14.0
@@ -36,6 +36,8 @@ PCB_CY = PCB_W / 2
 
 # Z-stack, skin up
 ADHESIVE_T = 0.2             # 0.2-0.3 range, outside the pod
+ADHESIVE_FOAM_T = (0.5, 0.8) # compliant black foam options for the wear test
+ADHESIVE_EDGE_INSET = 0.1    # patch ends this far inside the flat of the skin face
 LINER_T = 0.05               # release liner under the adhesive [ASSUMED]
 WINDOW_T = 0.5
 SKIN_ZONE = 1.0              # skin-side parts <= 1.0

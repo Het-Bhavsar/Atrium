@@ -21,13 +21,15 @@ from pod_internals import (
     LINER_TAB,
     adhesive_holes,
     pod_adhesive,
+    pod_adhesive_foam05,
+    pod_adhesive_foam08,
     pod_cell,
     pod_liner,
     pod_pcba,
     pod_pcba_antenna_flat,
     pod_poron,
 )
-from pod_shell import pod_top_shell
+from pod_shell import pod_comfort_dummy, pod_top_shell
 from pod_window import aperture_faces, pod_window_clear, pod_window_frame, pogo_gasket, thermal_button, thermal_gap_pad
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -44,6 +46,9 @@ STEP_PARTS = {
     "pod_cell_301020": pod_cell,
     "pod_poron_pad": pod_poron,
     "pod_adhesive_diecut": pod_adhesive,
+    "pod_adhesive_foam_0p5": pod_adhesive_foam05,
+    "pod_adhesive_foam_0p8": pod_adhesive_foam08,
+    "pod_comfort_dummy": pod_comfort_dummy,
     "pod_adhesive_liner": pod_liner,
     "pod_assembly": pod_assembly,
     "pod_assembly_docked": pod_assembly_docked,
@@ -51,6 +56,7 @@ STEP_PARTS = {
 PRINT_PARTS = {
     "pod_top_shell": pod_top_shell,
     "pod_window_frame": pod_window_frame,
+    "pod_comfort_dummy": pod_comfort_dummy,
 }
 
 
