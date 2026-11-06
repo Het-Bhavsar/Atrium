@@ -7,7 +7,8 @@ Replaces the package budget, which used one wavelength (830 nm optics with a 950
 Datasheet inputs: SFH 7016 v1.5 p.5 (Ie, chip size), MAX86174A 19-100999 Rev 1 p.9-10 (ranges, 75 pA at 117.1 us),
 VEMD5080X01 Rev 1.4 (7.5 mm2, 0.60 A/W at 950 nm, relative 0.55 and 0.71 at 530 and 660 nm, curve read).
 
-Usage: python3 -I s2_signal_budget.py <s1_mc.json> <out.json>
+Usage (from the repo root):
+       python3 hardware/simulation/s2_signal_budget.py hardware/simulation/results/s1_mc.json hardware/simulation/results/s2_budget.json
 """
 import json, math, sys
 import numpy as np

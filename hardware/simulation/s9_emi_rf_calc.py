@@ -2,7 +2,8 @@
 
 Buck pulse shape from TPS62840 SLVSEC6D Eq. 2: TON = Vout/Vin * 556 ns. PD capacitance from VEMD5080X01: 80 pF at 0 V, 30 pF at 3 V.
 Loop areas are [ASSUMED]. The answer is an order of magnitude to decide whether the 5 mm rule can be waived with a solid L2.
-Usage: python3 -I s9_emi_rf_calc.py <s7.json or ''> <out.json>
+Usage (from the repo root):
+       python3 hardware/simulation/s9_emi_rf_calc.py hardware/simulation/results/s7_rf.json hardware/simulation/results/s9.json
 """
 import json, math, sys
 import numpy as np

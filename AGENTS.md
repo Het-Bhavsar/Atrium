@@ -23,11 +23,20 @@ LICENSE  README.md  AGENTS.md
 - **Parts:** every part from the LCSC / JLCPCB catalogue, or stated as hand-fitted with its source.
 - **Docs:** short and factual. Numbers carry units and a source. Unknowns are marked `[VERIFY]` or `[ASSUMED]`. No filler or hype.
 
-## Commits
+## Commits and branches
 
-- Few, meaningful commits. Squash work in progress before pushing.
+- One branch per change, merged by pull request as one squashed commit. Delete the branch after it merges.
 - Imperative subject lines of 72 characters or fewer. No AI attribution lines.
-- Work on a branch and merge by pull request.
+- Each workstream touches only its own folders, so `git diff --stat main` on its branch lists nothing else:
+
+  | Workstream | Folders |
+  |---|---|
+  | Electrical | `hardware/{pod,case}/{schematic,pcb,bom,production}`, `hardware/simulation` |
+  | Mechanical | `hardware/{pod,case}/mechanical`, `docs/images`, `docs/make_figures.py` |
+  | Firmware | `firmware/` |
+  | App, cloud | `app/`, `cloud/` |
+
+- No one-off scripts, logs or caches. Every script in the repo has a usage line that runs from the repo root.
 
 ## Design rules that must keep passing
 

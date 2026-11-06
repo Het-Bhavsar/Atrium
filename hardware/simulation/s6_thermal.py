@@ -6,7 +6,8 @@ Answers three questions the lumped estimate could not:
  3. Which sensor position would, and how much do the U4 slots help?
 
 Conductivities are [ASSUMED] handbook values, see K below. Skin is a Pennes bioheat layer over core-temperature tissue.
-Usage: python3 -I s6_thermal.py <pod_placement.csv> <out.json>
+Usage (from the repo root):
+       python3 hardware/simulation/s6_thermal.py hardware/pod/pcb/placement/pod_placement.csv hardware/simulation/results/s6_thermal.json
 """
 import csv, json, sys
 import numpy as np

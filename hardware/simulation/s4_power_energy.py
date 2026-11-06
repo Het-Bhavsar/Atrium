@@ -4,7 +4,8 @@ The package budget uses block currents with no source and calls them "mA from th
 buck rail. This rebuilds each mode from per-event charge. Every number below carries its source or [ASSUMED].
 
 Rail currents are at 1.8 V and get converted through the buck at the live VBAT. LEDs and the fuel gauge sit on VBAT directly.
-Usage: python3 -I s4_power_energy.py <out.json>
+Usage (from the repo root):
+       python3 hardware/simulation/s4_power_energy.py hardware/simulation/results/s4.json
 """
 import json, math, sys
 import numpy as np

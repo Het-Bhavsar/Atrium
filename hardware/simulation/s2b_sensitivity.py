@@ -1,5 +1,8 @@
 """S2b. How much do the headline photocurrents move with tissue scattering and with the window geometry?
-Reuses the S2 ray path. Usage: python3 s2b_sensitivity.py <s1_mc.json> <s1_mc_lowscat.json> <out.json>
+Reuses the S2 ray path.
+
+Usage (from the repo root):
+       python3 hardware/simulation/s2b_sensitivity.py hardware/simulation/results/s1_mc.json hardware/simulation/results/s1_mc_lowscat.json hardware/simulation/results/s2b.json
 """
 import json, math, os, sys
 import numpy as np

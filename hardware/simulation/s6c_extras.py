@@ -1,12 +1,13 @@
 """S6c. Extras read from the S6 sweep and the converged solver: skin estimate from two sensors, TH1 position bias, buck distance after moving PD1.
-Usage: python3 s6c_extras.py <pod_placement.csv> <out.json>"""
+Usage (from the repo root):
+       python3 hardware/simulation/s6c_extras.py hardware/pod/pcb/placement/pod_placement.csv hardware/simulation/results/s6c.json"""
 import csv, json, os, sys
 import numpy as np
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import s6_thermal as s6
 from s6b_thermal_fine import pcg
 R = {}
-rows = json.load(open("results/s6_thermal.json"))["sweep"]
+rows = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "results", "s6_thermal.json")))["sweep"]
 u4 = np.array([r["U4"] for r in rows]); th = np.array([r["TH1"] for r in rows]); sk = np.array([r["skin_U4"] for r in rows])
 e0 = u4 - sk
 a = np.polyfit(u4 - th, sk - u4, 1)

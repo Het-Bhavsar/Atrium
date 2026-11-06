@@ -3,7 +3,8 @@
 Replaces s5_spice/buck_ripple.cir: ngspice was still inside that deck after 2 h 50 min at a 10 ns step, so nothing came out of it.
 Fixed on-time from TPS62840 SLVSEC6D Eq. 2 (TON = Vout/Vin * 556 ns), comparator at Vref, synchronous rectifier that stops at zero current.
 This checks ripple scale and droop only. It is not a stability proof. Rdson and comparator delay are [ASSUMED].
-Usage: python3 -I s5c_buck_stepper.py <out.json>
+Usage (from the repo root):
+       python3 hardware/simulation/s5c_buck_stepper.py hardware/simulation/results/s5c.json
 """
 import json, sys
 import numpy as np
