@@ -1,0 +1,6 @@
+board:
+  name: atrium_pod
+  full_name: Atrium pod Rev B.2
+  vendor: localforge
+  socs:
+    - name: nrf52832

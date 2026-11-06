@@ -1,0 +1,246 @@
+/*
+ * Copyright (c) 2026 Local Forge
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Atrium pod Rev B.2 (compact, MAXM86161). Every pin below is U1 ball -> net from the
+ * Rev B.2 pod netlist; tests/check_pins.py checks it. Rev B.1 is archived (git tag rev-b1).
+ *
+ * Power: no fuel gauge on the r5 Pill board; VBAT_SENSE is VBAT / 2 on AIN5. VLED = VBAT.
+ * TPS62840 (R2 267 kOhm) makes VDD 3.3 V from VBAT; below 3.3 V it runs at 100 %.
+ * The nRF52832 regulator runs in DC/DC mode: DCC (U1 B6) -> L2 10 uH -> L3 15 nH -> DEC4.
+ * Clocks: Y1 32 MHz on XC1/XC2 (U1 B2, A1). No 32.768 kHz crystal: calibrated LFRC
+ * (atrium_pod_defconfig); XL1/XL2 (P0.00/P0.01) are not connected.
+ */
+
+/dts-v1/;
+#include <nordic/nrf52832_ciaa.dtsi>
+#include <zephyr/dt-bindings/adc/adc.h>
+#include <zephyr/dt-bindings/adc/nrf-saadc.h>
+#include "atrium_pod-pinctrl.dtsi"
+
+/ {
+	model = "Atrium pod Rev B.2";
+	compatible = "localforge,atrium-pod";
+
+	chosen {
+		zephyr,sram = &sram0;
+		zephyr,flash = &flash0;
+		zephyr,code-partition = &slot0_partition;
+	};
+
+	aliases {
+		watchdog0 = &wdt0;
+		led0 = &status_led;
+		ppg0 = &ppg;
+		imu0 = &imu;
+		log-flash0 = &ext_flash;
+	};
+
+	/* Power, charge and thermal pins, used by src/hw/power_hw.c. */
+	zephyr,user {
+		io-channels = <&adc 0>, <&adc 1>, <&adc 5>, <&adc 6>;
+		io-channel-names = "vbus_sense", "nt1_sense", "vbat_sense", "nt3_sense";
+		/* SHIP U1 G2 P0.20 -> LPB1010 CTL (internal pull-down). High >= 100 ms ships. */
+		ship-gpios = <&gpio0 20 GPIO_ACTIVE_HIGH>;
+		/* CHG_INH U1 G7 P0.08 -> R16 1 kOhm -> BQ25101 TS. Active = driven low; idle = Hi-Z. */
+		chg-inh-gpios = <&gpio0 8 GPIO_ACTIVE_LOW>;
+		/* CHRG_N U1 B5 P0.31 <- BQ25101 CHG#, open drain, no pull-up on the board */
+		chrg-n-gpios = <&gpio0 31 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+		/* NTC_PWR U1 F3 P0.19 -> R13 / R21 10 kOhm 0.1 % -> TH1 / TH4 to GND */
+		ntc-pwr-gpios = <&gpio0 19 GPIO_ACTIVE_HIGH>;
+
+		/* Cell and charger, read by src/main.c (REV_B2_COMPACT.md, numbers every session uses):
+		 * - cell: Sharvi 400909, 30 mAh, no protection board (the LPB1010 protects it);
+		 * - ICHG = K_ISET / R1 13.3 kOhm: 145 / 13.3k = 10.90 mA worst case (135: 10.15 typical);
+		 * - cut-off 3.30 V loaded, above LPB1010 VDL max 2.9 V;
+		 * - green needs about 3.5 V on the MAXM86161 31 mA range [VERIFY];
+		 * - cell resistance: no data sheet yet, so 2.0 ohm, the end-of-life and cold
+		 *   figure (1.0 ohm typical) [ASSUMED]. Set it from the bench;
+		 * - VBAT_SENSE = VBAT x R18 / (R17 + R18), 1 MOhm / 1 MOhm.
+		 * P0.04 (heater) and P0.05 (TH3) are not connected. */
+		cell-capacity-mah = <30>;
+		charge-current-max-ua = <10902>;
+		cutoff-mv = <3300>;
+		green-min-mv = <3500>;
+		cell-resistance-mohm = <2000>;
+		vbat-sense-top-ohm = <1000000>;
+		vbat-sense-bottom-ohm = <1000000>;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+
+		/* LED_K U1 G3 P0.17: VDD -> R22 470 Ohm -> D2 white LED -> P0.17, about 1 mA when low.
+		 * Under the light pipe. */
+		status_led: led_0 {
+			gpios = <&gpio0 17 GPIO_ACTIVE_LOW>;
+			label = "status";
+		};
+	};
+};
+
+&reg {
+	regulator-initial-mode = <NRF5X_REG_MODE_DCDC>;
+};
+
+/*
+ * SWD on internal test pads, no series resistors: SWDIO U1 G1 -> TP5, SWCLK U1 F1 -> TP6,
+ * NRESET U1 H1 P0.21 -> TP7. Pin reset stays off (UICR PSELRESET unprogrammed): SWD
+ * does not need it. For bring-up only, add `&uicr { gpio-as-nreset; };` in an overlay.
+ */
+
+&gpiote {
+	status = "okay";
+};
+
+&gpio0 {
+	status = "okay";
+};
+
+&adc {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	status = "okay";
+
+	/* VBUS_SENSE U1 C6 P0.02/AIN0: R14 1 MOhm / R15 470 kOhm, 1.57 V max.
+	 * 0.6 V ref at gain 1/3 = 1.8 V FS; 320 kOhm source needs 40 us. */
+	channel@0 {
+		reg = <0>;
+		zephyr,gain = "ADC_GAIN_1_3";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME(ADC_ACQ_TIME_MICROSECONDS, 40)>;
+		zephyr,input-positive = <NRF_SAADC_AIN0>;
+		zephyr,resolution = <12>;
+	};
+
+	/* NT1_SENSE U1 D6 P0.03/AIN1: TH1, skin side under the window. Ratiometric:
+	 * VDD/4 ref at gain 1/4 = VDD full scale, the rail NTC_PWR drives. */
+	channel@1 {
+		reg = <1>;
+		zephyr,gain = "ADC_GAIN_1_4";
+		zephyr,reference = "ADC_REF_VDD_1_4";
+		zephyr,acquisition-time = <ADC_ACQ_TIME(ADC_ACQ_TIME_MICROSECONDS, 10)>;
+		zephyr,input-positive = <NRF_SAADC_AIN1>;
+		zephyr,resolution = <12>;
+	};
+
+	/* VBAT_SENSE U1 A4 P0.29/AIN5: VBAT / 2 (R17 / R18 1 MOhm), 2.1 V max, C24 100 nF holds
+	 * the node. 0.6 V ref at gain 1/4 = 2.4 V FS. */
+	channel@5 {
+		reg = <5>;
+		zephyr,gain = "ADC_GAIN_1_4";
+		zephyr,reference = "ADC_REF_INTERNAL";
+		zephyr,acquisition-time = <ADC_ACQ_TIME(ADC_ACQ_TIME_MICROSECONDS, 40)>;
+		zephyr,input-positive = <NRF_SAADC_AIN5>;
+		zephyr,resolution = <12>;
+	};
+
+	/* NT3_SENSE U1 A5 P0.30/AIN6: TH4, top side under the lid. */
+	channel@6 {
+		reg = <6>;
+		zephyr,gain = "ADC_GAIN_1_4";
+		zephyr,reference = "ADC_REF_VDD_1_4";
+		zephyr,acquisition-time = <ADC_ACQ_TIME(ADC_ACQ_TIME_MICROSECONDS, 10)>;
+		zephyr,input-positive = <NRF_SAADC_AIN6>;
+		zephyr,resolution = <12>;
+	};
+};
+
+&i2c0 {
+	compatible = "nordic,nrf-twim";
+	status = "okay";
+	clock-frequency = <I2C_BITRATE_FAST>;
+	pinctrl-0 = <&i2c0_default>;
+	pinctrl-1 = <&i2c0_sleep>;
+	pinctrl-names = "default", "sleep";
+
+	/* U2 MAXM86161 optical module: AFE, green, IR and red LEDs, one PD. VLED = VBAT. */
+	ppg: maxm86161@62 {
+		compatible = "maxim,maxm86161";
+		reg = <0x62>;
+		/* PPG_INT U1 B3 P0.25 <- INTB (pin 14), open drain; no pull-up on the board */
+		int-gpios = <&gpio0 25 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+		/* PPG_EN U1 H3 P0.16 -> LDO_EN (pin 3) */
+		en-gpios = <&gpio0 16 GPIO_ACTIVE_HIGH>;
+		/* PPG_SYNC U1 H2 P0.18 <-> GPIO (pin 13), open drain; not used yet */
+		sync-gpios = <&gpio0 18 (GPIO_ACTIVE_LOW | GPIO_OPEN_DRAIN)>;
+	};
+
+	/* U3 LSM6DSOX (LSM6DSO register set), SDO/SA0 to GND. IMU_INT2 U1 F4 P0.11 unused. */
+	imu: lsm6dsox@6a {
+		compatible = "st,lsm6dso";
+		reg = <0x6a>;
+		/* IMU_INT1 U1 A3 P0.28 */
+		irq-gpios = <&gpio0 28 GPIO_ACTIVE_HIGH>;
+		int-pin = <1>;
+	};
+};
+
+&spi1 {
+	compatible = "nordic,nrf-spim";
+	status = "okay";
+	pinctrl-0 = <&spi1_default>;
+	pinctrl-1 = <&spi1_sleep>;
+	pinctrl-names = "default", "sleep";
+	/* FL_CS U1 H6 P0.12 */
+	cs-gpios = <&gpio0 12 GPIO_ACTIVE_LOW>;
+
+	/* U8 MX25R1635FZUIH0, 16 Mbit, 1.65 to 3.6 V. WP#/SIO2 and RESET#/SIO3 tied to VDD.
+	 * Powers up in ultra-low-power mode, fine for 8 MHz [VERIFY: MX25R data sheet fMAX in LP mode]. */
+	ext_flash: mx25r1635f@0 {
+		compatible = "jedec,spi-nor";
+		reg = <0>;
+		spi-max-frequency = <8000000>;
+		jedec-id = [c2 28 15];
+		size = <0x1000000>;
+		has-dpd;
+		/* tDP and tRDP from the MX25R family [VERIFY: MX25R1635F data sheet] */
+		t-enter-dpd = <10000>;
+		t-exit-dpd = <35000>;
+
+		partitions {
+			compatible = "fixed-partitions";
+			#address-cells = <1>;
+			#size-cells = <1>;
+
+			/* MCUboot secondary slot, same size as slot0 */
+			slot1_partition: partition@0 {
+				label = "image-1";
+				reg = <0x00000000 0x0006a000>;
+			};
+
+			/* the rest: 1600 KB of 24-byte records (src/logstore.c) */
+			log_partition: partition@70000 {
+				label = "log";
+				reg = <0x00070000 0x00190000>;
+			};
+		};
+	};
+};
+
+/*
+ * Internal flash: MCUboot 64 KB, primary slot 424 KB, settings and bonds 24 KB.
+ * The secondary slot is on the MX25R1635F (above).
+ */
+&flash0 {
+	partitions {
+		compatible = "fixed-partitions";
+		#address-cells = <1>;
+		#size-cells = <1>;
+
+		boot_partition: partition@0 {
+			label = "mcuboot";
+			reg = <0x00000000 0x10000>;
+		};
+
+		slot0_partition: partition@10000 {
+			label = "image-0";
+			reg = <0x00010000 0x6a000>;
+		};
+
+		storage_partition: partition@7a000 {
+			label = "storage";
+			reg = <0x0007a000 0x00006000>;
+		};
+	};
+};

@@ -1,0 +1,17 @@
+identifier: atrium_pod
+name: Atrium pod Rev B.2
+type: mcu
+arch: arm
+toolchain:
+  - zephyr
+ram: 64
+flash: 512
+supported:
+  - adc
+  - gpio
+  - i2c
+  - spi
+  - nvs
+  - watchdog
+  - ble
+vendor: localforge

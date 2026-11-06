@@ -1,0 +1,42 @@
+/*
+ * Copyright (c) 2026 Local Forge
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Pins from the Rev B.2 pod netlist, U1 nRF52832-CIAA (WLCSP).
+ */
+
+&pinctrl {
+	/* SDA U1 F7 P0.06, SCL U1 F6 P0.07. R3/R4 4.7 kOhm pull-ups to VDD on the board. */
+	i2c0_default: i2c0_default {
+		group1 {
+			psels = <NRF_PSEL(TWIM_SDA, 0, 6)>,
+				<NRF_PSEL(TWIM_SCL, 0, 7)>;
+		};
+	};
+
+	i2c0_sleep: i2c0_sleep {
+		group1 {
+			psels = <NRF_PSEL(TWIM_SDA, 0, 6)>,
+				<NRF_PSEL(TWIM_SCL, 0, 7)>;
+			low-power-enable;
+		};
+	};
+
+	/* FL_SCK U1 G4 P0.13, FL_MOSI U1 H5 P0.14, FL_MISO U1 H4 P0.15 (CS is a GPIO). */
+	spi1_default: spi1_default {
+		group1 {
+			psels = <NRF_PSEL(SPIM_SCK, 0, 13)>,
+				<NRF_PSEL(SPIM_MOSI, 0, 14)>,
+				<NRF_PSEL(SPIM_MISO, 0, 15)>;
+		};
+	};
+
+	spi1_sleep: spi1_sleep {
+		group1 {
+			psels = <NRF_PSEL(SPIM_SCK, 0, 13)>,
+				<NRF_PSEL(SPIM_MOSI, 0, 14)>,
+				<NRF_PSEL(SPIM_MISO, 0, 15)>;
+			low-power-enable;
+		};
+	};
+};

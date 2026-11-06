@@ -1,0 +1,16 @@
+# Copyright (c) 2026 Local Forge
+# SPDX-License-Identifier: Apache-2.0
+
+if BOARD_ATRIUM_POD
+
+config HW_STACK_PROTECTION
+	default ARCH_HAS_STACK_PROTECTION
+
+# MX25R1635F: report 4 KB pages so MCUboot's swap-move sees the same sector
+# size in the internal primary slot and the external secondary slot.
+if SPI_NOR
+config SPI_NOR_FLASH_LAYOUT_PAGE_SIZE
+	default 4096
+endif
+
+endif # BOARD_ATRIUM_POD

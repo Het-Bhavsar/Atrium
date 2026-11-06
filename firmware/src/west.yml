@@ -1,0 +1,20 @@
+# West manifest for the Atrium pod firmware (read by firmware/tests/Dockerfile): Zephyr plus only the modules the nRF52832 build needs.
+manifest:
+  remotes:
+    - name: zephyrproject-rtos
+      url-base: https://github.com/zephyrproject-rtos
+  projects:
+    - name: zephyr
+      remote: zephyrproject-rtos
+      revision: v4.4.2
+      import:
+        name-allowlist:
+          - cmsis
+          - cmsis_6
+          - hal_nordic
+          - hal_st
+          - mbedtls
+          - mcuboot
+          - segger
+          - tf-psa-crypto
+          - zcbor
