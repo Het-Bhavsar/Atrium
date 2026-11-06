@@ -35,6 +35,7 @@ LICENSE  README.md  AGENTS.md
   | Mechanical | `hardware/{pod,case}/mechanical`, `docs/images`, `docs/make_figures.py` |
   | Firmware | `firmware/` |
   | App, cloud | `app/`, `cloud/` |
+  | Product (shared) | `docs/FEATURES.md`: any workstream proposes changes by PR; the owner approves |
 
 - No one-off scripts, logs or caches. Every script in the repo has a usage line that runs from the repo root.
 
