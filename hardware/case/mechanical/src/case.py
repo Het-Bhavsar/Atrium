@@ -241,6 +241,28 @@ def case_cell():
     return bd.Compound(children=[cell, foam], label="case_cell")
 
 
+def magnet_bz(px, py, pz, cx, cy, zbot, d=P.MAGNET_D, t=P.MAGNET_T, br=P.MAGNET_BR, nl=60, ns=180):
+    """Bz (T) at a point (mm) from an axial cylinder magnet whose bottom face is at zbot.
+
+    Sheet-current model (K = Br / mu0 on the side) integrated with Biot-Savart, so it holds
+    off-axis, where a hall sensor sitting beside the magnet sees the field.
+    """
+    import numpy as np
+
+    mu0 = 4e-7 * math.pi
+    a, dz = d / 2, t / nl
+    i_loop = br / mu0 * dz * 1e-3
+    th = np.linspace(0, 2 * math.pi, ns, endpoint=False)
+    dl = 2 * math.pi / ns * a * 1e-3
+    x, y = cx + a * np.cos(th), cy + a * np.sin(th)
+    bz = 0.0
+    for z0 in zbot + dz * (np.arange(nl) + 0.5):
+        rx, ry, rz = (px - x) * 1e-3, (py - y) * 1e-3, (pz - z0) * 1e-3
+        r3 = (rx * rx + ry * ry + rz * rz) ** 1.5
+        bz += float(np.sum(mu0 * i_loop / (4 * math.pi) * dl * (-np.sin(th) * ry - np.cos(th) * rx) / r3))
+    return bz
+
+
 def magnet_field(z, d=P.MAGNET_D, t=P.MAGNET_T, br=P.MAGNET_BR):
     """On-axis flux density (T) of an axial cylinder magnet at distance z from its face."""
     r = d / 2

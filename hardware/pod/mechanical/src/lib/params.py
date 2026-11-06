@@ -151,7 +151,7 @@ POGO_PLUNGER_D = 1.0         # [VERIFY]
 POGO_STROKE_MAX = 1.2        # [VERIFY]
 POGO_WORK_COMP = 0.6         # design compression when docked
 
-CASE_POGO = [(18.73, 18.5), (21.27, 18.5)]
+CASE_POGO = [(18.73, 20.3), (21.27, 20.3)]   # +1.8 mm in y (was 18.5) to clear USB-C J1
 POD_DOCK_OFFSET = (CASE_POGO[0][0] - POGO_PADS[0][0], CASE_POGO[0][1] - POGO_PADS[0][1])
 
 CRADLE_POCKET_CLEAR = 0.15
@@ -163,7 +163,8 @@ LID_T = 1.0
 MAGNET_D = 3.0               # N52 axial
 MAGNET_T = 2.0
 MAGNET_BR = 1.45             # T, N52 remanence (1.42-1.48)
-MAGNET_XY = (36.0, 22.0)     # over DRV5032 U4
+HALL_XY = (36.6, 22.4)       # DRV5032 U4 centre (was 36.0, 22.0)
+MAGNET_XY = (37.55, 23.55)   # 1.5 mm outboard of U4 so its pocket clears the pod pocket
 HALL_DIE_Z = 0.55            # die height above the case PCB top [ASSUMED for SOT-23]
 HALL_BOP_MAX = 4.8e-3        # T, DRV5032FA
 HALL_BRP_MIN = 0.5e-3
