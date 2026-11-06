@@ -22,7 +22,7 @@ Sensors are the Rev B pod's: PPG (green, red and IR, near detector), IMU (LSM6DS
 | 5 | Sleep position | Time on the back, left and right sides | IMU orientation | V1 | Head orientation from the accelerometer |
 | 6 | Activity and effort | Active minutes, workouts detected, an effort score from HR zones | IMU, HR | V1 | Atrium's own effort score, with the formula documented in `app/` |
 | 7 | Recovery | A morning score from resting HR, HRV, sleep and temperature deviation | 1–4 | V1 | Formula documented and versioned |
-| 8 | SpO₂ trend | Overnight relative oxygen-saturation trend | PPG red and IR | Later | Uncalibrated, so trend only. Never a % SpO₂ number |
+| 8 | Blood oxygen | A nightly average blood-oxygen percentage, and how it compares with the user's usual nights | PPG red and IR | Later | A wellness estimate. One whole-percent value a night, capped at 100. Shown only after the Atrium calibration passes `app/python/VALIDATION.md` V5, across skin tones; until then the trend only. Below the calibrated range: "lower than your usual", not a number. No per-minute values, no alerts |
 | 9 | Thermal trends | Skin-temperature and pod-gradient trends over the day and during exercise | TMP117, edge NTC | Later | Atrium's own physiology; no composite "score" until validated |
 | 10 | Perfusion trend | Relative PPG amplitude (AC/DC) trend | PPG | Later | No brain or cerebral claims (see the simulation notes) |
 | 11 | Eating detection | A prompt: "Looks like you are eating — log it?" | IMU jaw-motion pattern | Later | Opt-in. Jaw clench and talking are confounders, so test before shipping |
@@ -60,6 +60,6 @@ Sensors are the Rev B pod's: PPG (green, red and IR, near detector), IMU (LSM6DS
 
 ## Not features
 
-- Medical claims, diagnosis, alerts that imply a condition, or blood-oxygen numbers.
+- Medical claims, diagnosis, or alerts that imply a condition. This includes blood-oxygen alerts and any blood-oxygen number other than the calibrated nightly value of #8.
 - Brain, cerebral or cognitive measurements.
 - Any metric whose method is not Atrium's own and documented.
