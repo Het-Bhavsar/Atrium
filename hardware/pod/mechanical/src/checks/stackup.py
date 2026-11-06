@@ -68,8 +68,8 @@ TOL = [
     ("top shell", P.SHELL_TOP_T, 0.05, +1),
     ("window plate", P.WINDOW_T, 0.03, +1),
     ("rib / rim height", P.SKIN_ZONE, 0.03, +1),
-    ("PCB 0.6 (JLC +/-10 %)", P.PCB_T, 0.06, +1),
-    ("top-part zone (allocated)", P.TOP_ZONE, 0.0, +1),
+    (f"PCB {P.PCB_T} (JLC +/-{P.PCB_T_TOL})", P.PCB_T, P.PCB_T_TOL, +1),
+    (f"parts under cell (rule)", P.UNDER_CELL_MAX, 0.0, +1),
     ("PI tape", P.CELL_INSULATOR_T, 0.01, +1),
 ]
 
@@ -83,7 +83,7 @@ say(f"  {'cell (nominal)':28s} {P.CELL_T:5.2f}  +/-{P.CELL_T_TOL:.2f}  [ASSUMED 
 gap_nom = P.POD_H - sum(n for _, n, _, s in TOL if s > 0) - P.CELL_T
 say(f"  {'gap above cell (PORON)':28s} {gap_nom:5.2f}")
 say(f"  {'outer height':28s} {P.POD_H:5.2f}")
-say(f"  tallest top part under the cell: {top_ref} {top_nom_h:.2f} (zone allocates {P.TOP_ZONE})")
+say(f"  tallest top part under the cell: {top_ref} {top_nom_h:.2f} (layout rule {P.UNDER_CELL_MAX})")
 say()
 
 poron_solid = P.PORON_T * P.PORON_SOLID_FRAC
@@ -93,7 +93,7 @@ rss = math.sqrt(sum(t * t for t in tol_list))
 
 
 def swell_case(label, cell_t, gap_reduction, using_actual_parts):
-    part_credit = (P.TOP_ZONE - top_nom_h) if using_actual_parts else 0.0
+    part_credit = (P.UNDER_CELL_MAX - top_nom_h) if using_actual_parts else 0.0
     gap = P.POD_H - sum(n for _, n, _, s in TOL if s > 0) - cell_t - gap_reduction + part_credit
     swell = P.CELL_SWELL * cell_t
     residual = gap - swell - poron_solid
@@ -108,8 +108,8 @@ def swell_case(label, cell_t, gap_reduction, using_actual_parts):
 
 
 say(f"Cell swell 10 % vs gap above the cell (PORON free {P.PORON_T:.2f}, solid {poron_solid:.2f}):")
-swell_case("nominal 3.0, zone 0.9", P.CELL_T, 0.0, False)
-swell_case(f"nominal 3.0, cell on {top_ref} {top_nom_h}", P.CELL_T, 0.0, True)
+check("layout rule: parts under the cell", top_nom_h <= P.UNDER_CELL_MAX, f"tallest {top_ref} {top_nom_h} vs rule {P.UNDER_CELL_MAX}")
+swell_case(f"nominal 3.0, rule {P.UNDER_CELL_MAX}", P.CELL_T, 0.0, False)
 swell_case("RSS tolerances", P.CELL_T, rss - 0.0, False)
 swell_case("worst-case tolerances", P.CELL_T, wc, False)
 swell_case("sheet max 3.5", P.CELL_T_SHEET_MAX, 0.0, False)
@@ -123,6 +123,20 @@ check(
     f"sheet max {P.CELL_L_SHEET_MAX} x {P.CELL_W_SHEET_MAX} vs zone 20 x 10; parts under the larger footprint "
     f"tallest {top_max_ref} {top_max_h:.2f} (<= {P.TOP_ZONE}), end at x {cell_x0 + P.CELL_L_SHEET_MAX:.1f} (< 24)",
 )
+say()
+
+# ------------------------------------------------------------------ PCB thickness extremes
+say(f"PCB thickness {P.PCB_T_MIN:.2f} / {P.PCB_T:.2f} / {P.PCB_T_MAX:.2f} mm (rib datum fixes the skin face):")
+for t in (P.PCB_T_MIN, P.PCB_T, P.PCB_T_MAX):
+    top = P.Z_PCB_BOT + t
+    pad = P.Z_TAB_BOT - top
+    comp = 1 - pad / P.TAB_PAD_T
+    check(f"PCB {t:.2f}: tab pad", 0.0 <= comp <= 0.70, f"space {pad:.2f} for {P.TAB_PAD_T} pad -> {comp * 100:.0f} % compression")
+    gap = P.Z_CAVITY_TOP - (top + P.UNDER_CELL_MAX + P.CELL_INSULATOR_T + P.CELL_T)
+    res = gap - P.CELL_SWELL * P.CELL_T - poron_solid
+    contact = "PORON preloads the cell" if gap < P.PORON_T else f"{gap - P.PORON_T:.2f} air above PORON (tape holds the cell)"
+    check(f"PCB {t:.2f}: 10 % swell", res >= 0, f"gap {gap:.2f} - swell {P.CELL_SWELL * P.CELL_T:.2f} - PORON solid {poron_solid:.2f} = {res:+.3f}; {contact}")
+say(f"  skin side and pogo pad face (z {P.Z_PCB_BOT - P.POGO_PAD_T:.2f}) do not move with PCB thickness")
 say()
 
 # ------------------------------------------------------------------ skin side

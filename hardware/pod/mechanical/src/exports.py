@@ -29,7 +29,7 @@ from pod_internals import (
     pod_pcba_antenna_flat,
     pod_poron,
 )
-from pod_shell import pod_comfort_dummy, pod_top_shell
+from pod_shell import pod_comfort_dummy, pod_tab_pads, pod_top_shell
 from pod_window import aperture_faces, pod_window_clear, pod_window_frame, pogo_gasket, thermal_button, thermal_gap_pad
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -41,6 +41,7 @@ STEP_PARTS = {
     "pod_thermal_button": thermal_button,
     "pod_thermal_gap_pad": thermal_gap_pad,
     "pod_pogo_gasket": pogo_gasket,
+    "pod_tab_pads": pod_tab_pads,
     "pod_pcba_envelope": pod_pcba,
     "pod_pcba_envelope_antenna_flat": pod_pcba_antenna_flat,
     "pod_cell_301020": pod_cell,
@@ -60,6 +61,20 @@ PRINT_PARTS = {
 }
 
 
+def fixed_dxf_dates(path):
+    """Pin the DXF header timestamps so re-exports only change when geometry does."""
+    import re
+
+    lines = open(path).read().split("\n")
+    for i, line in enumerate(lines[:-2]):
+        if line.strip() in ("$TDCREATE", "$TDUCREATE", "$TDUPDATE", "$TDUUPDATE", "$TDINDWG", "$TDUSRTIMER"):
+            lines[i + 2] = "0.0"
+        elif line.strip() in ("$FINGERPRINTGUID", "$VERSIONGUID"):
+            lines[i + 2] = "{00000000-0000-0000-0000-000000000000}"
+    text = re.sub(r" @ \d{4}-\d\d-\d\dT[\d:.+]+", "", "\n".join(lines))
+    open(path, "w").write(text)
+
+
 def to_dxf_frame(shape):
     return bd.Pos(1.0, 1.0) * shape
 
@@ -71,6 +86,7 @@ def write_dxf(path, layers):
         for s in shapes:
             dxf.add_shape(to_dxf_frame(s), layer=name)
     dxf.write(path)
+    fixed_dxf_dates(path)
 
 
 def dxf_window(path):

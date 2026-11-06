@@ -9,7 +9,7 @@ Parametric build123d models of the pod. Every parameter is in [`src/lib/params.p
 cd src
 cad run pod_assembly.py          # pod, and pod as docked (no adhesive)
 cad run checks/interference.py   # pairwise overlap, expect 0
-cad run checks/stackup.py        # z-stack, 10 % cell swell, skin clearances, metal keep-out
+cad run checks/stackup.py        # z-stack, PCB 0.51/0.61/0.71, 10 % cell swell, tab pads, skin clearances, metal keep-out
 cad run checks/design_rules.py   # visible form rules
 cad run exports.py               # STEP/ STL/ 3MF/ DXF/
 ```
@@ -24,7 +24,8 @@ cad run exports.py               # STEP/ STL/ 3MF/ DXF/
 | Thermal button | `thermal_button` | 316L, Ø2.45 × 0.5 with a retaining flange |
 | Gap pad, pogo seal | `thermal_gap_pad`, `pogo_gasket` | 0.3 mm gap filler; black silicone 0.15 mm (`POGO_SEAL`: none / gasket / glue) |
 | PCBA envelope | `pod_internals.py::pod_pcba` | boxes from `pcb/placement/pod_placement.csv` (antenna lifted 2.5 mm; `pod_pcba_antenna_flat` keeps it on the board) |
-| Cell, PORON, adhesive | `pod_cell`, `pod_poron`, `pod_adhesive`, `pod_liner` | 301020 cell with PI tape; 0.5 mm PORON; 0.2 mm medical tape with a liner tab |
+| Cell, PORON, adhesive | `pod_cell`, `pod_poron`, `pod_adhesive`, `pod_liner` | 301020 cell on double-coated PI tape; 0.4 mm PORON for swell; 0.2 mm medical tape with a liner tab |
+| Tab pads | `pod_shell.py::pod_tab_pads` | 0.35 mm PORON under each shell hold-down tab; clamps a 0.51–0.71 mm board (9–66 % compression) |
 | Foam adhesive options | `pod_adhesive_foam05`, `pod_adhesive_foam08` | 0.5 and 0.8 mm black medical foam, same die-cut, for the wear test |
 | Comfort dummy | `pod_shell.py::pod_comfort_dummy` | outer envelope as one solid with a ballast pocket, for SLA printing |
 
@@ -34,11 +35,11 @@ cad run exports.py               # STEP/ STL/ 3MF/ DXF/
 |---|---|
 | Window | 0.5 |
 | Skin-side parts | 1.0 |
-| PCB | 0.6 |
-| Top parts | 0.9 |
-| PI tape | 0.05 |
+| PCB | 0.61 ± 0.10 (JLC HDI JLCH04061HN1-1078) |
+| Top parts under the cell | ≤ 0.83 (layout rule) |
+| PI tape | 0.05 (double-coated; holds the cell) |
 | Cell | 3.0 |
-| PORON gap | 0.45 |
+| PORON gap | 0.51 at a 0.61 board (0.41–0.61) |
 | Top shell | 0.5 |
 | **Total** | **7.0** |
 

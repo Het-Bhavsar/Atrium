@@ -4,23 +4,32 @@ Pod z-stack (skin face z = 0), mm:
   top shell                     0.50  +/-0.05
   window plate                  0.50  +/-0.03
   rib / rim height              1.00  +/-0.03
-  PCB 0.6 (JLC +/-10 %)         0.60  +/-0.06
-  top-part zone (allocated)     0.90  +/-0.00
+  PCB 0.61 (JLC +/-0.1)         0.61  +/-0.10
+  parts under cell (rule)       0.83  +/-0.00
   PI tape                       0.05  +/-0.01
   cell (nominal)                3.00  +/-0.20  [ASSUMED tol]
-  gap above cell (PORON)        0.45
+  gap above cell (PORON)        0.51
   outer height                  7.00
-  tallest top part under the cell: U3 0.83 (zone allocates 0.9)
+  tallest top part under the cell: U3 0.83 (layout rule 0.83)
 
-Cell swell 10 % vs gap above the cell (PORON free 0.50, solid 0.10):
-[PASS] swell nominal 3.0, zone 0.9: gap 0.450 - swell 0.300 - PORON solid 0.10 = +0.050 mm (PORON at 70 % compression)
-[PASS] swell nominal 3.0, cell on U3 0.83: gap 0.520 - swell 0.300 - PORON solid 0.10 = +0.120 mm (PORON at 56 % compression)
-[FAIL] swell RSS tolerances: gap 0.225 - swell 0.300 - PORON solid 0.10 = -0.175 mm
-[FAIL] swell worst-case tolerances: gap 0.020 - swell 0.300 - PORON solid 0.10 = -0.380 mm
-[FAIL] swell sheet max 3.5: gap -0.050 - swell 0.350 - PORON solid 0.10 = -0.500 mm
-  -> worst-case pass needs outer height >= 7.38 mm (3.0 cell)
-  -> sheet-max cell needs outer height >= 7.50 mm (nominal tolerances)
+Cell swell 10 % vs gap above the cell (PORON free 0.40, solid 0.08):
+[PASS] layout rule: parts under the cell: tallest U3 0.83 vs rule 0.83
+[PASS] swell nominal 3.0, rule 0.83: gap 0.510 - swell 0.300 - PORON solid 0.08 = +0.130 mm (PORON at 47 % compression)
+[FAIL] swell RSS tolerances: gap 0.271 - swell 0.300 - PORON solid 0.08 = -0.109 mm
+[FAIL] swell worst-case tolerances: gap 0.040 - swell 0.300 - PORON solid 0.08 = -0.340 mm
+[FAIL] swell sheet max 3.5: gap 0.010 - swell 0.350 - PORON solid 0.08 = -0.420 mm
+  -> worst-case pass needs outer height >= 7.34 mm (3.0 cell)
+  -> sheet-max cell needs outer height >= 7.42 mm (nominal tolerances)
 [FAIL] cell footprint vs battery zone: sheet max 20.5 x 11.0 vs zone 20 x 10; parts under the larger footprint tallest U3 0.83 (<= 0.9), end at x 23.5 (< 24)
+
+PCB thickness 0.51 / 0.61 / 0.71 mm (rib datum fixes the skin face):
+[PASS] PCB 0.51: tab pad: space 0.32 for 0.35 pad -> 9 % compression
+[PASS] PCB 0.51: 10 % swell: gap 0.61 - swell 0.30 - PORON solid 0.08 = +0.230; 0.21 air above PORON (tape holds the cell)
+[PASS] PCB 0.61: tab pad: space 0.22 for 0.35 pad -> 37 % compression
+[PASS] PCB 0.61: 10 % swell: gap 0.51 - swell 0.30 - PORON solid 0.08 = +0.130; 0.11 air above PORON (tape holds the cell)
+[PASS] PCB 0.71: tab pad: space 0.12 for 0.35 pad -> 66 % compression
+[PASS] PCB 0.71: 10 % swell: gap 0.41 - swell 0.30 - PORON solid 0.08 = +0.030; 0.01 air above PORON (tape holds the cell)
+  skin side and pogo pad face (z 1.48) do not move with PCB thickness
 
 Skin side:
 [PASS] skin part D2: h 0.55, clearance to window 0.42 at rib -0.03
@@ -34,7 +43,7 @@ Skin side:
 [PASS] TMP gap pad, U4 max 0.8: gap 0.20, pad 0.3 free -> 33 % compression
 
 Antenna and metal keep-out:
-[PASS] raised antenna room: top 5.20 vs ceiling 6.50
+[PASS] raised antenna room: top 5.21 vs ceiling 6.50
 [PASS] shell material: plastic only, no inserts (by construction)
 [PASS] x < 24: thermal_button_316L: max x 15.50
 [PASS] x < 24: cell_insulator_pi_tape: max x 23.00
@@ -45,17 +54,17 @@ Antenna and metal keep-out:
 
 Mass (pod without adhesive):
   cell                    2.00 g
-  pod_top_shell           0.77 g
+  pod_top_shell           0.76 g
   pod_pcb                 0.39 g
   window_frame            0.27 g
   components              0.19 g
   antenna_riser           0.04 g
-  poron                   0.02 g
+  poron                   0.03 g
   thermal_button          0.02 g
   cell_insulator          0.01 g
   clear_                  0.01 g
   tab_                    0.01 g
-  total                   3.76 g
-[PASS] comfort dummy can match mass: resin 2.73 g + ballast 1.03 g (40 % of the pocket at 4.5 g/cm3)
+  total                   3.77 g
+[PASS] comfort dummy can match mass: resin 2.73 g + ballast 1.04 g (40 % of the pocket at 4.5 g/cm3)
 
 FAILED: swell RSS tolerances, swell worst-case tolerances, swell sheet max 3.5, cell footprint vs battery zone, LED|PD1 rib width

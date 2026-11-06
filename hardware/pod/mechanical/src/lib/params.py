@@ -30,7 +30,11 @@ SKIN_EDGE_FILLET = 0.8       # outer skin-contact edge; <= SKIRT_T, avoids a pre
 
 PCB_L = 28.0
 PCB_W = 14.0
-PCB_T = 0.6
+PCB_T = 0.61                 # JLC HDI JLCH04061HN1-1078, finished 0.61
+PCB_T_TOL = 0.10             # JLC below 1.0 mm: +/-0.10, so 0.51-0.71
+PCB_T_MIN, PCB_T_MAX = PCB_T - PCB_T_TOL, PCB_T + PCB_T_TOL
+TAB_PAD_T = 0.35             # PORON under each shell hold-down tab, free
+TAB_PAD_MIN = 0.12           # compressed thickness on a 0.71 board; tabs end at PCB_T_MAX + this
 PCB_CX = PCB_L / 2           # stadium centre in the pod frame
 PCB_CY = PCB_W / 2
 
@@ -41,13 +45,15 @@ ADHESIVE_EDGE_INSET = 0.1    # patch ends this far inside the flat of the skin f
 LINER_T = 0.05               # release liner under the adhesive [ASSUMED]
 WINDOW_T = 0.5
 SKIN_ZONE = 1.0              # skin-side parts <= 1.0
-TOP_ZONE = 0.9               # top parts <= 0.9 under the cell
-CELL_INSULATOR_T = 0.05      # polyimide tape under the cell, puncture barrier [ASSUMED]
+TOP_ZONE = 0.9               # top parts outside the cell footprint
+UNDER_CELL_MAX = 0.83        # layout rule: top parts under the cell (U3 0.83, U6/L1 0.80)
+CELL_INSULATOR_T = 0.05      # double-coated PI tape: puncture barrier, and it holds the cell [ASSUMED]
 
 Z_WINDOW_TOP = WINDOW_T
 Z_PCB_BOT = Z_WINDOW_TOP + SKIN_ZONE
 Z_PCB_TOP = Z_PCB_BOT + PCB_T
-Z_CELL_BOT = Z_PCB_TOP + TOP_ZONE + CELL_INSULATOR_T
+Z_CELL_BOT = Z_PCB_TOP + UNDER_CELL_MAX + CELL_INSULATOR_T
+Z_TAB_BOT = Z_PCB_BOT + PCB_T_MAX + TAB_PAD_MIN   # shell hold-down tabs stop here; PORON pads fill to the PCB
 Z_CAVITY_TOP = POD_H - SHELL_TOP_T
 
 # Cell: LP301020 class. The model name says 3.0 x 10 x 20; the supplier sheet allows
@@ -69,7 +75,7 @@ CELL_TAB_Y = (4.4, 9.6)      # BT+ and BT- pad centres
 CELL_TAB_PAD_X = 3.6
 CELL_TAB_FOLD_X = 2.55       # outermost x of the tab fold
 
-PORON_T = 0.50               # free thickness; installed in the 0.45 gap (10 % preload)
+PORON_T = 0.40               # free; absorbs swell. Touches the cell only on a 0.71 board, so tape holds the cell
 PORON_SOLID_FRAC = 0.20      # fully compressed thickness / free [VERIFY: grade data]
 PORON_INSET = 0.5            # pad inset from the cell edge
 

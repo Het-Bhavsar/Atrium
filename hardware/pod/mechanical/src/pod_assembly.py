@@ -4,7 +4,7 @@ import build123d as bd
 from cad import model
 
 from pod_internals import pod_adhesive, pod_cell, pod_liner, pod_pcba, pod_poron
-from pod_shell import pod_top_shell
+from pod_shell import pod_tab_pads, pod_top_shell
 from pod_window import pod_window_clear, pod_window_frame, pogo_gasket, thermal_button, thermal_gap_pad
 from lib import params as P
 
@@ -12,6 +12,7 @@ from lib import params as P
 def pod_children(with_adhesive=True):
     kids = [
         pod_top_shell().shape,
+        pod_tab_pads().shape,
         pod_window_frame().shape,
         pod_window_clear().shape,
         thermal_button().shape,

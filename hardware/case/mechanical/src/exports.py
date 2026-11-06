@@ -38,6 +38,20 @@ STEP_PARTS = {
 PRINT_PARTS = {"case_base": case_base, "case_cradle": case_cradle, "case_lid": case_lid}
 
 
+def fixed_dxf_dates(path):
+    """Pin the DXF header timestamps so re-exports only change when geometry does."""
+    import re
+
+    lines = open(path).read().split("\n")
+    for i, line in enumerate(lines[:-2]):
+        if line.strip() in ("$TDCREATE", "$TDUCREATE", "$TDUPDATE", "$TDUUPDATE", "$TDINDWG", "$TDUSRTIMER"):
+            lines[i + 2] = "0.0"
+        elif line.strip() in ("$FINGERPRINTGUID", "$VERSIONGUID"):
+            lines[i + 2] = "{00000000-0000-0000-0000-000000000000}"
+    text = re.sub(r" @ \d{4}-\d\d-\d\dT[\d:.+]+", "", "\n".join(lines))
+    open(path, "w").write(text)
+
+
 def rrect(x0, y0, x1, y1, r):
     return bd.Pos((x0 + x1) / 2, (y0 + y1) / 2) * bd.RectangleRounded(x1 - x0, y1 - y0, r)
 
@@ -67,6 +81,7 @@ def keepout_dxf(path):
         for sh in shapes:
             dxf.add_shape(sh.wire() if hasattr(sh, "wire") else sh, layer=name)
     dxf.write(path)
+    fixed_dxf_dates(path)
 
 if __name__ == "__main__":
     for name, fn in STEP_PARTS.items():

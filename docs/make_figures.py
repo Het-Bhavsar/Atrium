@@ -265,9 +265,9 @@ def section(pod):
                     pts += [e.position_at(i / (n - 1)) for i in range(n)]
                 ax.add_patch(Polygon([(q.X, q.Z) for q in pts], closed=True, fc=fc if k == 0 else PAPER, ec=INK, lw=0.45, zorder=3))
     stack = (
-        (0, P.Z_WINDOW_TOP, "window 0.5"), (P.Z_WINDOW_TOP, P.Z_PCB_BOT, "skin parts 1.0"), (P.Z_PCB_BOT, P.Z_PCB_TOP, "board 0.6"),
-        (P.Z_PCB_TOP, P.Z_CELL_BOT, "top parts 0.9 + tape"), (P.Z_CELL_BOT, P.Z_CELL_BOT + P.CELL_T, "cell 3.0"),
-        (P.Z_CELL_BOT + P.CELL_T, P.Z_CAVITY_TOP, "PORON 0.45"), (P.Z_CAVITY_TOP, P.POD_H, "shell 0.5"),
+        (0, P.Z_WINDOW_TOP, "window 0.5"), (P.Z_WINDOW_TOP, P.Z_PCB_BOT, "skin parts 1.0"), (P.Z_PCB_BOT, P.Z_PCB_TOP, f"board {P.PCB_T:.2f} ±{P.PCB_T_TOL:.2f}"),
+        (P.Z_PCB_TOP, P.Z_CELL_BOT, f"parts ≤{P.UNDER_CELL_MAX} + tape"), (P.Z_CELL_BOT, P.Z_CELL_BOT + P.CELL_T, "cell 3.0"),
+        (P.Z_CELL_BOT + P.CELL_T, P.Z_CAVITY_TOP, f"PORON gap {P.Z_CAVITY_TOP - P.Z_CELL_BOT - P.CELL_T:.2f}"), (P.Z_CAVITY_TOP, P.POD_H, "shell 0.5"),
     )
     for i, (a, b, t) in enumerate(stack):
         x = 30.8 + (i % 2) * 4.2

@@ -2,8 +2,8 @@
 
 The shell wraps the window plate with a 0.5 mm skirt (z 0-0.5). Above the window the
 cavity is the PCB outline plus PCB_WALL_CLEAR, so the wall is 0.9 at the PCB band.
-Hold-down tabs reach from the ceiling to the PCB top along the 0.3 mm edge band,
-clamping the PCB onto the window ribs. Plastic only: nothing metal at x >= 24.
+Hold-down tabs reach from the ceiling to Z_TAB_BOT along the 0.3 mm edge band; a PORON
+pad under each (pod_tab_pads) clamps the PCB onto the window ribs over its 0.51-0.71 mm range. Plastic only: nothing metal at x >= 24.
 
 Visible (ornamental) surfaces: TOP_EDGE_FILLET, SKIN_EDGE_FILLET and the flat top face.
 They come from comfort and moulding needs and stay parameters; checks/design_rules.py
@@ -28,6 +28,23 @@ def shell_outer(height=P.POD_H):
     return bd.fillet(outer.edges().group_by(bd.Axis.Z)[0], P.SKIN_EDGE_FILLET)
 
 
+def tab_region(z0, z1):
+    """Hold-down tab footprint on the PCB edge band, between z0 and z1."""
+    inner_l = P.PCB_L + 2 * P.PCB_WALL_CLEAR
+    inner_w = P.PCB_W + 2 * P.PCB_WALL_CLEAR
+    band = stadium_prism(inner_l + 0.02, inner_w + 0.02, z0, z1 + 0.01) - stadium_prism(
+        P.PCB_L - 2 * HOLD_DOWN_BAND, P.PCB_W - 2 * HOLD_DOWN_BAND, z0 - 0.1, z1 + 0.1
+    )
+    h = z1 - z0 + 0.02
+    keys = []
+    for x in HOLD_DOWN_SIDE_X:
+        for y0 in (-1.0, P.PCB_W - 1.0):
+            keys.append(box_at(x - HOLD_DOWN_LEN / 2, y0, z0, HOLD_DOWN_LEN, 2.0, h))
+    keys.append(box_at(-1.0, P.PCB_CY - HOLD_DOWN_LEN / 2, z0, 2.0, HOLD_DOWN_LEN, h))
+    keys.append(box_at(P.PCB_L - 1.0, P.PCB_CY - HOLD_DOWN_LEN / 2, z0, 2.0, HOLD_DOWN_LEN, h))
+    return band & union(keys)
+
+
 def shell_body(height=P.POD_H):
     outer = shell_outer(height)
 
@@ -38,18 +55,7 @@ def shell_body(height=P.POD_H):
     cavity = stadium_prism(inner_l, inner_w, P.Z_WINDOW_TOP - 0.01, cavity_top)
     body = outer - skirt - cavity
 
-    band = stadium_prism(inner_l + 0.02, inner_w + 0.02, P.Z_PCB_TOP, cavity_top + 0.01) - stadium_prism(
-        P.PCB_L - 2 * HOLD_DOWN_BAND, P.PCB_W - 2 * HOLD_DOWN_BAND, P.Z_PCB_TOP - 0.1, cavity_top + 0.1
-    )
-    zone_h = cavity_top - P.Z_PCB_TOP + 0.02
-    keys = []
-    for x in HOLD_DOWN_SIDE_X:
-        for y0 in (-1.0, P.PCB_W - 1.0):
-            keys.append(box_at(x - HOLD_DOWN_LEN / 2, y0, P.Z_PCB_TOP, HOLD_DOWN_LEN, 2.0, zone_h))
-    keys.append(box_at(-1.0, P.PCB_CY - HOLD_DOWN_LEN / 2, P.Z_PCB_TOP, 2.0, HOLD_DOWN_LEN, zone_h))
-    keys.append(box_at(P.PCB_L - 1.0, P.PCB_CY - HOLD_DOWN_LEN / 2, P.Z_PCB_TOP, 2.0, HOLD_DOWN_LEN, zone_h))
-    tabs = band & union(keys)
-    body = body + tabs
+    body = body + tab_region(P.Z_TAB_BOT, cavity_top)
 
     body.label = "pod_top_shell"
     body.color = P.SHELL_COLOR
@@ -77,6 +83,15 @@ def pod_comfort_dummy():
 
 
 @model
+def pod_tab_pads():
+    """PORON under the hold-down tabs, shown installed on a nominal 0.61 board."""
+    pads = tab_region(P.Z_PCB_TOP, P.Z_TAB_BOT) & stadium_prism(P.PCB_L + 2 * P.PCB_WALL_CLEAR, P.PCB_W + 2 * P.PCB_WALL_CLEAR, P.Z_PCB_TOP, P.Z_TAB_BOT)
+    pads.label = "tab_pads_poron"
+    pads.color = P.PORON_COLOR
+    return pads
+
+
+@model
 def pod_top_shell():
     body = shell_body()
     bb = body.bounding_box()
@@ -87,4 +102,5 @@ def pod_top_shell():
 
 if __name__ == "__main__":
     pod_top_shell()
+    pod_tab_pads()
     pod_comfort_dummy()
