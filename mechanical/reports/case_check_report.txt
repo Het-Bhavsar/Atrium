@@ -1,0 +1,31 @@
+atrium_case.py check_case(), 36.0 x 25.0 x 16.75 mm
+  [PASS] footprint and height: 36.00 x 25.90 (body 25.0, hinge barrel 0.90 behind) x 16.75 mm; cell reserve 5.0 (the listed 4.0 makes it 15.75)
+  [PASS] Z stack sums to the height: tub floor 1 + foam 0.5 + cell 5 + air 0.2 + PCB 0.8 + parts under floor 1.2 + nest floor 1 + pod 5.3 + pad 0.75 + lid top 1 = 16.75
+  [PASS] no interference in the case, lid closed (press fits and bonded parts aside): none
+  [PASS] routed-board pod seated, lid closed: no interference with the case: pod shell to lid 0.70, base to deck 0.000 (resting), U3 to deck 0.20 (window relief)
+  [PASS] lid pad presses the pod: 0.25 squeeze on the flat top: 0.250 of 1.0 soft foam (15.0 x 6.0 pill, 25 %): at 20-35 kPa that is 1.5-2.7 N against 1.2 N of pogo lift [VERIFY foam CFD]
+  [PASS] pogo stroke at the seated pod: 50-80 % of travel: tip free at z 10.75, pads at 10.07 (0.37 above the skin face, in the d1.2 holes): 0.68 of 1.0 (68 %), 1.2 N total at <= 0.3 N each [VERIFY part]; undocked the plungers stand 1.05 above the floor
+  [PASS] collars and plungers centred in the pod's contact holes: collar d1.04 x 0.25 in the d1.2 holes (0.08 radial, nest clearance 0.1), collar top 0.25 below the 0.37 pad; plunger d0.6
+  [PASS] keyed: a pod turned round lands its base on the SWD collars: collars 1.57 clear of any hole when turned, so it stands 0.25 high and rocks (the lid pad then squeezes 0.50); it still charges (VIN/GND map onto VIN/GND) but SWD can't reach. The outline is 180-degree symmetric, so this is the key; module relief at the hinge end only
+  [PASS] nest magnets under the stiffener: magnet to steel 0.80 (as the Plinth); with 4 pins the pull won't beat 1.2 N: the lid pad holds the pod [VERIFY pull]
+  [PASS] lid swings to 110 degrees clear of the tub, deck and pod: 30: 0.0000, 60: 0.0000, 90: 0.0000, 110: 0.0000 mm3
+  [PASS] hall sees the lid magnet when closed: N52 d4.0 x 2.0 5.7 above the HAL248 die: ~18 mT on axis [VERIFY HAL248 operate point]
+  [PASS] light pipe over the LED, out through the front: mirror over the LED at y -10.0, 0.45 air above it, face flush at y -12.50
+  [PASS] button cap meets the switch stem and travels it: 0.05 pre-travel to the stem tip at y -11.15 (0.15 inside the wall face); flat d1.2 key (Alps); cap face 0.2 recessed, 0.2 travel at 2.2 N; stem centre z 8.10 [VERIFY Alps drawing]
+  [PASS] USB-C receptacle clear in its opening: 0.10 to the tub; opening 9.4 x 3.6 pill
+  [info] vents: 4 pill slots, 44 mm2 open above the pod's sides; the pod rises ~9 C charging
+  [info] cell 30 x 20 x 5.0 at x -14.5..15.5, 0.2 under the PCB; tab fold room 2.3 at -X; cell to ledges 0.30
+  -- routed case PCB: mechanical/boards/atrium_case_evt.step --
+  [PASS] case board in the case frame, bottom on the ledges: 32.975 x 21.975 x 0.800 at z 6.70..7.50; outline edge 0.013 inside the DXF
+  [PASS] routed case PCB: no part body clashes with the case, the cell, the cap, the light pipe or the pogos: none
+  [PASS] routed case PCB: parts >= 0.1 from the case (courtyard): none
+  [info] tallest top parts: J1 3.26, U5 1.65, U6 1.65, C4 1.30, SW1 1.27, U4 1.25
+  [PASS] nest zone: parts under the nest floor <= 1.0: all <= 1.0 (floor underside 0.2 above)
+  [PASS] cell clear under the 0.8 board: board bottom 6.70 over the cell top 6.50 (0.20); lowest part point z 6.60 (J1's legs) 0.10 over the cell
+  [PASS] SW1 stem meets the cap key: 0.035 pre-travel; stem tip y -11.165 (CAD assumed -11.15), stem z 7.51..8.77 centre 8.14 (cap key at 8.10, d1.2), stem width 3.43
+  [PASS] D3 under the light-pipe mirror: D3 centre (-9.00, -10.00), top 8.09, 0.41 air to the pipe
+  [PASS] J1 (USB-C) clear in its opening, mouth at the wall face: 0.219 to the tub, mouth x 17.990 (outer face 18.0), top z 10.76 under the hump 11.00
+  [PASS] cell leads reach their plated holes beside the cell (pad edge >= 0.3 outboard): (-15.50, 2.00) pad edge +0.35 from the cell end, wire rises 1.00 from the tub wall; (-15.50, -2.00) pad edge +0.35 from the cell end, wire rises 1.00 from the tub wall. Top fillet to z 8.00, 2.50 under the deck. Move them to ((-15.5, 2.0), (-15.5, -2.0)) with d1.3 pads (0.35 from the cell end, 0.34 from the edge) and drop the slot [VERIFY lead exit on the cell]
+  [info] U8 (HAL248) at (-12.00, -7.00) under the lid magnet at (-12.0, -7.0)
+  [OPEN] pogo landing pads under the pogos (d1.4): the STEP carries no copper (empty copper layers), so the pads can't be checked here; positions as stated: VIN (0.00, 0.05), GND (0.00, 2.25), SWDIO (2.20, -3.70), SWDCLK (-2.20, -3.70)
+FAILED: none | OPEN: ['pogo landing pads under the pogos (d1.4)']

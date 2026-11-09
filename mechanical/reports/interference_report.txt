@@ -1,0 +1,42 @@
+atrium_pod.py check(), 20.9 x 11.0 x 5.3 mm
+  [PASS] envelope 20.9 x 11.0 x 5.3: 20.90 x 11.00 x 5.30
+  [PASS] Z stack sums to H: top 0.5 + swell 0.2 + cell 4.0 + stiffener 0.1 + flex 0.12 + bond 0.03 + base 0.35 = 5.30
+  [PASS] no interference (housing, boards, parts, cell, stiffener, flex), clamp keep-outs aside: none
+  [PASS] clamp bands clear of courtyards in the current placement (PCB keep-out): all clear
+  [PASS] islands clamped: posts under and ribs over at every clamp point: 6 points; radio island to base 0.000, to shell 0.000; power to base 0.000, to shell 0.000
+  [PASS] no rib or post in the antenna zone: zone x >= 18.76; inside: none
+  [PASS] antenna at the tip: body in its zone, pads on the board, clear of the wall and ribs: body 0.175 inside the zone (pads 0.06), pad corner 0.20 from the board edge, 0.30 to the shell wall, 2.74 to the nearest rib
+  [PASS] shell wall >= 0.3 everywhere (form capsule): 0.38 mm
+  [PASS] module corners >= 0.05 inside the window: window 3.4 x 6.14 at x 17.11, gasket ring >= 0.25 at the sides
+  [PASS] no metal in the antenna zone from the optical module (the window and gasket are plastic and silicone): module to x 18.56, zone from 18.76; window (no metal) to x 18.81
+  [PASS] contact holes >= 1.5 from the window: closest GND_B 2.16 mm
+  [PASS] skin NTC (TH1) boss gap: 0.10 mm (gel)
+  [PASS] pod rests on its base in the Plinth, module clear (window relief, both ways round): base to nest floor 0.000, module to Plinth 0.20 mm
+  [PASS] skin pad inside the pod footprint (nothing shows from the front): pad 18.80 x 8.90, 1.05 mm inside the outline
+  [PASS] skin pad is a full pad, not a ring (largest hole < 15 %): 150 mm2, 130 mm2 bonded, largest hole 13.3 %
+  [PASS] module face level with the pad's skin face: module -0.10, pad face -0.10
+  [PASS] pad sits in the bed, tucked behind the frame: frame 0.5 rim + 0.25 lip, bed 0.05 deep; pad edge 0.25 inside the lip, skin face 0.10 below the frame
+  [PASS] base floor under the bed >= 0.30: 0.30 mm (lip 0.35)
+  [PASS] pad lands in the bed off the card (frame clearance + 0.10 die-cut registration < bed clearance): 0.20 worst case vs 0.25 [VERIFY converter registration]
+  [PASS] pad covers every contact hole while worn (it comes off before charging): covered: VIN, GND_A, GND_B, SWDIO, SWDCLK
+  [PASS] Plinth magnets >= 5.0 mm from the antenna zone: 7.06 mm
+  [PASS] magnet pockets clear of the pin bores (>= 0.2 wall): 0.22 mm
+  [PASS] stiffener over both magnets, either way round: min 65 % of a magnet face under steel; magnet to steel 0.80 mm [VERIFY pull]
+  -- routed boards: EasyEDA exports in mechanical/boards/ --
+  [PASS] routed boards: no part body clashes with the shell, base, gasket, cell, stiffener, flex or the other board: none
+  [OPEN] routed boards: rib tips land on the board (crush <= 0.03, O-38): stack 0.844 (PCB_T 0.82 + mask) over the rib tips at 6 ribs, 0.024 crush
+  [OPEN] routed boards: every part >= 0.1 from the housing and the flex outline (courtyard): C53 (power, bottom) 0.023 to the flex; C30 (radio, top) 0.023 to the shell; C55 (power, bottom) 0.043 to the flex; R51 (power, bottom) 0.062 to the flex; D10 (power, bottom) 0.067 to the flex; U2 (radio, bottom) 0.068 to the flex; C21 (radio, bottom) 0.093 to the flex
+  [PASS] MAXM86161 0.10 proud of the base (board bottom on the posts): U3 face at z -0.100, 0.100 proud
+  [OPEN] U3 3D model is the MAXM86161 body, centred on its pad field: model 3.114 x 4.534 x 1.40 centred (17.191, 5.591); datasheet body 2.9 x 4.3 x 1.4; 6 pads centred (17.110, 5.500), geometry (17.110, 5.500). The assemblies and the clash checks use the datasheet body in its place
+  [PASS] bottom-side parts <= 0.80 tall (U3 excepted): tallest U10 (power) 0.610, U12 (power) 0.511, C51 (power) 0.500; top side U11 (power) 0.921, ANT1 (radio) 0.750, L2 (radio) 0.520
+  [PASS] ANT1 body in its zone, >= 0.25 from the shell wall and >= 0.5 from the ribs: body x 18.935..19.866 (zone from 18.76), 0.455 to the wall, 2.97 to the nearest rib
+  [PASS] contact pads P1-P5 centred in the base holes (<= 0.02): d1.0 pads in d1.2 holes; offsets VIN 0.000, GND_A 0.000, GND_B 0.000, SWDIO 0.000, SWDCLK 0.000
+  [PASS] jumper pads: every flex land pad over its island pad (<= 0.02): 20/20 aligned
+  [OPEN] flex S-bends clear of the cell overhang (>= 0.05): power: 36 um, r 0.425 (4.9x the 0.0865 flex); radio: 45 um, r 0.382 (4.4x the 0.0865 flex); flex top 0.0335 under the stiffener (PSA) [VERIFY JLC min bend radius]
+  [PASS] flex flat pattern carries the bend allowance (each end longer by the S-path minus its run): flat lands at x 3.205 / 14.795, 0.47 / 0.51 outboard of the island pads; the bends need 0.47 (power) / 0.51 (radio) more flex than the 0.85 / 0.76 runs give (geometry FPC_BEND_EXTRA (0.47, 0.51))
+  [OPEN] TH1 to its boss 0.1 (gel gap): 0.190: TH1 body 0.240 tall vs 0.33 in footprints.json, TH1 at (15.15, 9.55) vs placement (15.15, 9.55)
+  [OPEN] board outlines inside the geometry islands (edge cuts): power 0.113 to the side wall; radio 0.21 mm2 outside (x 13.87..15.05 y 0.61..0.84, x 13.87..15.05 y 10.16..10.39); radio 0.113 to the side wall
+  [info] flex S-bend: rise 0.80; run from the stiffener end 0.85 (power) / 0.76 (radio); r ≈ 0.43 / 0.38 mm = 5.4x a 0.07 single-copper bend zone (3.2x the 0.12 two-layer build); first arc under the cell overhang: clear
+  [info] worst-case cell 9.5 x 9.5 x 4.2 + 8 % swell needs H 5.64 and a 9.55 pocket; this bay is 9.3 with a 0.2 swell gap (nominal cell)
+  [info] 20.9 x 11.0 x 5.3 mm, envelope 1.08 cm³; PC shell 0.25 g (zirconia 1.27 g) (SLA 0.25 g), base 0.06 g
+FAILED: none | OPEN: ['routed boards: rib tips land on the board (crush <= 0.03, O-38)', 'routed boards: every part >= 0.1 from the housing and the flex outline (courtyard)', 'U3 3D model is the MAXM86161 body, centred on its pad field', 'flex S-bends clear of the cell overhang (>= 0.05)', 'TH1 to its boss 0.1 (gel gap)', 'board outlines inside the geometry islands (edge cuts)']
