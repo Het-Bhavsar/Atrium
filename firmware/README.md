@@ -2,6 +2,11 @@
 
 Firmware for the EVT pod (baseline 20.9 × 11 × 5.3 mm, approved 2026-11-07): an nRF52832 (WLCSP, nRF52832-CIAA) on Zephyr v4.4.2 with MCUboot, a MAXM86161 optical module, an LSM6DSOX and a BQ21061 charger. Rev B.1 is archived (git tag `rev-b1`).
 
+<p align="center">
+  <img src="../docs/images/plates/firmware_architecture.jpg" alt="Firmware architecture: sensors, nRF52832 modules, the app over BLE, flash map, case firmware and tests" width="100%">
+</p>
+
+
 It builds for the custom board `atrium_pod`, and the host unit tests pass on `native_sim`. It has not run on hardware yet: see [What needs hardware](#what-needs-hardware).
 
 | Folder | Contents |

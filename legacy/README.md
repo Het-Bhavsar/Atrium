@@ -4,6 +4,23 @@ Earlier revisions and the ideas that were tried on the way to the EVT pod. Nothi
 contributors can see what was already explored and why it was left. The current design is in `hardware/`,
 `mechanical/` and `firmware/`.
 
+<p align="center">
+  <img src="rev-b1/images/atrium-hero.svg" alt="Rev B.1 pod" width="49%">
+  <img src="rev-b1/images/atrium-exploded.svg" alt="Rev B.1 exploded view" width="49%">
+  <br><sub>Rev B.1: the 28 × 14 mm pod that started it.</sub>
+</p>
+
+<p align="center">
+  <img src="rev-b2-compact/concept-sheets/atrium_b2_forms.png" alt="Rev B.2 single-board form studies" width="100%">
+  <br><sub>Rev B.2: the single-board forms drawn around the optical module.</sub>
+</p>
+
+<p align="center">
+  <img src="concepts/form-studies/form_study.png" alt="EVT form studies" width="100%">
+  <br><sub>EVT form studies. The capsule won.</sub>
+</p>
+
+
 | Version | When | What it was | Why it was dropped |
 |---|---|---|---|
 | [Rev B.1](rev-b1/) | 2026-11-05 | 28 × 14 mm stadium pod on a 0.6 mm 4-layer board: nRF52832, a discrete optical front end (MAX86174A, SFH 7016 LEDs, two VEMD5080 photodiodes, one 18.5 mm away as a far channel), LSM6DSV16X IMU, TMP117 skin sensor, fuel gauge. 40 × 26 mm two-layer charging case with BQ24073 and USB-C | Too large for something worn on the head (about 3,360 mm³). A Monte Carlo of the optics showed the far channel added little signal for the 8 mm it cost. The schematic simulation also found an I²C address clash (AFE and IMU both at 0x6A) |

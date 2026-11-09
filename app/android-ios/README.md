@@ -2,6 +2,11 @@
 
 Atrium is made by Local Forge ([localforge.in](https://localforge.in)).
 
+<p align="center">
+  <img src="../../docs/images/app/app_daily.jpg" alt="App screens" width="100%">
+</p>
+
+
 The phone app for the Atrium pod: pairing, fit guide, Today, Recovery, Heart, Sleep (with sleep head position), Effort, Skin temperature, Trends, Device, Skin pad, Pod software and Settings.
 - **Bundle id:** `open.atrium` on iOS and Android.
 - **Design:** `design/` (the clickable prototype and its README).

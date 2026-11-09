@@ -3,6 +3,24 @@
 Every board of the Atrium EVT build: the two pod islands, the flex that joins them, a panel of both islands for
 ordering, and the charging-case board. All dimensions are in mm.
 
+<p align="center">
+  <img src="../docs/images/plates/layout_islands.jpg" alt="Radio and power island layouts, top and bottom" width="100%">
+</p>
+
+<p align="center">
+  <img src="../docs/images/plates/layout_case.jpg" alt="Charging case board, top" width="100%">
+</p>
+
+<p align="center">
+  <img src="pod/islands-panel/Pod_Islands_Panel_render.png" alt="Islands panel, top and bottom" width="100%">
+  <br><sub>The islands panel: six pods, 312 placements, one order.</sub>
+</p>
+
+<p align="center">
+  <img src="../docs/images/plates/boards.jpg" alt="The islands joined by the flex jumper" width="100%">
+</p>
+
+
 | Board | Build | Folder |
 |---|---|---|
 | Radio island | 6-layer HDI 1+4+1, 0.82 mm, JLC06081H-2313, ENIG. nRF52832 WLCSP, MAXM86161, chip antenna | `pod/radio-island/` |
@@ -32,6 +50,26 @@ Also here:
 | `design-data/outline/` | Board outlines and keep-outs (DXF, SVG) |
 | `simulation/` | Simulation reports and plots: RF chain, CPWG impedance, link budget, optics, power, charging tolerance, thermal, assembly |
 | `stencil-report.md` | Stencil area ratios for every board |
+
+## Schematics at a glance
+
+Every schematic is drawn in titled functional blocks with net labels. Full sheets are in each board's `schematic/`
+folder (PDF, SVG and SchDoc).
+
+<p align="center">
+  <img src="../docs/images/schematics/radio_island_schematic.png" alt="Radio island schematic" width="100%">
+  <br><sub>Radio island: nRF52832, DC/DC, crystal, RF match and antenna, LDO, optical module, NTCs, flex landing.</sub>
+</p>
+
+<p align="center">
+  <img src="../docs/images/schematics/power_island_schematic.png" alt="Power island schematic" width="100%">
+  <br><sub>Power island: charger, cell protection, motion sensor and the 1.8 V LDO.</sub>
+</p>
+
+<p align="center">
+  <img src="../docs/images/schematics/charging_case_schematic.png" alt="Charging case schematic" width="70%">
+  <br><sub>Charging case: MCU, charger, boost, current limit, SWD translators and the pod nest.</sub>
+</p>
 
 ## Ordering
 

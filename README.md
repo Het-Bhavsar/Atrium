@@ -146,6 +146,15 @@ If any of this is the part you want to build, start with the [roadmap](docs/road
 
 ## Get the app
 
+<p align="center">
+  <img src="docs/images/app/app_daily.jpg" alt="App screens: Welcome, Today, Heart, Sleep, Trends" width="100%">
+</p>
+
+<p align="center">
+  <img src="docs/images/app/app_setup.jpg" alt="Setup screens: pairing, placement, signal check, device and skin pad" width="100%">
+</p>
+
+
 The Android app is on the [Releases page](https://github.com/Het-Bhavsar/Atrium/releases/latest):
 
 - `atrium-…-demo-arm64-v8a.apk`: sample data, no pod needed. Start here.

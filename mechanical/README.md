@@ -3,6 +3,29 @@
 The enclosure parts of the Atrium EVT build, as drawings, solid models and meshes. Design notes are in
 [`docs/mechanical.md`](../docs/mechanical.md).
 
+<p align="center">
+  <img src="../docs/images/renders/pod_studio_dimensions.png" alt="Pod studio render with dimensions" width="100%">
+</p>
+
+<p align="center">
+  <img src="renders/hero_pod_three_quarter.png" alt="Pod, three-quarter view" width="49%">
+  <img src="renders/hero_on_plinth.png" alt="Pod on the Plinth" width="49%">
+  <img src="renders/case_section_button.png" alt="Charging case section through the button" width="49%">
+  <img src="renders/packaging_open_xray.png" alt="Packaging, open" width="49%">
+</p>
+
+<p align="center">
+  <img src="renders/routed_boards_section_y5.png" alt="Section through the pod with the routed boards and cell" width="100%">
+  <br><sub>Section through the closed pod: shell, both islands, the flex and the cell.</sub>
+</p>
+
+<p align="center">
+  <img src="../docs/images/drawings/pod_shell_drawing.png" alt="Pod top shell drawing" width="49%">
+  <img src="../docs/images/drawings/case_tub_drawing.png" alt="Case tub drawing" width="49%">
+  <br><sub>Every part has a dimensioned drawing in its <code>drawings/</code> folder.</sub>
+</p>
+
+
 | Folder | Parts |
 |---|---|
 | `pod/` | Top shell, base plate, window gasket, skin pad; assemblies (on the pad, in the skin, with routed boards); `reference-bodies/` for the cell, islands, flex, optical module and stiffener |
