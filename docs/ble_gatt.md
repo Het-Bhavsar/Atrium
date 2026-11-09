@@ -9,7 +9,7 @@ Feature numbers (#n) refer to [`FEATURES.md`](FEATURES.md).
 - New Vibration Data (0x0207, N): one accelerometer axis, the one normal to the skin, as raw 16-bit samples. Every notification has a sequence number, the uptime of its first sample and that sample's index, so gaps show.
 - A bench rig (§4.5): the same packets, mode 11, gap-free over SPI on an nRF52 DK, as text lines on USB serial. It is not part of the pod and changes nothing over the air.
 
-**Rev 15** adds one flag for the charging case (`docs/charging-case.md` in the EVT baseline); nothing earlier changes, so a rev 14 app still works:
+**Rev 15** adds one flag for the charging case ([charging-case.md](charging-case.md)); nothing earlier changes, so a rev 14 app still works:
 - Charge State byte 4 bit 4: fed by the charging case. The case marks its VIN with two 200 ms drop-outs about 3 s after it starts feeding (and after a reset); the Plinth does not, so the bit tells them apart (2026-11-08). It clears when VIN goes away for more than 400 ms, so a full pod resting in the case with VIN off reads undocked [ASSUMED: the case switches VIN off once the pod is full].
 - Three such drop-outs within 2 s reboot the pod (the case's soft reset). The phone sees a disconnect.
 

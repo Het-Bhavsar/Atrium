@@ -1,6 +1,6 @@
 # Charging case firmware
 
-Firmware for the Atrium charging case (`docs/charging-case.md` in the EVT baseline): a CH32V003F4U6 (WCH RISC-V, QFN-20, LCSC C5299908) in C, with no RTOS. It builds, and the host tests pass. It has not run on a case board yet: see [What needs hardware](#what-needs-hardware).
+Firmware for the Atrium charging case (see [`docs/charging-case.md`](../../docs/charging-case.md)): a CH32V003F4U6 (WCH RISC-V, QFN-20, LCSC C5299908) in C, with no RTOS. It builds, and the host tests pass. It has not run on a case board yet: see [What needs hardware](#what-needs-hardware).
 
 | Folder | Contents |
 |---|---|
@@ -29,7 +29,7 @@ Firmware for the Atrium charging case (`docs/charging-case.md` in the EVT baseli
 
 ## Pins (QFN-20)
 
-From CH32V003DS0 V1.8, table 2-1. The OPA pins are fixed by the silicon. The case netlist (`atrium-evt-baseline/hardware/design-data/netlist/case_nets.yaml`, 2026-11-08) matches all 18 MCU pins.
+From CH32V003DS0 V1.8, table 2-1. The OPA pins are fixed by the silicon. The case netlist (`hardware/design-data/netlist/case_nets.yaml`, 2026-11-08) matches all 18 MCU pins.
 
 Board values the firmware depends on, from that netlist: TP4054 PROG 4.7k (about 213 mA [VERIFY]), boost 5.21 V (768k / 100k), SY6280 ISET 15k (0.45 A backstop above the 80 mA firmware trip), LED XL-1615RGBC-RF common anode to VDD with red 1k and green and blue 330 Ω, HAL248 pull-up R19 4.7M fitted only if the output is open drain (DNP).
 

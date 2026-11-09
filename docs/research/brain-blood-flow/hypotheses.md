@@ -96,4 +96,4 @@ Added analysis, labelled post hoc:
   - point sampling with no anti-alias filter, which is how the module samples with SMP_AVE = 1;
   - 200 Hz point sampling averaged down on the chip.
 
-The point-sampled case is the one that describes the released firmware.
+The point-sampled case is the one that describes the everyday modes.

@@ -14,7 +14,7 @@ places where help is most useful.
 
 | Area | Where | Notes |
 |---|---|---|
-| Firmware | `firmware/` | Zephyr / nRF Connect SDK for the pod, CH32V003 for the case. Build and test steps are in `firmware/README.md`. Every change keeps the unit tests passing and adds tests for new behaviour |
+| Firmware | `firmware/` | Zephyr RTOS for the pod, CH32V003 for the case. Build and test steps are in `firmware/README.md`. Every change keeps the unit tests passing and adds tests for new behaviour |
 | App | `app/android-ios/` | Flutter. Run `flutter test` before a pull request. Follow the BLE interface in `docs/ble_gatt.md`; a change to the interface changes the doc in the same pull request |
 | Hardware | `hardware/` | Open the `.SchDoc` / `.PcbDoc` in Altium Designer or import them into KiCad. Include updated PDFs, Gerbers, BOM and CPL with any board change, and say which checks you ran (DRC, impedance, stencil) |
 | Mechanical | `mechanical/` | Include STEP, STL and an updated drawing PDF with any part change, and a fit check against the reference bodies |

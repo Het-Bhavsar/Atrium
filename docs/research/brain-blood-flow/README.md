@@ -15,7 +15,7 @@ answers, and real finger recordings from a public dataset. Every simulated outpu
 | Where does the pod's pulse come from? | Scalp. Green: more than 99.9 % scalp. Red and IR: 88–89 % scalp, 11–12 % temporalis muscle | Photon model, `data/monte_carlo/` |
 | How much is brain? | 0.006–0.008 % with typical layers; about 0.05 % with the thinnest published layers, up to about 0.1 % with a 3.7 mm muscle | Photon model, `figures/f6_depth.png` |
 | How much at fNIRS spacing? | 10.6 % at 30 mm, inside the 8–13 % that published head models give at 25–35 mm | Photon model |
-| Could a study on the pod detect it? | No. 80 % power needs a brain share of 3.8 % (12 people) or 2.0 % (24 people): 40–450 times more than physics gives | 500 simulated studies per point, `data/power/`, `figures/f7_power.png` |
+| Could a study on the pod detect it? | No. 80 % power needs a brain share of 3.8 % (12 people) or 2.0 % (24 people): 20–450 times more than physics gives | 500 simulated studies per point, `data/power/`, `figures/f7_power.png` |
 | Does sampling faster help? | Barely. 25 → 200 Hz moves the shortfall from 454× to 360× (12 people); a noiseless sensor is still 346× short | `data/research_mode/` |
 | Can a "deeper than green" result be trusted? | No. A 5 % temporalis response alone gives a false deep result in 48 % (12 people) to 76 % (24 people) of studies | `data/sim_muscle/`, `figures/f3_co2_challenges.png` |
 | Is an IR–green timing lag depth evidence? | No. In real finger data IR leads green by a median 25 ms (IQR 16–36 ms, 21 of 22 people), and a finger has no brain | `data/finger/` |

@@ -1,6 +1,6 @@
 # Research mode: what 100–200 Hz adds, and where it stops (2026-11-08)
 
-**Status.** Firmware research modes 6 (100 Hz) and 7 (200 Hz) stream green, IR, red and direct ambient, with the IMU at 104 Hz (`ble_gatt.md` rev 14). They are planned and not bench-tested. No head recording exists.
+**Status.** Firmware research modes 6 (100 Hz) and 7 (200 Hz) stream green, IR, red and direct ambient, with the IMU at 104 Hz (`ble_gatt.md` rev 14). They are in the firmware but not bench-tested. No head recording exists.
 
 Every number below names its source:
 - **finger** is real data: pulse-transit-time-ppg 1.1.0, 22 adults sitting, MAX30101 at 500 Hz, with ECG.
@@ -18,14 +18,14 @@ The results are in `data/research_mode/`.
 | 3 | Pulse timing: arrival time after a chest-strap ECG R peak, IR–green lag | coarse (95th percentile error 20 ms and 8.8 ms) | **good** (5 ms and 1.9 ms) | |
 | 4 | Pulse shape: rise time, notch, reflection ratios | no | coarse (95th percentile rise-time error 67 ms at 200 Hz) | 500 Hz or more |
 | 5 | Response beyond the scalp to breathing challenges | "consistent with" muscle or subcutis only | unchanged | a muscle-only control (jaw clench) |
-| 6 | A deep (intracranial) haemodynamic change | **no**: 40–450 times under the detection limit | **no**: unchanged | separate source and detectors at 25–35 mm plus an 8 mm short channel (fNIRS) |
+| 6 | A deep (intracranial) haemodynamic change | **no**: 20–450 times under the detection limit | **no**: unchanged | separate source and detectors at 25–35 mm plus an 8 mm short channel (fNIRS) |
 | 7 | Blood flow in the brain | **no** | **no** | coherent laser and photon-counting detectors at 25–30 mm (DCS or speckle contrast), or transcranial Doppler ultrasound |
 
 The pod's ceiling is **levels 1–3**, with level 3 needing research mode. Levels 6 and 7 are not reachable with a single module whose LEDs and photodiode sit about 2 mm apart [VERIFY], at any sample rate. They are not reachable in the pod's 20.9 mm body either (below).
 
 ## 1. What research mode buys: pulse timing (finger, real data)
 
-The released firmware reads one short integration per 25 Hz frame (SMP_AVE = 1, `maxm86161_regs.c`). Nothing filters the optical signal before it is sampled, so pulse content and noise above 12.5 Hz fold back into the band. That folding, not the 25 Hz rate itself, is what costs timing:
+In its everyday modes the firmware reads one short integration per 25 Hz frame (SMP_AVE = 1, `maxm86161_regs.c`). Nothing filters the optical signal before it is sampled, so pulse content and noise above 12.5 Hz fold back into the band. That folding, not the 25 Hz rate itself, is what costs timing:
 - Ideal anti-aliased decimation to 25 Hz keeps per-beat timing within 2 ms (95th percentile).
 - Point sampling at 25 Hz does not.
 
@@ -33,7 +33,7 @@ Error per beat against 500 Hz, in ms, as the median / 95th percentile of the abs
 
 | How the module samples | IR–green lag | Pulse arrival, green | Pulse arrival, IR | Rise time, green |
 |---|---|---|---|---|
-| 25 Hz, one integration per frame (**released firmware**) | 2.2 / 8.8 | 5.0 / 20.0 | 2.0 / 13.1 | 25 / 124 |
+| 25 Hz, one integration per frame (**everyday modes**) | 2.2 / 8.8 | 5.0 / 20.0 | 2.0 / 13.1 | 25 / 124 |
 | 50 Hz, one integration per frame | 1.5 / 6.2 | 3.0 / 15.0 | 2.0 / 8.0 | 19 / 123 |
 | 100 Hz, one integration per frame (mode 6) | 1.0 / 4.4 | 3.0 / 10.0 | 2.0 / 6.0 | 15 / 109 |
 | 200 Hz, one integration per frame (mode 7) | 0.4 / 1.9 | 1.0 / 5.0 | 0.0 / 2.0 | 4 / 67 |
@@ -45,7 +45,7 @@ Medians over 22 sitting records. Pulse-arrival errors come in 2 ms steps, becaus
 
 **What follows from the table:**
 - For timing, **sampling fast matters more than streaming fast.** 200 Hz averaged to 50 Hz matches streaming 200 Hz for lag and pulse arrival, at a quarter of the BLE data. 200 Hz averaged to 25 Hz gets most of the way there.
-- Firmware modes 8 and 9 (`ble_gatt.md` rev 15) do exactly this: they sample at 200 Hz with on-chip averaging (SMP_AVE 4 or 8) and stream 50 or 25 Hz. The LED fires as often as in mode 7, so their LED current is close to mode 7's, not to today's 25 Hz modes [ASSUMED until measured].
+- Firmware modes 8 and 9 (`ble_gatt.md` rev 14) do exactly this: they sample at 200 Hz with on-chip averaging (SMP_AVE 4 or 8) and stream 50 or 25 Hz. The LED fires as often as in mode 7, so their LED current is close to mode 7's, not to today's 25 Hz modes [ASSUMED until measured].
 - The research modes already average down to 25 Hz for the on-pod filters (`modes.h`), so the pod's own pulse and HRV filters get the anti-aliasing benefit in those modes.
 - **Shape features stay coarse.** Rise time has a 95th percentile error of 67 ms even at 200 Hz. Morphology claims need 500 Hz or more, or a model-based fit.
 
@@ -129,5 +129,5 @@ So that Atrium's wording can be placed correctly:
 ## Next steps this adds
 
 - **E1 (already listed):** bench-test modes 6 and 7, and compare point-sampled against averaged on the pod's own signal. Minimum 3 pods, 10 min each.
-- **E1b:** firmware modes 8 and 9 now do this (`ble_gatt.md` rev 15): they sample at 200 Hz and average on the module to 50 Hz (SMP_AVE 4) or 25 Hz (SMP_AVE 8). They are planned and not bench-tested, and their currents are [ASSUMED]. The decoder moves each word to its window centre (7.5 or 17.5 ms earlier). On the bench, check SMP_AVE reads back from 0x12, and measure the current.
+- **E1b:** firmware modes 8 and 9 now do this (`ble_gatt.md` rev 14): they sample at 200 Hz and average on the module to 50 Hz (SMP_AVE 4) or 25 Hz (SMP_AVE 8). They are in the firmware but not bench-tested, and their currents are [ASSUMED]. The decoder moves each word to its window centre (7.5 or 17.5 ms earlier). On the bench, check SMP_AVE reads back from 0x12, and measure the current.
 - **E5 (already listed):** ultrasound layer thickness at both spots, 5 people. This now matters more, because the plausible range of the 2 mm brain share spans a factor of 12 (0.008–0.1 %).

@@ -12,7 +12,7 @@ The phone app for the Atrium pod: pairing, fit guide, Today, Recovery, Heart, Sl
 - **Design:** `design/` (the clickable prototype and its README).
 - **Plan:** `BLUEPRINT.md`.
 - **Features:** numbered as in `docs/FEATURES.md`.
-- **Pod interface:** `docs/ble_gatt.md` (rev 13).
+- **Pod interface:** `docs/ble_gatt.md`. The app is built to rev 13; revs 14–16 add only research modes and the charging-case flag, so it works with the rev 16 firmware.
 
 Wellness and research only. No screen makes a medical claim.
 

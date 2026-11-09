@@ -6,6 +6,7 @@
 
 <p align="center">
   <img src="../docs/images/app/app_setup.jpg" alt="Setup screens: pairing, placement, signal check, device and skin pad" width="100%">
+  <br><sub>Screens from the demo build, with sample data. The photographs in the app are illustrations.</sub>
 </p>
 
 

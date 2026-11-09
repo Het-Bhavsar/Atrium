@@ -20,7 +20,7 @@ Atrium is a wellness and research device. Nothing here is a medical measurement.
 
    Spacing is about 2 mm [VERIFY]. Even at 3 mm the brain share is 0.016 %. With these layers, the muscle share is more than 1,000 times the brain share at 2–3 mm, and still about 80 times at 20 mm (`figures/f6_depth.png`).
 
-   **Thinner layers, same conclusion.** Published imaging puts the adult temporalis at about 5 mm (range 3.7–17 mm) and the temporal skull at about 2 mm. The table above assumes 7 mm and 3 mm. Re-running the Monte Carlo with 5 mm and 2 mm (`data/monte_carlo/s1_mc_thin.json`) gives an IR brain share of:
+   **Thinner layers, same conclusion.** MRI puts the adult temporalis at 3.7–17 mm between people (360 adults, *Surgical Neurology International*); the temporal skull is thin, and 2 mm is our assumption. The table above assumes 7 mm and 3 mm. Re-running the Monte Carlo with 5 mm and 2 mm (`data/monte_carlo/s1_mc_thin.json`) gives an IR brain share of:
    - 4.9 × 10⁻⁴ (0.05 %) at 2 mm;
    - about 1 × 10⁻³ with a 3.7 mm temporalis.
 
@@ -46,7 +46,7 @@ Atrium is a wellness and research device. Nothing here is a medical measurement.
    There is no brain in a finger, so an IR–green lag at the head cannot by itself be read as an intracranial signal.
 
 5. **What costs timing at 25 Hz is aliasing, not the rate itself.** Source: real finger data, n = 22, sitting (`research_mode.md`, `data/research_mode/`; amended H6).
-   - The released firmware reads one short integration per 25 Hz frame (SMP_AVE = 1), so pulse content and noise above 12.5 Hz fold into the band. 95th percentile of |error per beat| against 500 Hz:
+   - In its everyday modes the firmware reads one short integration per 25 Hz frame (SMP_AVE = 1), so pulse content and noise above 12.5 Hz fold into the band. 95th percentile of |error per beat| against 500 Hz:
      - pulse-arrival time (green): 20 ms;
      - IR–green lag: 8.8 ms.
    - Research mode 7 (200 Hz) brings those to 5 ms and 1.9 ms.
@@ -72,7 +72,7 @@ Atrium is a wellness and research device. Nothing here is a medical measurement.
 - **That a red or IR residual beyond green is intracranial.** At most it is "consistent with muscle, subcutis or deeper tissue".
 - **Modified Beer–Lambert ΔHbO and ΔHbR as concentrations.** They assume a uniform change along the Monte Carlo's mean path. In layered tissue they are a dermis-weighted mean, so they are relative indices only.
 - **That the jaw-artefact detector works.** Its AUC of 1.00 is on simulated artefacts, which are cleaner than real ones. The real value comes from P6.
-- **Ambient-light leakage.** It is unknown. The released firmware has no direct-ambient slot; research modes 6 and 7 add one (`ble_gatt.md` rev 14), but they are planned and not bench-tested.
+- **Ambient-light leakage.** It is unknown. The everyday modes have no direct-ambient slot; research modes 6 and 7 add one (`ble_gatt.md` rev 14). They are in the firmware but not bench-tested.
 - **The source–detector spacing.** It is unknown to better than about ±0.5 mm [VERIFY].
 
 ## What would change our mind

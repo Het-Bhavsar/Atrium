@@ -20,7 +20,8 @@ when the small vessels swell, a little less light comes back. That rhythm is the
 The light that returns does not go straight down and up. It wanders through the tissue and comes back along a curved,
 banana-shaped path between the LED and the photodiode. **How deep that banana reaches depends on how far apart they
 are.** Put them close together and the light stays near the surface. Move them apart and the light that makes it across
-has, on average, travelled deeper; a common rule of thumb is a depth of a third to a half of the spacing.
+has, on average, travelled deeper. Even at the 2–4 cm used for brain imaging, the signal is strongly weighted to the
+outermost 10–15 mm inside the skull ([Strangman et al. 2013](https://doi.org/10.1371/journal.pone.0066319)).
 
 The colour matters too. Green is absorbed quickly and stays in the top millimetre or two. Red and near-infrared go
 further, which is why every brain-imaging optical system uses near-infrared.
@@ -29,12 +30,12 @@ further, which is why every brain-imaging optical system uses near-infrared.
 
 From the skin inwards, at the spot where the pod sits:
 
-| Layer | Typical thickness | Blood supply |
+| Layer | Thickness (used in our model) | Blood supply |
 |---|---|---|
-| Skin and scalp | about 3 mm | Superficial temporal artery |
-| Temporalis muscle (the jaw muscle) | about 5 mm, from 3.7 to 17 mm between people | Deep temporal arteries |
-| Skull | about 2–3 mm | |
-| Cerebrospinal fluid | about 2 mm | |
+| Skin and scalp | 3 mm | Superficial temporal artery |
+| Temporalis muscle (the jaw muscle) | 7 mm, and 5 mm in a thin-layer run. Measured by MRI at 3.7–17 mm between adults ([Surg Neurol Int](https://surgicalneurologyint.com/surgicalint-articles/standard-values-for-temporal-muscle-thickness-in-the-japanese-population-who-undergo-brain-check-up-by-magnetic-resonance-imaging/)) | Deep temporal arteries |
+| Skull | 3 mm, and 2 mm in the thin-layer run [ASSUMED] | |
+| Cerebrospinal fluid | 2 mm [ASSUMED] | |
 | Brain | | Internal carotid and vertebral arteries |
 
 Two things follow from this.
@@ -58,7 +59,8 @@ green, red and infrared) and asked one question: what share of the pulse signal 
 | With the thinnest published layers | brain about 0.05 %, up to about 0.1 % with a 3.7 mm muscle | |
 | Fits on the side of the head? | yes, it is the pod | needs a band or a 3 cm probe |
 
-Our 30 mm result lands inside the 8–13 % that published head-model simulations report at 25–35 mm spacing. That
+Our 30 mm result lands inside the 8–13 % that a published head-template simulation reports for 25–35 mm spacing
+([Strangman et al. 2013](https://doi.org/10.1371/journal.pone.0066319)). That
 agreement is why I trust the model at 2 mm too.
 
 <p align="center">
@@ -84,9 +86,10 @@ The obvious reply is "the brain part is small, so filter harder". We tested that
 - **The signal is hundreds of times too small to find.** I simulated the study I would actually run: people breathe
   extra CO₂, which widens brain vessels, and we look for a matching change in the pod's signal. To detect a brain
   share reliably (80 % of the time) we would need it to be about **3.8 % with 12 people, or 2 % with 24**. Physics gives
-  0.008 % with typical layers and 0.05 % with thin ones: **40 to 450 times too small**.
+  0.008 % with typical layers, 0.05 % with thin ones and about 0.1 % with the thinnest muscle: **20 to 450 times too
+  small**.
 - **Faster sampling does not help.** At 200 samples a second instead of 25, the shortfall barely moves (from 454 to 360
-  times). A perfect, noiseless sensor is still 231 times short. The limit is the natural beat-to-beat change in scalp
+  times). A perfect, noiseless sensor is still 346 times short (231 times with 24 people). The limit is the natural beat-to-beat change in scalp
   and muscle blood, which looks exactly like a deeper pulse would.
 - **Muscle fools the test.** The temporalis also responds to CO₂. In simulation, a 5 % muscle response alone produced a
   false "deeper than skin" result in 48 % of 12-person studies and 76 % of 24-person studies, with no brain signal at
@@ -103,7 +106,7 @@ These are the questions I asked myself. They are fair to ask of any product, inc
 1. **How far apart are the light source and the detector?** Under about 2 cm, the brain's share is tiny. The physics
    does not care how good the algorithm is.
 2. **Is there a short channel?** Serious fNIRS adds a second detector about 8 mm from the source that sees only the
-   scalp, and subtracts it. Without one, scalp changes are reported as brain changes.
+   scalp, and subtracts it ([Brigadoi and Cooper 2015](https://doi.org/10.1117/1.NPh.2.2.025005)). Without one, scalp changes are reported as brain changes.
 3. **What was it validated against, and in how many people?** Transcranial Doppler or MRI blood-flow imaging, in a
    published study, is the bar. A correlation with heart rate is not.
 4. **Does the signal survive the controls?** If pressing the temporal artery in front of the ear wipes it out, it is
@@ -152,6 +155,11 @@ all result data (photon model output, 500-study power sweeps, simulated studies 
   [`legacy/rev-b1/hardware/simulation/results/`](../legacy/rev-b1/hardware/simulation/results/).
 - **Study power:** 500 simulated studies per point, with the analysis fixed before any data was looked at.
 - **Finger timing:** pulse-transit-time-ppg 1.1.0 (PhysioNet, ODbL 1.0), 22 people, sitting, 500 Hz.
-- **Anatomy:** published imaging puts the adult temporalis at about 5 mm (3.7–17 mm) and the temporal skull at about
-  2 mm; published head-model simulations put the brain share at 8–13 % for 25–35 mm spacing.
+- **Published work:**
+  - Strangman, Li and Zhang (2013), *PLoS ONE* 8(8): e66319: brain sensitivity of 8–13 % at 25–35 mm on the Colin27
+    head template, and the bias towards the outer 10–15 mm.
+  - Brigadoi and Cooper (2015), *Neurophotonics* 2(2): 025005: the 8.4 mm optimum short-channel distance in adults.
+  - Temporal muscle thickness by MRI, 360 adults aged 35–84: 3.69–16.90 mm (*Surgical Neurology International*).
+  - The superficial temporal artery is a terminal branch of the external carotid artery (standard anatomy).
+- **Not yet cited:** the skull and CSF thicknesses are model assumptions.
 - **Status:** no Atrium head recording exists yet. Every result here is simulated or from finger data.

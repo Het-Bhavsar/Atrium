@@ -1,5 +1,6 @@
 <p align="center">
   <img src="docs/images/photos/hero_mono.jpg" alt="A man in profile wearing the Atrium pod beside his eye" width="100%">
+  <br><sub>Illustration: the pod at true scale. No EVT units are built yet.</sub>
 </p>
 
 <p align="center">
@@ -80,8 +81,8 @@ ends of the pod, joined by a flex under a centred cell. Each step, and what I tr
 
 ## Inside
 
-Every board is routed by hand: no autorouter, arc bends on the antenna feed, a copper-free zone under the chip antenna
-on every layer, and ground stitching along each edge.
+Every board is routed by hand: no autorouter, arc bends on the antenna feed and a copper-free zone under the chip
+antenna on every layer.
 
 <p align="center">
   <img src="docs/images/plates/layout_islands.jpg" alt="Radio and power island layouts, top and bottom" width="100%">
@@ -113,7 +114,8 @@ the bone and nothing in your ear. It is designed on paper and deliberately left 
 ### Brain blood flow?
 
 It's the first thing people ask about a sensor on the side of the head, so here is the straight answer: **no, Atrium
-can't see blood flow in the brain, and neither can any sensor this small.** I wanted it to, so I tested it before
+can't see blood flow in the brain, and neither can any sensor whose light and detector sit this close
+together.** I wanted it to, so I tested it before
 claiming anything.
 
 <p align="center">
@@ -122,20 +124,21 @@ claiming anything.
 
 An optical sensor works by shining light into the skin and catching what scatters back. The light comes back along a
 curved path, and **how deep that path goes depends on how far apart the light and the detector are.** Under the pod
-there are about 3 mm of scalp, 5 mm of jaw muscle, 2–3 mm of skull and some fluid before you reach the brain.
+there are a few millimetres of scalp, 4 to 17 mm of jaw muscle depending on the person, then the skull and some fluid
+before you reach the brain.
 
 - **The usual way, which Atrium uses.** An integrated optical module: green, red and infrared LEDs and the photodiode
   in one 2.9 × 4.3 mm package, so they are fixed about 2 mm apart by the part itself. Our photon simulations say green never leaves the scalp, and in red and infrared the brain's share of the
-  pulse is **under 0.1 %**; the rest is scalp and the temporalis muscle. The pulse at the side of your head comes from
+  pulse is **0.1 % at most**; the rest is scalp and the temporalis muscle. The pulse at the side of your head comes from
   the superficial temporal artery, which feeds the scalp, not the brain.
-- **A far detector, which we tried.** Rev B.1 had a second photodiode 18.5 mm from the LEDs. At that distance the
-  brain is still only about 1 % of the pulse and the jaw muscle about three quarters, so it was dropped.
+- **A far detector, which we tried.** Rev B.1 had a second photodiode 18.5 mm from the LEDs. At that distance our
+  simulation puts the brain at about 1 % of the pulse and the jaw muscle at about three quarters, so it was dropped.
 - **The fNIRS way.** Near-infrared light with the source and the detector about **3 cm** apart, so the light that makes
   it across has gone deep enough to reach the brain. Even then the brain is only **about 10 %** of the signal, which
   is why research systems add a short scalp-only channel and subtract it.
 
 Better processing can't close that gap. To detect a brain signal in a 24-person study it would need to be about 2 % of
-the pulse; at the pod's spacing it is 40 to 450 times smaller, faster sampling barely helps, and the jaw muscle
+the pulse; at the pod's spacing it is 20 to 450 times smaller, depending on the person, faster sampling barely helps, and the jaw muscle
 produces false "deep" results on its own. So when a small device says it reads brain blood flow, ask how far apart its
 light and detector are, whether it has a short channel, and what it was validated against.
 
@@ -158,11 +161,11 @@ If any of this is the part you want to build, start with the [roadmap](docs/road
 | **Optics** | MAXM86161 module (green, red and infrared LEDs, photodiode, front end) behind a pill window |
 | **Other sensors** | LSM6DSOX motion, a skin NTC and a top NTC |
 | **Power** | 30 mAh Li-po (9 × 9 × 4 mm), BQ21061 charger, AP6683 protection, 1.8 V rails; about 4 days in the default mode (to be measured on EVT units) |
-| **Charging** | ENIG contacts on the skin side: VIN at the centre and ground either side, so it charges either way round, plus two SWD contacts for the programming jig. A steel stiffener and two magnets hold it on the Plinth |
-| **Case** | 2-layer board: CH32V003 MCU, linear charger, 5 V boost and current limit into the pod; about 8 pod charges per case charge |
+| **Charging** | ENIG contacts on the skin side: VIN at the centre and ground either side, so it charges either way round, plus two SWD contacts for the programming jig and the charging case. A steel stiffener and two magnets hold it on the Plinth |
+| **Case** | 2-layer board: CH32V003 MCU, linear charger, 5 V boost and current limit into the pod; about 8 pod charges per case charge (estimated) |
 | **Wear** | Upright, window end up. A hidden 0.15 mm disposable pad in a bed under the pod; nothing shows |
 | **Build** | Parts from the LCSC / JLCPCB catalogue; both islands on one panel for one PCBA order |
-| **Software** | Pod firmware on Zephyr (nRF Connect SDK), case firmware for the CH32V003, Flutter app for Android and iOS. No account and no cloud: data stays on the phone |
+| **Software** | Pod firmware on Zephyr RTOS with MCUboot, case firmware for the CH32V003, Flutter app for Android and iOS. No account and no cloud: data stays on the phone |
 
 
 ## Get the app
@@ -173,6 +176,7 @@ If any of this is the part you want to build, start with the [roadmap](docs/road
 
 <p align="center">
   <img src="docs/images/app/app_setup.jpg" alt="Setup screens: pairing, placement, signal check, device and skin pad" width="100%">
+  <br><sub>Screens from the demo build, with sample data. The photographs in the app are illustrations.</sub>
 </p>
 
 
@@ -215,7 +219,7 @@ Engineering validation (EVT).
 | | |
 |---|---|
 | Schematics | Captured and checked against the netlist |
-| Boards | Hand-routed: radio and power islands (6-layer HDI), flex jumper, charging case. DRC clean |
+| Boards | Hand-routed: radio and power islands (6-layer HDI), flex jumper, charging case. DRC: islands and panel 0 errors; flex and case have explained, accepted items ([`hardware/README.md`](hardware/README.md#checks)) |
 | Production files | Gerbers, BOM, CPL and a 2 × 3 islands panel ready to order |
 | Enclosure | Pod, skin pad, Plinth, case, jig and packaging CAD with fit checks and drawings |
 | Firmware | Pod and case firmware build; unit tests pass |

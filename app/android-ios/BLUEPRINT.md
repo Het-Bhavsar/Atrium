@@ -92,14 +92,14 @@ Pigeon definitions live in `pigeons/pod.dart`; the generated Swift, Kotlin and D
 
 ## 9. Ports from the ML reference models (app side)
 
-Each is ported to pure Dart in `insights/` and checked against ML's test vectors (`make_test_vectors.py`):
+Each is ported to pure Dart in `insights/` and checked against the reference models' test vectors in `test/fixtures/` (the reference models themselves are not part of this release):
 
-| Module | Feature | What is ported |
+| Reference model | Feature | What is ported |
 |---|---|---|
-| `logrec.py` | log | The 12-byte epoch decoder |
-| `position.py` | #5 | Sleep head position, plus `on_pod` |
-| `sleep.py` | #4 | 6 features and the logistic regression |
-| `hrv.py` | #2 | The nightly summary |
+| Log record | log | The 12-byte epoch decoder |
+| Head position | #5 | Sleep head position, plus `on_pod` |
+| Sleep | #4 | 6 features and the logistic regression |
+| HRV | #2 | The nightly summary |
 
 ## 10. Risks and gaps
 
