@@ -269,6 +269,12 @@ Copyright 2026 Het Bhavsar. Atrium is published under the Local Forge name. Sour
   the licence, a note of changes, and the same licence on adaptations.
 - **Names and marks.** The licences cover the design, code and text. They do not grant rights to the names "Atrium" and
   "Local Forge" or their logos. A product built from these files must not suggest that Local Forge made or endorses it.
+- **Selling it.** The licences let anyone make, change and sell Atrium without asking first. What they may not do is
+  close it or borrow its name: whoever sells hardware made from these files must publish the complete source of their
+  version (including their changes) under CERN-OHL-S-2.0, keep every copyright, licence and source-location notice,
+  credit the documentation, and must not use the names Atrium or Local Forge, their logos or an OSHWA certification
+  that is not theirs. Someone who breaks these terms loses the licence. The seller, not the designer, is responsible
+  for the safety and regulatory approval of what they sell.
 - **Third-party material.** Libraries the firmware and app build against, the app font, the datasets behind the sleep
   model and the depth study, and the component library parts keep their own licences; see
   [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

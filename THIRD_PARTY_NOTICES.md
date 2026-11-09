@@ -36,6 +36,33 @@ The renders, layout plates and diagrams were made from Atrium's own CAD and boar
 wearing the pod are AI-generated illustrations made for this project; they show no real person. All of them are under
 CC BY-SA 4.0 with the rest of the documentation.
 
+## Components and trademarks
+
+Atrium is built from catalogue parts made by other companies. Their chips are used, not copied: no part of their
+internal design is in this repository, and no datasheet is redistributed. Each part is listed with its manufacturer
+part number and LCSC number in the board BOMs, where its public datasheet can be found.
+
+| Maker | Parts used in Atrium |
+|---|---|
+| Analog Devices (Maxim Integrated) | MAXM86161 optical module |
+| Nordic Semiconductor | nRF52832 Bluetooth LE system-on-chip |
+| STMicroelectronics | LSM6DSOX motion sensor |
+| Texas Instruments | BQ21061 charger, TPS7A02 LDO, TPS61023 boost, SN74LVC1T45 level translators |
+| WCH (Nanjing Qinheng) | CH32V003 microcontroller (charging case) |
+| Silergy | SY6280 current-limited switch |
+| Torex | XC6206 LDO |
+| TPOWER | TP4054 charger (charging case) |
+| Allpower | AP6683 cell protection |
+| Hallwee | HAL248 Hall sensor |
+| Kinghelm | KH-1608 chip antenna |
+| NDK | NX1612SA 32 MHz crystal |
+| Murata, Samsung Electro-Mechanics, Fenghua, Sunlord, YAGEO, UNI-ROYAL, TECH PUBLIC | Capacitors, inductors, resistors, ESD protection |
+| XINGLIGHT, ALPS ALPINE, SHOU HAN | RGB LED, button and USB-C receptacle (charging case) |
+| Sharvi | 30 mAh Li-po cell (pod) |
+
+All product and company names are trademarks or registered trademarks of their owners. Their use here identifies the
+parts only. None of these companies is affiliated with Atrium or endorses it.
+
 ## Names and marks
 
 "Atrium", "Local Forge" and their logos are not licensed by any of the above (see the README). The OSHWA certification
