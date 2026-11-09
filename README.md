@@ -101,8 +101,8 @@ antenna on every layer.
 </p>
 
 <p align="center">
-  <img src="hardware/pod/islands-panel/Pod_Islands_Panel_render.png" alt="The islands panel: six pods on one 6-layer panel" width="100%">
-  <br><sub>One 45 × 47.4 mm panel builds six pods: one PCB order, one stencil per side, one assembly run.</sub>
+  <img src="hardware/pod/islands-panel/Pod_Islands_Panel_render.png" alt="The islands panel: 20 pods on one 6-layer panel" width="100%">
+  <br><sub>One 83 × 71 mm panel builds 20 pods: one PCB order, one stencil per side, one assembly run.</sub>
 </p>
 
 ## What's next
@@ -203,7 +203,7 @@ hardware/
   pod/radio-island/      schematic (SchDoc, PDF, SVG) · pcb (PcbDoc, PDF, STEP, renders) · production (Gerbers, BOM, CPL, IPC netlist)
   pod/power-island/      same
   pod/flex-jumper/       same
-  pod/islands-panel/     the 2 × 3 panel of both islands: PcbDoc, Gerbers, BOM, CPL, order notes
+  pod/islands-panel/     the 4 × 5 panel of both islands: PcbDoc, Gerbers, BOM, CPL, order notes
   case/charging-case/    same as the islands
   design-data/           netlist, pin map, PCB and flex rules, board outlines (DXF)
   simulation/            reports: RF chain, impedance, link budget, optics, power, charging, thermal, assembly
@@ -229,7 +229,7 @@ Engineering validation (EVT).
 |---|---|
 | Schematics | Captured and checked against the netlist |
 | Boards | Hand-routed: radio and power islands (6-layer HDI), flex jumper, charging case. DRC: islands and panel 0 errors; flex and case have explained, accepted items ([`hardware/README.md`](hardware/README.md#checks)) |
-| Production files | Gerbers, BOM, CPL and a 2 × 3 islands panel ready to order |
+| Production files | Gerbers, BOM, CPL and a 4 × 5 islands panel ready to order |
 | Enclosure | Pod, skin pad, Plinth, case, jig and packaging CAD with fit checks and drawings |
 | Firmware | Pod and case firmware build; unit tests pass |
 | App | Android and iOS app with demo and real-pod modes; v0.1.0 APKs |

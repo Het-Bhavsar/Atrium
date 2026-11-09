@@ -42,7 +42,7 @@ written down before the first track. The flex keeps single-layer bend zones and 
 
 The enclosure followed: a satin silver-grey capsule with a flat top, a base that holds a hidden 0.15 mm skin pad, a
 Plinth that charges it on magnets either way round, and a pocket case with its own small MCU. Then the production
-files: Gerbers checked layer by layer, stencil apertures checked per pad, and a 2 × 3 panel that carries both islands
+files: Gerbers checked layer by layer, stencil apertures checked per pad, and a 4 × 5 panel that carries both islands
 so a first build is one order.
 
 ## Software

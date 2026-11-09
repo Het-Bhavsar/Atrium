@@ -84,7 +84,7 @@ Add `--dart-define=ATRIUM_REAL_DATA=true` to `flutter run` to use a real pod ins
 
 ## 4. Order and assemble
 
-1. **Pod boards:** order `hardware/pod/islands-panel/` (6-layer HDI, 0.82 mm, both islands on one panel, six pods per
+1. **Pod boards:** order `hardware/pod/islands-panel/` (6-layer HDI, 0.82 mm, both islands on one panel, 20 pods per
    panel) as a two-sided PCBA. Read its [order notes](../hardware/pod/islands-panel/README.md#order-notes) first: cut
    the tabs, never snap them.
 2. **Flex:** order `hardware/pod/flex-jumper/production/` as a bare 2-layer polyimide flex with ENIG and the SUS430

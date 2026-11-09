@@ -17,7 +17,7 @@ ordering, and the charging-case board. All dimensions are in mm.
 
 <p align="center">
   <img src="pod/islands-panel/Pod_Islands_Panel_render.png" alt="Islands panel, top and bottom" width="100%">
-  <br><sub>The islands panel: six pods, 312 placements, one order.</sub>
+  <br><sub>The islands panel: 20 pods, 1,040 placements, one order.</sub>
 </p>
 
 <p align="center">
@@ -30,7 +30,7 @@ ordering, and the charging-case board. All dimensions are in mm.
 | Radio island | 6-layer HDI 1+4+1, 0.82 mm, JLC06081H-2313, ENIG. nRF52832 WLCSP, MAXM86161A, chip antenna | `pod/radio-island/` |
 | Power island | Same stack. BQ21061 charger, AP6683 protection, LSM6DSOX, 1.8 V LDO | `pod/power-island/` |
 | Flex jumper | 2-layer polyimide, 0.0865 mm, ENIG both sides, SUS430 stiffener; no parts | `pod/flex-jumper/` |
-| Islands panel | Both islands, 2 × 3 sets, tabs and mouse bites, for one PCB and PCBA order | `pod/islands-panel/` |
+| Islands panel | Both islands, 4 × 5 sets (83 × 71 mm), tabs and mouse bites, for one PCB and PCBA order | `pod/islands-panel/` |
 | Charging case | 2-layer FR-4, 0.8 mm. CH32V003, BQ24040 charger with cell-temperature cut-off, TPS61023 boost, SY6280 limit, USB-C | `case/charging-case/` |
 
 Each board folder has the same three parts:

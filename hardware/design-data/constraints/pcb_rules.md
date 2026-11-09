@@ -8,7 +8,7 @@ features drawn as seen from the top, as in KiCad/EasyEDA).
 
 | Item | Value |
 |---|---|
-| Layers / thickness | **6, 0.82 mm, JLC06081H-2313** (decided 2026-11-08); controlled impedance. JLC standard 4/6-layer starts at 0.8 mm; HDI also offers 0.6 mm 4-layer, but the 4-layer routing under U1 did not close |
+| Layers / thickness | **6, 0.82 mm, JLC06081H-2313** (decided 2026-11-08); controlled impedance. JLC now names this prepreg 3313 (same thickness and εr as 2313, per JLC's impedance-calculator guide), so the order may show JLC06081H-3313. The stack is set in each board's EasyEDA Layer Manager; the Altium export does not carry it. JLC standard 4/6-layer starts at 0.8 mm; HDI also offers 0.6 mm 4-layer, but the 4-layer routing under U1 did not close |
 | Stackup | L1 signal + RF / PP 2313 0.0964 / L2 solid GND / core 0.15 / L3 signal / PP 2x2313 / L4 signal + power / core 0.15 / L5 solid GND / PP 2313 0.0964 / L6 signal + bottom parts (inner Cu 0.5 oz, outer 1 oz, Tg170) |
 | Min trace/space | Design at 0.10/0.10 mm; 0.09 only in the WLCSP fan-out |
 | Vias | **HDI 1-step 1+4+1**: laser microvias L1–L2 and L5–L6 0.10 hole / 0.25 pad (aspect 0.96 on 0.0964 prepreg, JLC max 1:1), copper filled, in the ball pads of the 0.4 mm WLCSP-50 and DSBGA-20; buried L2–L5 0.15 / 0.30; stacked skip L1–L5 / L2–L6 0.10 / 0.25 (laser on buried); through 0.15 / 0.25 where both sides are clear. EasyEDA blind-via rules `1-2`, `5-6`, `2-5`, `1-5`, `2-6`. Quote 2026-11-08 (5 pcs, 7 × 10 mm, ENIG, filled & capped): about $222 + buried-via and lamination fees (manual quote), 12–13 days |
@@ -17,14 +17,14 @@ features drawn as seen from the top, as in KiCad/EasyEDA).
 | Why HDI | The radio bottom carries the MAXM86161 pad columns and the flex tongue directly under U1: 13 of U1's 15 inner-ball through vias would land on other-net bottom pads (DRC 2026-11-07; a placement scan found one legal through-via spot for U1 exists, but it leaves no room for the RF match before the antenna zone). Microvias stop at L2, so nothing under U1 reaches the bottom. The same holds for U10 (bottom) under U11 (top) on the power island. |
 | Assembly | JLC **Standard** PCBA, both sides, X-ray for U1/U10. Panelised with rails and fiducials; mouse-bites, never V-score (curved outlines, 0201 parts near the edge). |
 
-## Radio island (x 13.86 to 20.3)
+## Radio island (x 13.86 to 20.3, y 0.6 to 10.4: a rectangle to x 15.40 closed by an R 4.9 semicircle)
 
 Placement: all 64 parts were placed with real pads and clearances before routing. Use it as the starting placement; keep its side assignments unless the tool still passes after a change.
 
 
 - **Top**: U1 nRF52832 (see placement file), Y1 NX1612SA 1.88 mm from XC1/XC2, TH4 (top NTC) beside R11, L1/L2 DC/DC per Nordic, U2 LDO, RF match L3/C3, pi pads C40/Z41/C42, ANT1 at the tip, C30–C32 for the MAXM86161 directly above its pads, R1–R3, R10/R11, R40/R41/C12.
 - **Bottom**: U3 MAXM86161 (x 15.66–18.56, y 3.35–7.65), TH1 over the base boss (0.10 mm gel gap), jumper tongue at the inner edge (coordinates in the outline DXF). Small passives the placement moved here are allowed (all <= 0.80 mm).
-- **Antenna zone**: x >= 17.26 mm, copper-free on **all four layers** (no pour, trace, via or plane). The ground edge at x = 17.26 gets a via fence at <= 1 mm pitch.
+- **Antenna zone** (as built, checked on the Gerbers 2026-11-10): x >= 18.76 mm. L2-L6 carry no copper there (no pour, trace, via or plane); L1 carries only ANT1's pads, its feed and its GND tie. Ground sits about 0.25 mm from the antenna body, about half of Kinghelm's minimum clearance (their layouts are 5 x 3 to 5.5 x 4 mm), so the pi match is tuned on the head (open items O-7, O-13).
 - **RF feed**: nRF ANT -> L3 3.3 nH -> C3 1.0 pF shunt -> 50 ohm CPWG on L1 over solid L2 -> pi (C42 shunt / Z41 series / C40 shunt) -> ANT1. Feed under 3 mm long. **Arc bends, radius >= 3x width.** No vias. Via fence both sides at <= 1 mm. Width **0.124 mm with a 0.127 mm gap** to the L1 ground, L2 reference (JLC calculator, JLC06081H-2313, coplanar single-ended with mask, 2026-11-08; the field solver in hardware/simulation/cpwg_fd.md gives 53 ohm with its assumed mask). GND vias along it are L1–L2 microvias.
 - **Crystal**: no vias in XC traces, ground ring, nothing switching under it, caps grounded next to the crystal ground pad.
 - **DC/DC loop** (DCC -> L1 -> L2 -> DEC4 -> C9 -> GND): smallest possible area, kept away from the RF feed and Y1.
