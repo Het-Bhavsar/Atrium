@@ -121,7 +121,35 @@ These are the questions I asked myself. They are fair to ask of any product, inc
 5. **Measured or simulated?** Say which. Every number on this page is simulated or from finger data, and is labelled
    that way.
 
-## 6. What we will test next
+## 6. Other ways to see brain blood flow, and whether the pod can use them
+
+Light is not the only way in. I looked at every other non-invasive route I could find, and asked of each whether the
+pod could do it, either as it is or with changes that still fit a 20.9 mm pod.
+
+| Route | What it reads | What it needs | How much is brain | The pod as it is | A changed pod of this size |
+|---|---|---|---|---|---|
+| Light at 2 mm (Atrium today) | Pulse in the skin | LEDs and a photodiode in one module | 0.008–0.05 % | Scalp pulse only | No: the longest spacing that fits is about 18 mm, and Rev B.1's 18.5 mm gave about 1 % brain and 75 % jaw muscle |
+| Light at 30 mm (fNIRS) | Oxygen change in the outer brain | Separate source and detector about 3 cm apart | About 10 %, outer 5–8 mm of the brain | No | No: needs a band or a larger probe |
+| Laser speckle (diffuse correlation spectroscopy) | A blood-flow index from the flicker of laser light | A coherent laser and very fast photon counters or a camera, 2–3 cm apart | Some outer brain at that spacing | No | No: the same spacing problem, plus the laser |
+| Head impedance (rheoencephalography) | The head's electrical impedance with each beat | A current source and electrodes spread across the head | Mostly scalp: over 60 % of the signal in one model, 8–12 % intracranial at most in another; in people, stopping scalp flow with a cuff left 12–68 % of it | No: the pod's two skin pads are its charging contacts, millimetres apart | No: the electrodes must span the head, and two pods would need a wire between them to carry the current |
+| Ultrasound Doppler through the bone in front of the ear | Blood speed in the brain's main arteries | A 2 MHz ultrasound array with a high-voltage pulser, receiver and beam steering | The arteries themselves | No | Not practical: a 12 mm transducer would fit, but its electronics draw far more than a 30 mAh cell can give for long [ASSUMED], and it is a regulated medical device |
+
+The only wearable here that reads brain blood flow is the ultrasound patch. A 2024 study fitted a conformal 2 MHz
+patch at the bone window in front of the ear, where the pod also sits. It tracked the brain's main arteries with
+mean differences of a few cm/s against a hospital probe in 36 healthy people, and recorded one person for 4 hours.
+It found the vessel in 71 % of tries, against 75 % for the hospital probe. That is a separate device built for brain
+blood flow, not something a light sensor can grow into.
+
+I also looked for an Analog Devices design for brain blood flow, since the pod's module comes from them. I found none
+published (searched 2026-11-10). Their optical front ends could drive a research fNIRS probe, but only with the 3 cm
+spacing above.
+
+**What the pod can honestly offer near this topic**, as wellness signals and never called brain blood flow:
+- a scalp perfusion trend at the temporal region: the pulse of the superficial temporal artery, which feeds the scalp;
+- the things that drive brain blood flow, without measuring it: breathing rate (carbon dioxide is the main lever),
+  posture changes such as standing up, and the heart's response.
+
+## 7. What we will test next
 
 Nothing above is a head measurement yet. These are the experiments, with the smallest number of people that can give
 a clear answer:
@@ -135,7 +163,7 @@ a clear answer:
 
 We will publish the results here, including the negative ones.
 
-## 7. What Atrium is
+## 8. What Atrium is
 
 A wellness device that reads your pulse, heart-rate variability, skin-temperature trend, sleep and activity from the
 scalp, very well, in a pod small enough to forget. That is a lot, and I would rather do it honestly than promise
@@ -171,5 +199,14 @@ all result data (photon model output, 500-study power sweeps, simulated studies 
   - Brigadoi and Cooper (2015), *Neurophotonics* 2(2): 025005: the 8.4 mm optimum short-channel distance in adults.
   - Temporal muscle thickness by MRI, 360 adults aged 35–84: 3.69–16.90 mm (*Surgical Neurology International*).
   - The superficial temporal artery is a terminal branch of the external carotid artery (standard anatomy).
+  - Zhou et al. (2024), *Nature* 629: 810–818: a conformal ultrasound patch for continuous 3D monitoring of
+    cerebral blood flow; 36 healthy volunteers against a hospital probe, one 4-hour recording
+    ([PDF](https://xugroup.eng.ucsd.edu/wp-content/uploads/2024/11/92_Nature.pdf)).
+  - Rheoencephalography and scalp blood flow: a clinical cuff study
+    ([PMC4169836](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4169836/)) and a finite-element model
+    ([BioMedical Engineering OnLine 13:131](https://biomedical-engineering-online.biomedcentral.com/articles/10.1186/1475-925X-13-131)), and the scalp-thickness study on electrode layouts
+    ([INIS](https://inis.iaea.org/records/0a91c-tpm04)).
+  - Real-time diffuse correlation spectroscopy for cerebral blood flow with on-chip correlators
+    ([arXiv 2503.17459](https://arxiv.org/abs/2503.17459v2)).
 - **Not yet cited:** the skull and CSF thicknesses are model assumptions.
 - **Status:** no Atrium head recording exists yet. Every result here is simulated or from finger data.
