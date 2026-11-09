@@ -11,6 +11,9 @@
  *    stranger cannot hold the pod's one connection.
  *  - New pairings only up to the end of the window after a lift from the Plinth (or boot). That
  *    includes a phone pairing again over its own old bond (CONFIG_BT_SMP_ALLOW_UNAUTH_OVERWRITE).
+ *  - Advertising every 2 s on the Plinth and off the body, where no phone is waiting on a pulse
+ *    and the docked-idle and off-body budgets (modes.c) count it at 2 s; every 1 s otherwise
+ *    [ASSUMED], so a bonded phone reconnects quickly while the pod is worn.
  */
 #ifndef ATRIUM_BLE_POLICY_H_
 #define ATRIUM_BLE_POLICY_H_
@@ -18,8 +21,12 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include "modes.h"
+
 #define BLE_UNENC_TIMEOUT_S 30
 #define BLE_MIN_KEY_SIZE    16
+#define BLE_ADV_MS          1000
+#define BLE_ADV_IDLE_MS     2000
 
 static inline bool ble_link_secure(uint8_t level, bool sc, uint8_t key_size)
 {
@@ -29,6 +36,12 @@ static inline bool ble_link_secure(uint8_t level, bool sc, uint8_t key_size)
 static inline bool ble_pairing_open(int64_t now_ms, int64_t until_ms)
 {
 	return now_ms <= until_ms;
+}
+
+/* Advertising interval while no phone is connected */
+static inline uint16_t ble_adv_interval_ms(enum pod_mode m)
+{
+	return (m == MODE_DOCKED_IDLE || m == MODE_OFFBODY) ? BLE_ADV_IDLE_MS : BLE_ADV_MS;
 }
 
 #endif /* ATRIUM_BLE_POLICY_H_ */

@@ -34,9 +34,8 @@ static const struct bt_data sd[] = {
 
 static uint16_t adv_units(enum pod_mode m)
 {
-	/* 2 s docked (counted in the docked-idle budget), 1 s otherwise [ASSUMED] */
-	return m == MODE_DOCKED_IDLE ? BT_GAP_MS_TO_ADV_INTERVAL(2000)
-				     : BT_GAP_MS_TO_ADV_INTERVAL(1000);
+	/* 2 s docked or off the body, 1 s otherwise (ble_policy.h) */
+	return BT_GAP_MS_TO_ADV_INTERVAL(ble_adv_interval_ms(m));
 }
 
 static int adv_start(void)

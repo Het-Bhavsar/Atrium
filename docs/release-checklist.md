@@ -30,7 +30,7 @@ hold. Fill in a new table for each release; never edit an old one.
 | Check | Where it ran | Result |
 |---|---|---|
 | Board DRC | EasyEDA | Radio and power islands, panel: 0 errors. Flex and case: known, accepted items only (`hardware/README.md`). Case re-checked 2026-11-10 after the charger change: two USB-C footprint slot notes, nothing else |
-| Pod firmware unit tests | Host (`native_sim`, Twister) | 176 of 176 pass |
+| Pod firmware unit tests | Host (`native_sim`, Twister) | 177 of 177 pass |
 | Case firmware unit tests | Host (`make -C firmware/case test`) | 45 of 45 pass, including the 50 ms short-circuit cut-off |
 | Case charger temperature cut-off | Not run | Hot air and freeze spray on TH2, thermocouple on U2 (build item B-10) |
 | App unit tests | Host (`flutter test`) | Pass; see the app README for the count |

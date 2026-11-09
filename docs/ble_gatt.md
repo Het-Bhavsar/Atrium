@@ -63,8 +63,8 @@ Revs 4 to 9 described earlier boards and log formats (a fuel gauge, external fla
 
 | State | Interval | Payload |
 |---|---|---|
-| Not connected, any mode except docked idle (off-body included) | 1 s [ASSUMED] | Flags and the Power service UUID (0x0100); name `Atrium` in the scan response |
-| Docked idle (on the Plinth) | 2 s | Same as above. Counted in the docked-idle budget (`firmware/src/power/modes.c`) |
+| Worn, not connected (full, smart, lite, sleep, research modes) | 1 s [ASSUMED] | Flags and the Power service UUID (0x0100); name `Atrium` in the scan response |
+| Docked idle (on the Plinth), off-body | 2 s | Same as above. Counted in the docked-idle and off-body budgets (`firmware/src/power/modes.c`; `ble_adv_interval_ms` in `ble_policy.h`) |
 | Power-off (cut-off), ship mode | none | The pod is off until the next Plinth |
 
 Connection interval follows the mode, with latency 0: 200 ms (full), 400 ms (smart), 1 s (lite), 4 s (sleep), 2 s (docked idle and off-body), 30 ms (modes 6 and 7), 100 ms (modes 8 and 9), 15 ms (modes 10 and 11) (`firmware/src/power/modes.c`). A log read asks for 15–30 ms instead (§7).

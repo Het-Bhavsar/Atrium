@@ -27,3 +27,16 @@ ZTEST(ble_policy, test_pairing_window)
 	zassert_false(ble_pairing_open(60001, 60000), "after it");
 	zassert_false(ble_pairing_open(0, -1), "no window yet");
 }
+
+/* 2 s on the Plinth and off the body (the docked-idle and off-body budgets count it at 2 s),
+ * 1 s in every mode worn on the head */
+ZTEST(ble_policy, test_adv_interval)
+{
+	for (int m = 0; m < MODE_COUNT; m++) {
+		uint16_t want = (m == MODE_DOCKED_IDLE || m == MODE_OFFBODY) ? 2000 : 1000;
+
+		zassert_equal(ble_adv_interval_ms(m), want, "%s", mode_get(m)->name);
+	}
+	zassert_equal(ble_adv_interval_ms(MODE_OFFBODY), 2000, "off-body, as budgeted");
+	zassert_equal(ble_adv_interval_ms(MODE_SMART), 1000);
+}
