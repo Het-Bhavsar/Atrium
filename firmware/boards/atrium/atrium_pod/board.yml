@@ -1,0 +1,6 @@
+board:
+  name: atrium_pod
+  full_name: Atrium pod EVT
+  vendor: atrium
+  socs:
+    - name: nrf52832

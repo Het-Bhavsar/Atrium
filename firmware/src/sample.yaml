@@ -1,0 +1,13 @@
+sample:
+  name: Atrium pod firmware
+tests:
+  atrium.pod.build:
+    sysbuild: true
+    build_only: true
+    extra_args:
+      - BOARD_ROOT=..
+    platform_allow:
+      - atrium_pod
+    integration_platforms:
+      - atrium_pod
+    tags: atrium

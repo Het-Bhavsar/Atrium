@@ -1,0 +1,20 @@
+# Copyright (c) 2026 Local Forge
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+  MAXM86161 optical module (AFE, green, IR and red LEDs, one photodiode),
+  I2C address 0x62.
+
+compatible: "adi,maxm86161"
+
+include: i2c-device.yaml
+
+properties:
+  int-gpios:
+    type: phandle-array
+    required: true
+    description: INTB, open drain, active low. Needs a pull-up.
+  ldo-en-gpios:
+    type: phandle-array
+    required: true
+    description: LDO_EN. High powers the module; low is 0.05 uA. 1 MOhm pull-down on the board.

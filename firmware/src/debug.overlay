@@ -1,0 +1,22 @@
+/*
+ * Bring-up build (tests/fw.sh debug): no MCUboot, the image starts at 0 and may use the
+ * boot and both slot partitions (472 KB). Settings and the log keep their places.
+ */
+/delete-node/ &boot_partition;
+/delete-node/ &slot0_partition;
+/delete-node/ &slot1_partition;
+
+&flash0 {
+	partitions {
+		debug_partition: partition@0 {
+			label = "debug";
+			reg = <0x00000000 0x00076000>;
+		};
+	};
+};
+
+/ {
+	chosen {
+		zephyr,code-partition = &debug_partition;
+	};
+};

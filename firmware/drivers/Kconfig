@@ -1,0 +1,23 @@
+# Copyright (c) 2026 Local Forge
+# SPDX-License-Identifier: Apache-2.0
+
+menuconfig MAXM86161
+	bool "MAXM86161 optical module"
+	default y
+	depends on DT_HAS_ADI_MAXM86161_ENABLED
+	select I2C
+	select GPIO
+	help
+	  Driver for the MAXM86161 optical module (pod U3).
+
+if MAXM86161
+
+config MAXM86161_INIT_PRIORITY
+	int "Init priority"
+	default 80
+
+module = MAXM86161
+module-str = maxm86161
+source "subsys/logging/Kconfig.template.log_config"
+
+endif # MAXM86161

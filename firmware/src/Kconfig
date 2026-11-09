@@ -1,0 +1,26 @@
+# Copyright (c) 2026 Local Forge
+# SPDX-License-Identifier: Apache-2.0
+
+mainmenu "Atrium pod firmware"
+
+rsource "../drivers/Kconfig"
+
+menu "Atrium"
+
+config ATRIUM_TICK_MS
+	int "Power state machine period (ms)"
+	default 1000
+	help
+	  The charge policy assumes at most this gap between updates (charge_policy_cfg.update_ms).
+
+config ATRIUM_DFU_MIN_MV
+	int "Lowest VSYS for a firmware update off the dock (mV)"
+	default 3600
+
+module = ATRIUM
+module-str = atrium
+source "subsys/logging/Kconfig.template.log_config"
+
+endmenu
+
+source "Kconfig.zephyr"

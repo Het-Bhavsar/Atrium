@@ -1,0 +1,27 @@
+# Copyright (c) 2026 Local Forge
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+  BQ21061 linear charger with power path (PMID = VSYS), I2C address 0x6B.
+  /LP is tied low on the pod, so the charger's I2C works only while VIN is
+  present (pod on the Plinth). The TS pin reads the cell NTC (TH5).
+
+compatible: "ti,bq21061"
+
+include: i2c-device.yaml
+
+properties:
+  pg-gpios:
+    type: phandle-array
+    required: true
+    description: /PG, open drain, low while a valid input is present.
+  constant-charge-current-max-microamp:
+    type: int
+    required: true
+    description: Fast-charge current, 1.25 mA steps.
+  cold-charge-current-microamp:
+    type: int
+    required: true
+    description: |
+      Fast-charge current the firmware sets while its own temperature reading
+      is in the cold band (0 to 10 C), at most 0.2C.

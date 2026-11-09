@@ -1,0 +1,24 @@
+/*
+ * Copyright (c) 2026 Local Forge
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Pins from the EVT baseline netlist (hardware/design-data/netlist/atrium_nets.yaml), U1 nRF52832-CIAA.
+ */
+
+&pinctrl {
+	/* I2C_SDA P0.15, I2C_SCL P0.16. R1 / R2 4.7 kOhm pull-ups to VDD 1.8 V on the board. */
+	i2c0_default: i2c0_default {
+		group1 {
+			psels = <NRF_PSEL(TWIM_SDA, 0, 15)>,
+				<NRF_PSEL(TWIM_SCL, 0, 16)>;
+		};
+	};
+
+	i2c0_sleep: i2c0_sleep {
+		group1 {
+			psels = <NRF_PSEL(TWIM_SDA, 0, 15)>,
+				<NRF_PSEL(TWIM_SCL, 0, 16)>;
+			low-power-enable;
+		};
+	};
+};
