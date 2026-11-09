@@ -22,7 +22,7 @@
 
 ## What the study needs but the current firmware cannot give
 
-**Update, same day:** firmware `ble_gatt.md` rev 14 adds research modes 6 (100 Hz) and 7 (200 Hz): green, IR, red and a direct-ambient slot (tag 0x04), with the accelerometer at 104 Hz. It answers items 1 and 2 below. Rev 15 adds modes 8 and 9: the same slots sampled at 200 Hz and averaged on the module to 50 and 25 Hz. All four are uncommitted in the firmware worktree and not bench-tested; their currents are [ASSUMED]. `capture.py` decodes all four.
+**Update, same day:** firmware `ble_gatt.md` rev 14 adds research modes 6 (100 Hz) and 7 (200 Hz): green, IR, red and a direct-ambient slot (tag 0x04), with the accelerometer at 104 Hz. It answers items 1 and 2 below. Rev 15 adds modes 8 and 9: the same slots sampled at 200 Hz and averaged on the module to 50 and 25 Hz. All four are planned and not bench-tested; their currents are [ASSUMED].
 
 1. **Sample rate.** 25 Hz is enough for amplitude, DC and optical-density analysis.
    - The loss for timing comes from point sampling without anti-aliasing (SMP_AVE = 1), not from the rate itself. On the finger data below, 95th percentile of |error per beat| against 500 Hz:

@@ -129,5 +129,5 @@ So that Atrium's wording can be placed correctly:
 ## Next steps this adds
 
 - **E1 (already listed):** bench-test modes 6 and 7, and compare point-sampled against averaged on the pod's own signal. Minimum 3 pods, 10 min each.
-- **E1b:** firmware modes 8 and 9 now do this (`ble_gatt.md` rev 15): they sample at 200 Hz and average on the module to 50 Hz (SMP_AVE 4) or 25 Hz (SMP_AVE 8). They are uncommitted and not bench-tested, and their currents are [ASSUMED]. `capture.py` decodes them and moves each word to its window centre (7.5 or 17.5 ms earlier). On the bench, check SMP_AVE reads back from 0x12, and measure the current.
+- **E1b:** firmware modes 8 and 9 now do this (`ble_gatt.md` rev 15): they sample at 200 Hz and average on the module to 50 Hz (SMP_AVE 4) or 25 Hz (SMP_AVE 8). They are planned and not bench-tested, and their currents are [ASSUMED]. The decoder moves each word to its window centre (7.5 or 17.5 ms earlier). On the bench, check SMP_AVE reads back from 0x12, and measure the current.
 - **E5 (already listed):** ultrasound layer thickness at both spots, 5 people. This now matters more, because the plausible range of the 2 mm brain share spans a factor of 12 (0.008–0.1 %).
