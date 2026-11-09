@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import 'package:atrium/core/app_state.dart';
+import 'package:atrium/core/config.dart';
 import 'package:atrium/core/theme/tokens.dart';
 import 'package:atrium/core/util/format.dart';
 import 'package:atrium/core/widgets/components.dart';
@@ -11,6 +12,7 @@ import 'package:atrium/features/insights/data/metrics_provider.dart';
 import 'package:atrium/features/insights/domain/metrics.dart';
 import 'package:atrium/features/insights/domain/metrics_source.dart';
 import 'package:atrium/features/insights/domain/story.dart';
+import 'package:atrium/features/metrics/presentation/oxygen_trend_card.dart';
 import 'package:atrium/features/pod/domain/pod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -83,6 +85,10 @@ class SleepView extends ConsumerWidget {
         ),
         const SectionHeader('Head position', trailing: 'While asleep'),
         _HeadPositionCard(side: s.side, asleep: d.asleep, positions: d.headPositions),
+        if (showOxygenTrend(realData: kRealData, labs: s.labs, trend: d.oxygenTrend)) ...[
+          const SectionHeader('Oxygen trend', trailing: 'Labs'),
+          OxygenTrendCard(d.oxygenTrend!),
+        ],
         SectionHeader('Time asleep', trailing: 'Average ${hm(r.mean)}'),
         Segmented<Range>(
           values: Range.values,

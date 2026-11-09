@@ -9,7 +9,7 @@ Atrium is a wellness and research device. Every feature below gives wellness tre
 - **V1:** first public release.
 - **Later:** a research item, built after its signal is validated on the bench.
 
-Sensors are the EVT pod's: PPG module MAXM86161 (green, red and IR, one photodiode), IMU (LSM6DSOX), two 10 k NTCs (TH1 skin, TH4 top), VSYS sense (no fuel gauge), BLE (nRF52832), and charge state from the BQ21061. The GATT interface is in `ble_gatt.md`.
+Sensors are the EVT pod's: PPG module MAXM86161A (green, red and IR, one photodiode), IMU (LSM6DSOX), two 10 k NTCs (TH1 skin, TH4 top), VSYS sense (no fuel gauge), BLE (nRF52832), and charge state from the BQ21061. The GATT interface is in `ble_gatt.md`.
 
 ## Body metrics
 
@@ -44,7 +44,7 @@ Sensors are the EVT pod's: PPG module MAXM86161 (green, red and IR, one photodio
 | 17 | Plinth status | "On the Plinth: charging / charged" | BQ21061 /PG and status | EVT |
 | 18 | Wear detection | Off-body, so pause measurement and save power | PPG DC, TH1 | EVT |
 | 19 | Ship mode | Store and ship with the cell disconnected: set on the Plinth, takes effect on lift, wakes on the Plinth | BQ21061 ship mode | EVT |
-| 20 | Log sync | Compact offline log on the pod (about 16–22 h, 12 B per 30 s epoch) and sync when the phone is near; the app syncs at least every 16 h and warns after 12 h without a sync | Internal flash, GATT log service | EVT |
+| 20 | Log sync | Compact offline log on the pod (about 20 h: 19.8–22.6 h, 12 B per 30 s epoch) and sync when the phone is near; the app shows when it last synced and warns after 16 h without a sync that older readings will soon be overwritten. Background sync on Android and iOS is not done yet | Internal flash, GATT log service | EVT |
 | 21 | Firmware update | Over the air, signed, with rollback | MCUmgr SMP | EVT |
 | 22 | Data export and delete | CSV export of the user's data; delete everything | App, cloud | V1 |
 | 23 | Privacy | Works without an account. Cloud features are opt-in. No sale or sharing of health data | App, cloud | EVT |

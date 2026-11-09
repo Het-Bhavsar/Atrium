@@ -27,7 +27,7 @@ What the sources agree on, and how much it varies:
 
 ## The optics
 
-- The MAXM86161 has green (≈ 527 nm), red (660 nm) and IR (880 nm) LEDs and one photodiode in a 2.9 × 4.3 mm module.
+- The MAXM86161A has green (≈ 527 nm), red (660 nm) and IR (880 nm) LEDs and one photodiode in a 2.9 × 4.3 mm module.
 - The LED-to-photodiode spacing isn't in the datasheet text: ≈ 1.5–2.5 mm, from the package size [VERIFY on the package drawing].
 - In reflection PPG, light samples to roughly half to one source–detector spacing deep, and deeper for red and IR than for green [VERIFY against a tissue-optics source].
   - **Green:** reaches about the upper 1 mm of skin (the dermal capillary bed). It gives the heart rate wherever the skin is well perfused, on or off the artery.
@@ -91,4 +91,4 @@ For the app's onboarding fit screen.
 - [Superficial temporal artery anatomy, Egyptian Journal of Anatomy (2018)](https://dx.doi.org/10.21608/ejana.2018.43501)
 - [CT-angiography study of the frontal branch (Hacettepe thesis)](https://openaccess.hacettepe.edu.tr/bitstreams/7917b0ca-c33c-4617-be4b-9766bdd0eace/download)
 - [Anatomical variant of the STA in temporoparietal fascia flaps for microtia](https://bvbvf1.bib-bvb.de/vufind/PrimoRecord/cdi_proquest_miscellaneous_2932936955)
-- [MAXM86161 data sheet (Analog Devices)](https://www.analog.com/MAXM86161/datasheet): LED wavelengths; package 2.9 × 4.3 × 1.4 mm
+- [MAXM86161A data sheet (Analog Devices)](https://www.analog.com/MAXM86161/datasheet): LED wavelengths; package 2.9 × 4.3 × 1.4 mm

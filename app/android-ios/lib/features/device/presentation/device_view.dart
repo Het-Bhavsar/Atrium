@@ -11,10 +11,15 @@ import 'package:atrium/core/theme/tokens.dart';
 import 'package:atrium/core/widgets/components.dart';
 import 'package:atrium/core/widgets/graphics.dart';
 import 'package:atrium/core/widgets/scaffolds.dart';
+import 'package:atrium/features/device/data/firmware_update_provider.dart';
+import 'package:atrium/features/device/domain/firmware_image.dart';
+import 'package:atrium/features/device/domain/firmware_update.dart';
 import 'package:atrium/features/device/presentation/device_sheets.dart';
 import 'package:atrium/features/device/presentation/device_widgets.dart';
 import 'package:atrium/features/pod/data/pod_session.dart';
 import 'package:atrium/features/pod/domain/pod.dart';
+import 'package:atrium/features/pod/domain/sync_age.dart';
+import 'package:atrium/features/pod/presentation/sync_status.dart';
 import 'package:atrium/features/settings/data/log_out.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -66,6 +71,13 @@ class _DeviceViewState extends ConsumerState<DeviceView> {
     final t = AtriumColors.of(context);
     final d = s.pod;
     final name = s.podName ?? 'Atrium 3F2A';
+    // Real builds: sync age from the saved last-sync time (#20), and the pod software from DIS and the update flow (#21).
+    final lastSync = kRealData ? ref.watch(lastSyncProvider) : null;
+    final now = DateTime.now();
+    final overdue = kRealData && syncOverdue(lastSync, now);
+    final syncedAgo = kRealData ? lastSyncedLabel(lastSync, now) : d.lastSync;
+    final ota = kRealData ? ref.watch(firmwareUpdateProvider) : null;
+    final podSoftware = kRealData ? (ota!.current ?? PodVersion.tryParse(ref.watch(podSessionProvider.select((p) => p.firmware)))) : null;
     final life = d.onPlinth
         ? (d.charging || d.alert == PodAlert.cold ? d.eta! : 'Ready to wear')
         : d.connected
@@ -89,15 +101,33 @@ class _DeviceViewState extends ConsumerState<DeviceView> {
               ),
               const SizedBox(height: Space.s),
               Text(
-                'It keeps logging on its own and holds about $podLogHours hours. Sync before then.',
+                'It keeps logging on its own and holds about $podLogCapacityHours hours. Sync before then.',
                 textAlign: TextAlign.center,
                 style: AtriumType.body(t.ink2),
               ),
+              if (kRealData) ...[const SizedBox(height: Space.s), LastSyncedLine(lastSync: lastSync, now: now, center: true)],
               const SizedBox(height: Space.l),
-              _SmallButton(_searching ? 'Searching…' : 'Search again', onPressed: _searching ? null : _searchAgain),
+              _SmallButton(
+                ota?.busy ?? false
+                    ? 'Updating pod software…'
+                    : _searching
+                    ? 'Searching…'
+                    : 'Search again',
+                onPressed: _searching || (ota?.busy ?? false) ? null : _searchAgain,
+              ),
             ],
           ),
         ),
+        if (ota?.busy ?? false) ...[
+          const SizedBox(height: Space.m),
+          NoticeCard(
+            icon: 'chip',
+            title: 'Updating pod software',
+            body: 'The update has the Bluetooth link for now. Atrium reconnects when the pod has restarted.',
+            onTap: () => context.pushDetail('/firmware'),
+          ),
+        ],
+        if (overdue) ...[const SizedBox(height: Space.m), SyncDueNotice(lastSync: lastSync!, now: now)],
         const SectionHeader('Things to try'),
         const ListGroup(
           children: [
@@ -120,15 +150,22 @@ class _DeviceViewState extends ConsumerState<DeviceView> {
                 style: AtriumType.serifAt(24, color: t.ink),
               ),
               const SizedBox(height: 3),
-              Text('$name · synced ${d.lastSync.toLowerCase()}', textAlign: TextAlign.center, style: AtriumType.secondary(t.ink2)),
+              Text(
+                kRealData && lastSync == null ? '$name · not synced yet' : '$name · synced ${syncedAgo.toLowerCase()}',
+                textAlign: TextAlign.center,
+                style: AtriumType.secondary(overdue ? t.red : t.ink2),
+              ),
             ],
           ),
         ),
       );
     }
 
-    // Alert notice (cold charging, sync due).
-    if (d.alert != null) {
+    // Alert notice (cold charging, sync due). Real builds: sync due from the last sync time, connected or not.
+    if (d.connected && overdue) {
+      children.addAll([const SizedBox(height: Space.m), SyncDueNotice(lastSync: lastSync!, now: now)]);
+    }
+    if (d.alert != null && (d.alert == PodAlert.cold || !kRealData)) {
       final cold = d.alert == PodAlert.cold;
       children.addAll([
         const SizedBox(height: Space.m),
@@ -138,7 +175,7 @@ class _DeviceViewState extends ConsumerState<DeviceView> {
           title: cold ? 'Charging paused in the cold' : 'Sync soon',
           body: cold
               ? 'The pod charges between about 0 and 45 °C, and more slowly when cold. It carries on when it warms up.'
-              : 'The pod is holding ${d.hoursHeld} hours of readings and keeps about $podLogHours. Keep your phone near it.',
+              : 'The pod is holding ${d.hoursHeld} hours of readings and keeps about $podLogCapacityHours. Keep your phone near it.',
         ),
       ]);
     } else if (d.connected) {
@@ -211,22 +248,37 @@ class _DeviceViewState extends ConsumerState<DeviceView> {
               value: d.offSkin || d.onPlinth ? 'Off skin' : 'Good',
             ),
             ListRow(icon: 'ruler', title: 'Worn on', subtitle: 'Upright, window end up', value: s.side.label),
-            ListRow(icon: 'clock', title: 'Last sync', value: d.lastSync),
+            ListRow(icon: 'clock', title: 'Last sync', value: kRealData && lastSync == null ? 'Not yet' : syncedAgo),
             ListRow(
               icon: 'storage',
               title: 'Held on the pod',
-              subtitle: "It keeps about $podLogHours hours; Atrium syncs whenever it's near",
-              value: '${d.hoursHeld} h',
+              subtitle: "It keeps about $podLogCapacityHours hours; Atrium syncs whenever it's near",
+              value: '${kRealData ? hoursSinceSync(lastSync, now) : d.hoursHeld} h',
             ),
-            ListRow(
-              icon: 'chip',
-              title: 'Pod software',
-              subtitle: s.firmware == FirmwareState.done ? 'Up to date' : '0.1.0 · 0.2.0 is available',
-              value: s.firmware == FirmwareState.done ? '0.2.0' : null,
-              trailing: s.firmware == FirmwareState.done ? null : const _UpdateBadge(),
-              chevron: true,
-              onTap: () => context.pushDetail('/firmware'),
-            ),
+            if (kRealData)
+              ListRow(
+                icon: 'chip',
+                title: 'Pod software',
+                subtitle: switch (ota!.phase) {
+                  OtaPhase.available => '${ota.release!.version} is available',
+                  OtaPhase.upToDate || OtaPhase.done => 'Up to date',
+                  _ when ota.busy => 'Updating…',
+                  _ => 'Check for updates',
+                },
+                value: podSoftware?.toString() ?? 'Unknown',
+                trailing: ota.phase == OtaPhase.available ? const _UpdateBadge() : null,
+                chevron: true,
+                onTap: () => context.pushDetail('/firmware'),
+              )
+            else
+              ListRow(
+                icon: 'chip',
+                title: 'Pod software',
+                subtitle: s.firmware == FirmwareState.done ? 'Demo finished' : 'Demo · an update is available',
+                trailing: s.firmware == FirmwareState.done ? null : const _UpdateBadge(),
+                chevron: true,
+                onTap: () => context.pushDetail('/firmware'),
+              ),
             const ListRow(icon: 'device', title: 'Hardware', value: 'EVT · 3F2A'),
           ],
         ),

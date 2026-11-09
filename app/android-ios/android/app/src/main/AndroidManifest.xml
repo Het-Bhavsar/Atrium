@@ -6,6 +6,8 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Pod software (#21): fetches the latest signed release from GitHub, only when Pod software is opened. -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="true" />
     <!-- Location is only for BLE scans on Android 11 and older; don't hide the app from phones without GPS. -->
     <uses-feature android:name="android.hardware.location" android:required="false" />

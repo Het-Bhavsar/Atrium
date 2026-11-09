@@ -177,7 +177,7 @@ Covered in full in [mechanical.md](mechanical.md#form-the-capsule):
 
 ## 9. Charging case
 
-1. **PCBA (JLC, one side, 0.10 mm foil):** CH32V003, TP4054, TPS61023, SY6280, translators, LDO, LEDs and button. D1 / D2 are B5819WS SOD-323 (C179554). In a pogo short the SY6280 limits at 0.34–0.57 A and the conducting diode dissipates 236–329 mW against a 200–250 mW rating, so firmware must cut VIN_EN within 50 ms of the 80 mA trip (B-8).
+1. **PCBA (JLC, one side, 0.10 mm foil):** CH32V003, BQ24040 (WSON-10, thermal pad), TPS61023, SY6280, translators, LDO, LEDs and button. D1 / D2 are 1N5819WS SOD-323 (C191023). In a pogo short the SY6280 limits at 0.34–0.57 A and the conducting diode dissipates 236–329 mW against a 200–250 mW rating, so firmware must cut VIN_EN within 50 ms of the 80 mA trip (B-8).
 2. **Flash (before the cell):** WCH-LinkE on TP1 SWIO / TP3 GND, with TP2 at 3.3 V from the programmer. Firmware source is in `firmware/case/`.
    - Run `minichlink -w atrium_case.bin flash -b`.
    - Run `minichlink -D` once, so PD7 is a GPIO (blue LED), not NRST.
@@ -185,8 +185,9 @@ Covered in full in [mechanical.md](mechanical.md#form-the-capsule):
    - The MCU answers SWIO for 5 s after reset and whenever USB is in.
 3. **Bring-up on USB (current-limited 5 V, 500 mA):**
    - VBUS_DET seen.
-   - Charge current set by R5 4.7 kΩ: expect about 199 mA (179–219 mA). Above 150 mA the TP4054 data sheet uses R = 1000/I × (1.2 − 4/3 I), not 1000/I (charging tolerance analysis in `hardware/simulation/`).
-   - The TP4054 runs hot at the start of constant current: about 0.34 W, 87 °C junction typical, 119 °C worst case, and thermal fold-back in about 5 % of builds. That is safe (the part folds back) but slower. R5 = 6.8 kΩ gives 147 mA, 26 % less heat and 3.5 h instead of 2.6 h (B-10).
+   - Charge current set by R5 2.7 kΩ on ISET: expect about 200 mA (187–210 mA).
+   - Cell temperature cut-off: warm TH2 (hot air, about 50 °C) and cool it (freeze spray) and check that the charge current reduces and stops, and comes back when TH2 returns to room temperature (B-10).
+   - The BQ24040 drops about 0.3 W at the start of constant current; thermocouple on U2.
    - Boost 5.2 V with BOOST_EN.
    - SY6280 limits at about 0.45 A into a short.
    - Pogo VIN switches with VIN_EN.
@@ -243,6 +244,6 @@ There is no published factory procedure for PPG. A fixed grey target (or a simpl
 | B-5 | Perimeter UV adhesive grade (skin-safe) and leak-test method | Supplier data, bench |
 | B-6 | MSL and protective film on the MAXM86161; reflow bake | ADI data sheet |
 | B-7 | Flex landing peel strength and hot-bar settings | Scrap flex |
-| B-8 | B5819WS overload in a pogo short (236–329 mW vs 200–250 mW rated) | Firmware trip ≤ 50 ms after 80 mA, measured on the bench with a shorted dock |
+| B-8 | 1N5819WS overload in a pogo short (236–329 mW vs 200–250 mW rated) | Firmware trip ≤ 50 ms after 80 mA: implemented as a per-frame check (about 40 ms worst case, host-tested in `firmware/case`); still to be measured with an oscilloscope on a shorted dock. During the first 100 ms after VIN on (inrush blanking) only the SY6280 limit applies |
 | B-9 | Panel CPL: equal to the PCB tool's own export; confirm the WLCSP / DSBGA / LGA / DFN zero orientation in JLC's library | JLC CPL preview, before paying |
-| B-10 | TP4054 heat: keep R5 4.7 k (199 mA, fold-back possible) or move to 6.8 k (147 mA) | Decide after the first case bring-up (thermocouple on U2) |
+| B-10 | BQ24040: cell-temperature cut-off works, and U2 heat at 200 mA. TH2 sits on the board 3.0 mm from U2, the closest free spot to the charger's TS pin; it may read the charger's own heat (estimate 2–3 °C). Check TH2 against a thermocouple on the cell while charging | First case bring-up (hot air and freeze spray on TH2, thermocouples on U2 and the cell) |

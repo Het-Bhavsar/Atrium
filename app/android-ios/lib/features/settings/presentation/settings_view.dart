@@ -22,7 +22,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 /// Labs features still in research (name, one line).
 const List<(String, String)> kLabs = [
-  ('Oxygen trend', 'Overnight relative trend, never a percentage'),
+  ('Oxygen trend', 'Overnight relative trend on Sleep after 7 nights, never a percentage'),
   ('Thermal trends', 'Skin and pod temperature through the day'),
   ('Perfusion trend', 'How strong the pulse signal is over time'),
   ('Eating prompt', 'Asks before logging a meal it noticed'),

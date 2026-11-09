@@ -4,7 +4,9 @@
  *
  * Atrium charging case: the hardware around case_sm.c. No RTOS: a 100 ms loop while
  * anything needs the MCU (LED frames every 20 ms), standby otherwise.
- *  - Each tick: read the lid, button, USB and TP4054 CHRG pins, VDD from VREFINT, and,
+ *  - Each 20 ms LED frame while the feed is armed: one pod-current reading for the fast
+ *    over-current cut-off (oc_fast.h), which turns VIN off itself.
+ *  - Each tick: read the lid, button, USB and charger CHG pins, VDD from VREFINT, and,
  *    with the outputs of the last tick, the pod current (OPA, 16 samples), the NTC (VIN on)
  *    and the SWDIO pull-up (1.8 V side on). Step the state machine, then set the outputs.
  *  - Standby: lid, button and VBUS wake it on either edge (EXTI 1-3, port C); the AWU
@@ -20,6 +22,7 @@
 #include "board.h"
 #include "case_sm.h"
 #include "led.h"
+#include "oc_fast.h"
 #include "sense.h"
 #include "swd.h"
 
@@ -304,6 +307,9 @@ int main(void)
 	struct case_out out = {0};
 	uint32_t zero = 0, idr = 0;
 	bool swd_ran = false, swd_ok = false;
+	struct oc_fast fast = {0};
+	bool fast_trip = false;
+	uint16_t vdd_last = 0;
 
 	SystemInit();
 	board_init();
@@ -327,8 +333,11 @@ int main(void)
 			.temp_c10 = CASE_TEMP_NONE,
 			.swd_done = swd_ran,
 			.swd_ok = swd_ok,
+			.fast_trip = fast_trip,
 		};
 		swd_ran = false;
+		fast_trip = false;
+		vdd_last = vdd;
 		if (out.vin_en && out.opa_on) {
 			uint32_t s = adc_sum(ADC_CH_OPA);
 
@@ -369,6 +378,20 @@ int main(void)
 
 				led_render(out.led, now_ms() - out.led_t0, &c);
 				led_set(c);
+				/* fast over-current cut-off (oc_fast.h): VIN off within about 40 ms */
+				if (out.oc_armed && !fast_trip) {
+					uint32_t s = adc_sum(ADC_CH_OPA); /* 16 conversions, about 0.4 ms */
+					int32_t ua = sense_pod_ua(s, zero, OVS, vdd_last);
+
+					if (oc_fast_sample(&fast, true, ua, sense_saturated(s, OVS), cfg.oc_ua)) {
+						funDigitalWrite(PIN_VIN_EN, 0);
+						funDigitalWrite(PIN_LDO, 0);
+						funDigitalWrite(PIN_BOOST, 0);
+						fast_trip = true;
+					}
+				} else if (!out.oc_armed) {
+					oc_fast_sample(&fast, false, 0, false, cfg.oc_ua);
+				}
 				next += FRAME_MS * TICKS_PER_MS;
 				nap_until(next);
 			}

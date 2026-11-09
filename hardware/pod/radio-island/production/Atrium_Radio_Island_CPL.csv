@@ -31,8 +31,8 @@ R40,RC0201FR-072M2L,R0201,17.05mm,2.15mm,17.05mm,2.15mm,17.292mm,2.15mm,2,B,180,
 R41,RC0201FR-071ML,R0201,16.45mm,1.6mm,16.45mm,1.6mm,16.692mm,1.6mm,2,B,180,Yes,1MΩ,1MΩ,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/RC0201FR-071ML/280203.html
 TH1,NCP03XH103F05RL,R0201,15.15mm,9.55mm,15.15mm,9.55mm,15.392mm,9.55mm,2,B,180,Yes,NCP03XH103F05RL,10KΩ,,LCSC,https://item.szlcsc.com/datasheet/NCP03XH103F05RL/99307.html
 TH4,NCP03XH103F05RL,R0201,17.85mm,8.76mm,17.85mm,8.76mm,17.85mm,8.518mm,2,T,90,Yes,NCP03XH103F05RL,10KΩ,,LCSC,https://item.szlcsc.com/datasheet/NCP03XH103F05RL/99307.html
-U1,NRF52832-CIAA-R,WLCSP-50_L3.2-W3.0-TL_NRF52832,15.4mm,6.15mm,15.4mm,6.15mm,16.6mm,4.75mm,50,T,180,Yes,NRF52832-CIAA-R,,transceiver,LCSC,https://item.szlcsc.com/datasheet/NRF52832-CIAA-R/523264.html
+U1,NRF52832-CIAA-R,WLCSP-50_L3.2-W3.0-TL_NRF52832,15.4mm,6.15mm,15.4mm,6.15mm,16.6mm,4.75mm,50,T,180,Yes,NRF52832-CIAA-G-R7,,transceiver,LCSC,https://item.szlcsc.com/datasheet/NRF52832-CIAA-R/523264.html
 U2,TPS7A0218PYCHR,WLCSP-4_L0.6-W0.6-P0.35-R2-C2-TL,14.8mm,2.62mm,14.8mm,2.62mm,14.975mm,2.795mm,4,B,180,Yes,TPS7A0218PYCHR,,,LCSC,https://www.ti.com/cn/lit/ds/symlink/tps7a02.pdf
-U3,MAXM86161EFD+T,OLGA-14_L4.3-W2.9-P0.60-TL,17.11mm,5.5mm,17.11mm,5.5mm,18.06mm,7.3mm,14,B,180,Yes,MAXM86161EFD+T,,,LCSC,https://item.szlcsc.com/datasheet/MAXM86161EFD%252BT/3740247.html
+U3,MAXM86161EFD+T,OLGA-14_L4.3-W2.9-P0.60-TL,17.11mm,5.5mm,17.11mm,5.5mm,18.06mm,7.3mm,14,B,180,Yes,MAXM86161AEFD+T,,,LCSC,https://item.szlcsc.com/datasheet/MAXM86161EFD%252BT/3740247.html
 Y1,NX1612SA-32MHZ-STD-CIS-3,CRYSTAL-SMD_4P-L1.6-W1.2-BL,17.5mm,3.65mm,17.5mm,3.65mm,17.9mm,3.1mm,4,T,90,Yes,-,-,-,LCSC,https://atta.szlcsc.com/upload/public/pdf/source/20201027/C910049_5CBBE0EFD018E6BEF6DC10D49B308B93.pdf
 Z41,0201WMF0000TEE,R0201,18.3mm,6.4mm,18.3mm,6.4mm,18.058mm,6.4mm,2,T,0,Yes,0Ω,0Ω,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/0201WMF0000TEE/479866.html

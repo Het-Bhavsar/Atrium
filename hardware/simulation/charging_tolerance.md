@@ -1,6 +1,19 @@
 # Charging chain: tolerances, limits and charge times
 
-40000 Monte Carlo draws, uniform over each datasheet min-max or tolerance band; percentiles 0.5 / 50 / 99.5. ## Case: TP4054 (R5 = 4.7 k)
+40000 Monte Carlo draws, uniform over each datasheet min-max or tolerance band; percentiles 0.5 / 50 / 99.5.
+
+## Case, Rev B: BQ24040 (R5 = 2.7 k)
+
+Rev B (2026-11-10) replaces the TP4054 with the BQ24040, which adds a cell-temperature (TS) input. Worked by hand from
+the data sheet (SLUS941H), not re-run through the Monte Carlo:
+
+- **Charge current: 200 mA** (187-210 mA): I = K_ISET / R_ISET, K_ISET 510-560 AΩ (540 typ), R5 2.7 k ±1 %. 0.4 C on the 500 mAh cell.
+- Termination at 10 % and pre-charge at 20 % of the set current (R24 2 k on PRE-TERM).
+- **Heat:** at the start of constant current the BQ24040 drops (5.0 - 3.4 V) x 0.2 A ≈ 0.32 W, close to the
+  TP4054 case below; its thermal pad goes to the ground pour. Measure with a thermocouple on U2 (build item B-10).
+- **Case cell, flat to full:** about 2.6-3 h [EST].
+
+## Case, Rev A (history): TP4054 (R5 = 4.7 k)
 
 - **Charge current: 199 mA** (179-219 mA). The maker's formula changes above 150 mA (R = 1000/I x (1.2 - 4/3 I)), so 4.7 k gives about 199 mA, not 1000/4.7k = 213 mA. That is 0.4 C on the 500 mAh cell: fine.
 - Float voltage 4.158-4.242 V; trickle below 2.9 V at about 25 mA; terminates at C/10 (about 20 mA); recharges at 4.05 V.
@@ -17,7 +30,7 @@
 - **Pod VIN from USB (case plugged in):** 4.42-5.24 V; 0.3 % of draws above 5.25 V and 0.0 % above the 5.35 V OVP minimum, and only with chargers above the 5.25 V USB limit. The diode's drop protects the pod here; don't replace D1 with a lower-drop part.
 - **Current limit (R9 15 k):** 0.45 A (0.34-0.57); firmware trips at 80 mA long before it.
 
-- **B5819WS in a pogo short (until firmware trips):** 236 mW (329 mW worst) against its 200-250 mW rating, steady-state Tj 131 C (181 C worst; Tj max 125 C). Safe only because firmware cuts VIN_EN within its 80 mA check; keep that check fast (<= 50 ms) [measure]. In normal charging (<= 25 mA) it dissipates < 10 mW.
+- **Diode in a pogo short (until firmware trips).** Worked for the B5819WS; Rev B fits the 1N5819WS (Hottech, C191023) with the same 0.60 V at 1 A, but its power rating is not in the LCSC listing [VERIFY Hottech data sheet]. The firmware trip (about 40 ms, host-tested) is what keeps either part safe. B5819WS figures: 236 mW (329 mW worst) against its 200-250 mW rating, steady-state Tj 131 C (181 C worst; Tj max 125 C). Safe only because firmware cuts VIN_EN within its 80 mA check; keep that check fast (<= 50 ms) [measure]. In normal charging (<= 25 mA) it dissipates < 10 mW.
 
 - **VBUS_DET at PC1:** 4.24-5.09 V; PC1 is 5 V tolerant (CH32V003 Table 2-1, FT max 5.5 V) and reads high above about 2.0 V at VDD 4.2 V.
 - **Cell voltage via VREFINT:** VREFINT is 1.17-1.23 V (+-2.5 %), so an uncalibrated reading of a 3.80 V cell spans 3.71-3.90 V: about +-8 % of state of charge in the LED bands. Store a one-point calibration at end-of-line test.

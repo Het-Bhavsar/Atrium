@@ -20,7 +20,7 @@ meta:
 
 components:
   # ------------------------------------------------------------- RADIO island
-  U1: {board: RADIO, side: top, part: nRF52832-CIAA-R, pkg: WLCSP-50 3.0x3.2 0.4p, lcsc: C509405,
+  U1: {board: RADIO, side: top, part: NRF52832-CIAA-G-R7 (CIAA in the 7k-reel code JLC stocks; CIAA-R C509405 had none), pkg: WLCSP-50 3.0x3.2 0.4p, lcsc: C3606951,
        note: "Copy Nordic's 'CIAA WLCSP with DC/DC regulator setup' reference circuit and layout exactly (nRF52832 PS, Reference circuitry, Fig 5 / Table 5)."}
   Y1: {board: RADIO, side: top, part: NX1612SA-32MHZ-STD-CIS-3 32 MHz 8 pF 1612, lcsc: C910049, note: "NDK NX1612SA (1.6 x 1.2 x 0.3): 8 pF, +/-10 ppm, +/-15 ppm -30..85 C, drive 10 (max 100) uW. Replaces the 2016 part so the Nordic decoupling fits next to U1 (review 2026-11-07).", verify: "ESR max 100 ohm at 32 MHz: Nordic allows 100 ohm only with C0 <= 3 pF (PS CLOCK, RS_HFXO_3PF); get C0 from NDK and check HFXO start-up at EVT bring-up"}
   C1: {board: RADIO, side: top, part: 12 pF C0G 0201, lcsc: C161404, note: "XC1 load (Nordic ref: 12 pF NP0 +/-2 %)"}
@@ -33,13 +33,13 @@ components:
   C7: {board: RADIO, side: top, part: 100 pF C0G 0201, lcsc: C62550, note: "DEC2 (A2). Nordic CIAA DC/DC reference: DEC2 is decoupled with 100 pF on the WLCSP (was a no-connect here: fixed 2026-11-08 against nrf52832_ciaa_dcdc.SchDoc)"}
   C8: {board: RADIO, side: top, part: 4.7 uF X5R 0201, lcsc: C335103, note: "VDD at A7 (Nordic CIAA DC/DC reference C8 4.7 uF sits at A7; H7 gets C5 100 nF). Top, beside A7."}
   C9: {board: RADIO, side: top, part: 1.0 uF X5R 0201, lcsc: C76929, note: DEC4}
-  L1: {board: RADIO, side: top, part: 10 uH 0603 Isat >= 50 mA, lcsc: C86083, note: "DC/DC (LQM18FN100M00D). Nordic forbids other values."}
+  L1: {board: RADIO, side: top, part: 10 uH 0603 Isat >= 50 mA, lcsc: C713281, note: "DC/DC (LQM18DN100M70L, replaces LQM18FN100M00D C86083). Nordic forbids other values."}
   L2: {board: RADIO, side: top, part: 15 nH 0402, lcsc: C395049, note: "DC/DC second inductor"}
   U2: {board: RADIO, side: bot, part: TPS7A0218PYCHR 1.8 V LDO, pkg: DSBGA-4 0.64x0.64 (YCH), lcsc: C3752366, note: "Iq 25 nA. VSYS -> VDD_1V8. LCSC stock 121 (2026-11-07), two per pod: buy early."}
   C20: {board: RADIO, side: bot, part: 1 uF X5R 0201, lcsc: C76929, note: "U2 in"}
   C21: {board: RADIO, side: bot, part: 1 uF X5R 0201, lcsc: C76929, note: "U2 out", verify: "TPS7A02 min output C (datasheet says >= 0.5 uF effective)"}
-  U3: {board: RADIO, side: bot, part: MAXM86161EFD+T, pkg: OLGA-14 2.9x4.3x1.4, lcsc: C3178309,
-       note: "Optical module, flush in the base window, 0.1 mm proud. Standard PCBA only. LCSC stock 89 (2026-11-07): buy early."}
+  U3: {board: RADIO, side: bot, part: MAXM86161AEFD+T, pkg: OLGA-14 2.9x4.3x1.4, lcsc: C54021201,
+       note: "Optical module, flush in the base window, 0.1 mm proud. Standard PCBA only. Active code; JLC stock 0 (2026-11-10), order through JLC parts sourcing. MAXM86161EFD+T (C3178309) fits the same land."}
   C30: {board: RADIO, side: top, part: 10 uF X5R 0402, lcsc: C15525, note: "VLED -> PGND, directly above U3 pin 5 with its own via (ADI layout guide)"}
   C31: {board: RADIO, side: top, part: 1 uF X5R 0201, lcsc: C76929, note: "VLDO -> GND_ANA"}
   C32: {board: RADIO, side: bot, part: 1 uF X5R 0201, lcsc: C76929, note: "VREF -> GND_ANA"}

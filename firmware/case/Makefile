@@ -5,10 +5,10 @@
 
 OUT := build
 HOSTCC ?= cc
-CORE := src/case_sm.c src/led.c src/sense.c src/swd.c
+CORE := src/case_sm.c src/led.c src/sense.c src/swd.c src/oc_fast.c
 POD := ../src/power/vinpat.c
 TESTS := tests/main.c tests/test_sense.c tests/test_led.c tests/test_swd.c tests/test_case_sm.c \
-	tests/swd_sim.c
+	tests/swd_sim.c tests/test_oc_fast.c
 HOST_CFLAGS := -std=c11 -O1 -g -Wall -Wextra -Werror -Isrc -Itests -I../src/power \
 	-fsanitize=address,undefined -fno-omit-frame-pointer
 

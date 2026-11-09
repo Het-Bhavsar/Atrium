@@ -1,4 +1,4 @@
-# Atrium charging case (EVT): single 2-layer board under the nest. Spec: docs/charging-case.md.
+# Atrium charging case (EVT, Rev B 2026-11-10: BQ24040 charger with cell-temperature cut-off): single 2-layer board under the nest. Spec: docs/charging-case.md.
 # Same schema as atrium_nets.yaml. LCSC numbers checked against EasyEDA's LCSC-linked library 2026-11-08.
 # Pads without an LCSC number are copper pads (cell tabs, pogo landings, programming pads): placeholder pad on the
 # schematic, off the BOM.
@@ -8,9 +8,9 @@ meta:
 
 components:
   U1:  {board: CASE, side: top, part: CH32V003F4U6 RISC-V MCU, pkg: QFN-20 3x3 0.4p, lcsc: C5299908}
-  U2:  {board: CASE, side: top, part: TP4054 linear Li-ion charger, pkg: SOT-23-5, lcsc: C382138,
-        note: "R5 4.7k on PROG: ~199 mA (0.4 C); above 150 mA the TP4054 sheet uses R = 1000/I x (1.2 - 4/3 I), see hardware/simulation/charging_tolerance.md"}
-  U3:  {board: CASE, side: top, part: TPS61023DRLT boost, pkg: SOT-563, lcsc: C1852149, note: "5.21 V: 0.6 V x (1 + 768k / 100k)"}
+  U2:  {board: CASE, side: top, part: BQ24040DSQR linear Li-ion charger with battery-temperature (TS) input, pkg: WSON-10 2x2 0.4p EP, lcsc: C81080,
+        note: "Rev B (2026-11-10), replaces the TP4054 (no temperature input, low stock). R5 2.7k on ISET: 540 / 2700 = 200 mA (189-207 mA, K_ISET 510-560 AΩ, SLUS941H table 7.5). ISET2 to VSS: the ISET current. R24 2k on PRE-TERM: termination 10 %, pre-charge 20 %. TS: TH2 10k NTC on the board above the cell (3.0 mm from U2, see build item B-10), 50 uA internal bias; outside the JEITA window the charger halves the current (cold) or drops to 4.06 V (warm) and stops at the limits, with no MCU involved. Fixed 10 h safety timer, 6.6 V input OVP. CHG open drain to PD6 as before; PG and NC unconnected. Thermal pad to GND"}
+  U3:  {board: CASE, side: top, part: TPS61023DRLR boost (same part as DRLT on a 3k reel; DRLT stock was 555), pkg: SOT-563, lcsc: C919459, note: "5.21 V: 0.6 V x (1 + 768k / 100k)"}
   U4:  {board: CASE, side: top, part: SY6280AAC current-limited switch, pkg: SOT-23-5, lcsc: C55136,
         note: "ISET 15k: 6800 / 15000 = 0.45 A (hardware backstop; firmware trips at 80 mA)"}
   U5:  {board: CASE, side: top, part: SN74LVC1T45DBVR (SWDCLK, A -> B), pkg: SOT-23-6, lcsc: C7843}
@@ -19,19 +19,20 @@ components:
   U8:  {board: CASE, side: top, part: HAL248 SW omnipolar hall (lid), pkg: DFN-6, lcsc: C6320892}
   J1:  {board: CASE, side: top, part: USB-C 16-pin receptacle, lcsc: C2765186}
   L1:  {board: CASE, side: top, part: 1 uH 4.2 A 54 mohm 2520, lcsc: C98348}
-  D1:  {board: CASE, side: top, part: B5819WS SOD-323 Schottky (VBUS -> 5V_POD), lcsc: C179554,
+  D1:  {board: CASE, side: top, part: 1N5819WS SOD-323 Schottky (VBUS -> 5V_POD; replaces B5819WS C179554, out of stock), lcsc: C191023,
         note: "SOD-323, not SOD-123: two stacked SOD-123 bodies (1.6 mm) did not fit between SW1 and J1 (mech fit 2026-11-08) [VERIFY Pd at the 0.45 A ISET limit]"}
-  D2:  {board: CASE, side: top, part: B5819WS SOD-323 Schottky (boost -> 5V_POD), lcsc: C179554,
+  D2:  {board: CASE, side: top, part: 1N5819WS SOD-323 Schottky (boost -> 5V_POD; replaces B5819WS C179554, out of stock), lcsc: C191023,
         note: "SOD-323, not SOD-123: two stacked SOD-123 bodies (1.6 mm) did not fit between SW1 and J1 (mech fit 2026-11-08) [VERIFY Pd at the 0.45 A ISET limit]"}
   D3:  {board: CASE, side: top, part: XL-1615RGBC-RF RGB LED, lcsc: C965840, note: "common anode to VDD [VERIFY pinout]"}
   SW1: {board: CASE, side: top, part: Alps SKSCLAE010 side-push tactile 3.5 x 2.9 x 1.25 (stem to the -Y wall), lcsc: C130445}
-  TH1: {board: CASE, side: top, part: "NCP15WF104F03RC 100k NTC B25/50 4250 K [VERIFY B25/85] (case cell)", lcsc: C77130}
+  TH1: {board: CASE, side: top, part: "NCU15WF104F6SRC 100k NTC, B 4250 K class (case cell, read by the MCU while feeding the pod; replaces the end-of-life NCP15WF104F03RC C77130) [VERIFY B against the firmware table]", lcsc: C458473}
+  TH2: {board: CASE, side: top, part: "NCP15XH103F03RC 10k NTC B25/50 3380 K on the board above the case cell, for the charger TS input", lcsc: C77131}
   RS1: {board: CASE, side: top, part: 1 ohm 1 % 0603 shunt (low side, pod GND return), lcsc: C22936}
   R1:  {board: CASE, side: top, part: 5.1k CC1, lcsc: C25905}
   R2:  {board: CASE, side: top, part: 5.1k CC2, lcsc: C25905}
   R3:  {board: CASE, side: top, part: 10k VBUS_DET series, lcsc: C25744}
   R4:  {board: CASE, side: top, part: 100k VBUS_DET to GND, lcsc: C25741}
-  R5:  {board: CASE, side: top, part: 4.7k TP4054 PROG, lcsc: C25900}
+  R5:  {board: CASE, side: top, part: 2.7k BQ24040 ISET (200 mA), lcsc: C25885}
   R6:  {board: CASE, side: top, part: 768k boost FB top, lcsc: C27017}
   R7:  {board: CASE, side: top, part: 100k boost FB bottom, lcsc: C25741}
   R8:  {board: CASE, side: top, part: 1M BOOST_EN pull-down, lcsc: C26083}
@@ -50,10 +51,11 @@ components:
   R21: {board: CASE, side: top, part: 1k LED red, lcsc: C11702}
   R22: {board: CASE, side: top, part: 330 ohm LED green, lcsc: C25104}
   R23: {board: CASE, side: top, part: 330 ohm LED blue, lcsc: C25104}
+  R24: {board: CASE, side: top, part: 2k BQ24040 PRE-TERM (10 % termination, 20 % pre-charge), lcsc: C4109}
   C1:  {board: CASE, side: top, part: 10 uF 0603 VBUS, lcsc: C19702}
-  C2:  {board: CASE, side: top, part: 4.7 uF 0603 TP4054 BAT, lcsc: C19666}
+  C2:  {board: CASE, side: top, part: 4.7 uF 0603 charger OUT (BAT), lcsc: C19666}
   C3:  {board: CASE, side: top, part: 10 uF 0603 boost in, lcsc: C19702}
-  C4:  {board: CASE, side: top, part: 22 uF 0805 boost out, lcsc: C45783}
+  C4:  {board: CASE, side: top, part: 22 uF 0805 boost out (CL21A226MAYNNNE), lcsc: C602037}
   C5:  {board: CASE, side: top, part: 10 uF 0603 5V_POD, lcsc: C19702}
   C6:  {board: CASE, side: top, part: 1 uF 0402 pogo VIN, lcsc: C52923}
   C7:  {board: CASE, side: top, part: 100 nF MCU VDD, lcsc: C1525}
@@ -79,11 +81,12 @@ components:
 nets:
   GND:        [U1.VSS, U1.EP, U2.GND, U3.GND, U4.GND, U5.GND, U6.GND, U7.GND, U8.GND, J1.GND, J1.SHELL, BT2, RS1.2, R1.2, R2.2,
                R4.2, R7.2, R8.2, R10.2, R13.2, R17.2, R18.2, TH1.2, SW1.3, SW1.4, C1.2, C2.2, C3.2, C4.2, C5.2, C6.2, C7.2, C8.2,
-               C9.2, C10.2, C11.2, C12.2, C13.2, C14.2, C15.2, C16.2, R9.2, R5.2, TP3]
-  VBUS:       [J1.VBUS, U2.VCC, D1.A, R3.1, C1.1]
+               C9.2, C10.2, C11.2, C12.2, C13.2, C14.2, C15.2, C16.2, R9.2, R5.2, TP3,
+               U2.VSS, U2.EP, U2.ISET2, R24.2, TH2.2]
+  VBUS:       [J1.VBUS, U2.IN, D1.A, R3.1, C1.1]
   CC1:        [J1.CC1, R1.1]
   CC2:        [J1.CC2, R2.1]
-  VDD:        [BT1, U2.BAT, C2.1, U1.VDD, C7.1, C8.1, U3.VIN, L1.1, C3.1, U5.VCCA, U5.DIR, U6.VCCA, C9.1, C11.1, U8.VDD, C15.1,
+  VDD:        [BT1, U2.OUT, C2.1, U1.VDD, C7.1, C8.1, U3.VIN, L1.1, C3.1, U5.VCCA, U5.DIR, U6.VCCA, C9.1, C11.1, U8.VDD, C15.1,
                R12.1, R19.1, D3.A, TP2]
   BOOST_SW:   [U3.SW, L1.2]
   BOOST_OUT:  [U3.VOUT, C4.1, R6.1, D2.A]
@@ -98,8 +101,10 @@ nets:
   OPA_N:      [U1.PA1, R13.1, R14.1]
   OPA_OUT:    [U1.PD4, R14.2]
   VBUS_DET:   [U1.PC1, R3.2, R4.1]
-  CHRG:       [U1.PD6, U2.CHRG]
-  PROG:       [U2.PROG, R5.1]
+  CHRG:       [U1.PD6, U2.CHG]
+  CHG_ISET:   [U2.ISET, R5.1]
+  CHG_PRETERM: [U2.PRETERM, R24.1]
+  CHG_TS:     [U2.TS, TH2.1]
   LID:        [U1.PC2, U8.OUT, R19.2]
   BTN:        [U1.PC3, SW1.1, SW1.2]   # SKSC symbol: 1-2 one contact bar, 3-4 the other
   NTC_ADC:    [U1.PC4, R20.2, TH1.1]
@@ -120,4 +125,4 @@ nets:
   V1V8:       [U7.VOUT, U5.VCCB, U6.VCCB, C10.1, C12.1, C14.1]
   SWIO:       [U1.PD1, TP1]
 
-no_connect: [J1.DP1, J1.DN1, J1.DP2, J1.DN2, J1.SBU1, J1.SBU2]
+no_connect: [J1.DP1, J1.DN1, J1.DP2, J1.DN2, J1.SBU1, J1.SBU2, U2.PG, U2.NC]

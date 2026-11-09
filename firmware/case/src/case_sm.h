@@ -17,6 +17,8 @@
  *  - Charging above 5 mA; full below 2.5 mA for 30 s with the pod present. Between the two
  *    the state holds. Once full without USB and with the lid shut, VIN goes off.
  *  - Over 80 mA for 3 readings (or the reading clips): contact fault, VIN off, retry 30 s.
+ *    main.c also checks every 20 ms frame and cuts VIN within about 40 ms (oc_fast.h); it
+ *    reports that as fast_trip, handled the same way.
  *  - Case cell below 3.4 V without USB (3 readings): no feeding until 3.6 V or USB.
  *  - Case cell above 45 C (NTC, read only while feeding): VIN off, retry in 10 min; it
  *    stays off until a reading below 42 C.
@@ -90,7 +92,7 @@ struct case_in {
 	bool lid_open;
 	bool btn;          /* pressed */
 	bool usb;          /* VBUS present */
-	bool chrg;         /* TP4054 CHRG low: the case cell is charging */
+	bool chrg;         /* BQ24040 CHG low: the case cell is charging */
 	uint16_t vbat_mv;  /* 0: not measured this time */
 	int16_t temp_c10;  /* CASE_TEMP_NONE: not measured (only while feeding) */
 	bool i_valid;      /* a pod current reading this time */
@@ -99,6 +101,7 @@ struct case_in {
 	bool pod_pullup;   /* SWDIO read high (valid while ldo_pwr) */
 	bool swd_done;     /* the hard reset asked for last time has run */
 	bool swd_ok;
+	bool fast_trip;     /* main cut VIN for an over-current between ticks (oc_fast.h) */
 };
 
 struct case_out {
@@ -106,6 +109,7 @@ struct case_out {
 	bool boost_en;
 	bool ldo_pwr;
 	bool opa_on;      /* OPA and shunt readings wanted */
+	bool oc_armed;    /* feed on, past the blanking, no pulse: main's fast check may run */
 	bool zero_req;    /* take the zero reading now, VIN still off, then set vin_en */
 	bool swd_reset;   /* run the hard reset now (once) */
 	enum led_pat led;

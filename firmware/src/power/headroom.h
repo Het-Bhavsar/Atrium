@@ -2,10 +2,11 @@
  * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
- * LED headroom policy. The MAXM86161 LEDs run straight from VBAT, and green has
- * the highest forward voltage: up to 3.8 V, plus the driver's compliance. That
- * puts green at about 3.5 V on the 31 mA range [VERIFY Vf against current]
- * (REV_B2_COMPACT.md). The cell sags by I x R during each LED pulse, so the
+ * LED headroom policy. The MAXM86161A LEDs run straight from VBAT, and green has
+ * the highest forward voltage: up to 3.4 V at 175 mA (MAXM86161A data sheet
+ * 19-102034 Rev 1; the MAXM86161 was 3.8 V at 150 mA), plus the driver's
+ * compliance. That puts green at about 3.1 V on the 31 mA range [VERIFY Vf
+ * against current], below the 3.3 V cut-off. The cell sags by I x R during each LED pulse, so the
  * limit applied to the VCELL reading is green-min-mv plus that sag. Below it,
  * green slots are dropped and the pulse comes from IR, or red when a mode has
  * no IR slot. Plain C, no Zephyr.

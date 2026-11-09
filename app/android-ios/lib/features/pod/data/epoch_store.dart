@@ -18,6 +18,9 @@ class EpochStore {
   final Map<int, Uint8List> _rows = {};
   int syncedToPage = 0;
 
+  /// When the phone last had every reading the pod held (a full sync, or live records arriving); null before the first.
+  DateTime? lastSyncAt;
+
   static Future<EpochStore> open() async {
     final dir = await getApplicationSupportDirectory();
     final store = EpochStore(File('${dir.path}/epochs.bin'));
@@ -26,6 +29,7 @@ class EpochStore {
   }
 
   File get _cursorFile => File('${file.path}.cursor');
+  File get _syncedFile => File('${file.path}.synced');
 
   Future<void> load() async {
     _rows.clear();
@@ -37,6 +41,17 @@ class EpochStore {
       }
     }
     if (await _cursorFile.exists()) syncedToPage = int.tryParse(await _cursorFile.readAsString()) ?? 0;
+    lastSyncAt = null;
+    if (await _syncedFile.exists()) {
+      final s = int.tryParse((await _syncedFile.readAsString()).trim());
+      if (s != null) lastSyncAt = DateTime.fromMillisecondsSinceEpoch(s * 1000);
+    }
+  }
+
+  /// Unix seconds in `epochs.bin.synced`, so Today and Device show the age of the last sync after a restart.
+  Future<void> setLastSync(DateTime at) async {
+    lastSyncAt = at;
+    await _syncedFile.writeAsString('${at.millisecondsSinceEpoch ~/ 1000}', flush: true);
   }
 
   /// Adds epochs with a real clock (uptime-stamped ones are rebased by the app first, or dropped).
@@ -73,7 +88,9 @@ class EpochStore {
   Future<void> clear() async {
     _rows.clear();
     syncedToPage = 0;
+    lastSyncAt = null;
     if (await file.exists()) await file.delete();
     if (await _cursorFile.exists()) await _cursorFile.delete();
+    if (await _syncedFile.exists()) await _syncedFile.delete();
   }
 }

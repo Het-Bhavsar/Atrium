@@ -34,6 +34,10 @@ abstract class MetricsSource {
 
   /// True when sleep stages come from the trained model; false when only asleep/awake is known.
   bool get hasStages;
+
+  /// Labs (#8): last night's overnight red/IR ratio against the user's own earlier nights; null before 7 of them
+  /// (and always in the demo). A relative research trend, never a blood-oxygen percentage.
+  OxygenTrend? get oxygenTrend => null;
   DateTime get today;
 
   int stageMinutes(SleepStage s) => hypnogram.where((b) => b.stage == s).fold(0, (a, b) => a + b.minutes);
@@ -68,6 +72,20 @@ abstract class MetricsSource {
     ];
     return Series(pts, xl);
   }
+}
+
+/// Last night's oxygen-trend ratio relative to the median of up to 14 earlier nights (`nightly.dart` `oxygenTrend`).
+class OxygenTrend {
+  const OxygenTrend({required this.change, required this.nights});
+
+  /// (tonight - baseline) / baseline of the burst ratio R.
+  final double change;
+
+  /// Earlier nights with bursts that form the baseline (7 to 14).
+  final int nights;
+
+  /// Tonight's ratio as a multiple of the baseline, e.g. 1.03.
+  double get factor => 1 + change;
 }
 
 const _mon = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];

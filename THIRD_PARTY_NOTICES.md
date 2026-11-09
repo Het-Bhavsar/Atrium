@@ -44,16 +44,16 @@ part number and LCSC number in the board BOMs, where its public datasheet can be
 
 | Maker | Parts used in Atrium |
 |---|---|
-| Analog Devices (Maxim Integrated) | MAXM86161 optical module |
+| Analog Devices (Maxim Integrated) | MAXM86161A optical module |
 | Nordic Semiconductor | nRF52832 Bluetooth LE system-on-chip |
 | STMicroelectronics | LSM6DSOX motion sensor |
-| Texas Instruments | BQ21061 charger, TPS7A02 LDO, TPS61023 boost, SN74LVC1T45 level translators |
+| Texas Instruments | BQ21061 charger, BQ24040 charger (charging case), TPS7A02 LDO, TPS61023 boost, SN74LVC1T45 level translators |
 | WCH (Nanjing Qinheng) | CH32V003 microcontroller (charging case) |
 | Silergy | SY6280 current-limited switch |
 | Torex | XC6206 LDO |
-| TPOWER | TP4054 charger (charging case) |
 | Allpower | AP6683 cell protection |
 | Hallwee | HAL248 Hall sensor |
+| Hottech | 1N5819WS Schottky diodes (charging case) |
 | Kinghelm | KH-1608 chip antenna |
 | NDK | NX1612SA 32 MHz crystal |
 | Murata, Samsung Electro-Mechanics, Fenghua, Sunlord, YAGEO, UNI-ROYAL, TECH PUBLIC | Capacitors, inductors, resistors, ESD protection |

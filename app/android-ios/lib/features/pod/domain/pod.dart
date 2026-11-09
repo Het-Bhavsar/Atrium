@@ -56,6 +56,8 @@ class PodStatus {
     this.offSkin = false,
     this.eta,
     this.alert,
+    this.vsysMv,
+    this.batteryLow = false,
   });
 
   final String label;
@@ -73,6 +75,12 @@ class PodStatus {
   final int hoursHeld;
   final String? eta;
   final PodAlert? alert;
+
+  /// Real pods: VSYS in mV from Charge State (null when unknown, and in the demo).
+  final int? vsysMv;
+
+  /// Real pods: Charge State byte 2 reports low or cut-off.
+  final bool batteryLow;
 
   static const Map<PodSituation, PodStatus> demo = {
     PodSituation.worn: PodStatus(
@@ -155,7 +163,7 @@ class PodStatus {
 
 enum PodAlert { cold, sync }
 
-/// The pod keeps about 16 h of readings; the app syncs at least every 16 h (#20).
+/// The app aims to sync at least every 16 h (#20); the pod's log itself holds about 20 h (`sync_age.dart`).
 const int podLogHours = 16;
 
 /// Fit Quality 0x0206: q 0-100 (255 = not measuring yet, about 4 s after fit mode starts) and flags.

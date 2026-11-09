@@ -68,10 +68,11 @@ agreement is why I trust the model at 2 mm too.
   <br><sub>Share of the red and infrared pulse from the brain (solid) and from the temporalis muscle (dashed) as the spacing grows. Simulated.</sub>
 </p>
 
-**The spacing is set by the part, not by us.** Atrium's sensor is an integrated optical module (MAXM86161): the green,
+**The spacing is set by the part, not by us.** Atrium's sensor is an integrated optical module (MAXM86161A): the green,
 red and infrared LEDs, the photodiode and the analog front end all sit in one 2.9 × 4.3 mm package. The distance from
 emitter to diode is fixed inside that package at about 2 mm. No firmware, setting or algorithm can move it, so the
-light can only ever sample the top few millimetres.
+light can only ever sample the top few millimetres. The MAXM86161A keeps the MAXM86161 package, so the spacing is
+the same; its brighter green LED gives a stronger skin signal, not a deeper one.
 
 **We also tried a far detector.** The first design, Rev B.1, used separate LEDs and two photodiodes, one of them
 18.5 mm away from the LEDs as a "far channel" to look deeper. The model showed what that buys: at about 20 mm the

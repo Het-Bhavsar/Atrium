@@ -14,6 +14,8 @@ import 'package:atrium/features/insights/domain/metrics.dart';
 import 'package:atrium/features/insights/domain/metrics_source.dart';
 import 'package:atrium/features/pod/data/pod_session.dart';
 import 'package:atrium/features/pod/domain/pod.dart';
+import 'package:atrium/features/pod/domain/sync_age.dart';
+import 'package:atrium/features/pod/presentation/sync_status.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -33,6 +35,16 @@ class TodayView extends ConsumerWidget {
     final sky = empty ? Sky.night : s.sky;
     final last = d.last;
     final top = MediaQuery.paddingOf(context).top;
+    // Real builds: the age of the last sync, and a warning before the pod's log starts overwriting (#20).
+    final lastSync = kRealData ? ref.watch(lastSyncProvider) : null;
+    final now = DateTime.now();
+    final overdue = kRealData && syncOverdue(lastSync, now);
+    final syncedLine = kRealData
+        ? Padding(
+            padding: const EdgeInsets.only(bottom: Space.m),
+            child: LastSyncedLine(lastSync: lastSync, now: now, center: true),
+          )
+        : null;
 
     final story = learning
         ? 'Your first Recovery score arrives after the third night.'
@@ -135,11 +147,16 @@ class TodayView extends ConsumerWidget {
     );
 
     final notices = <Widget>[
+      if (overdue) SyncDueNotice(lastSync: lastSync!, now: now, onTap: () => context.go('/device')),
       if (!pod.connected)
         NoticeCard(
           icon: 'bt',
           title: "Atrium isn't connected",
-          body: pod.lastSync == 'not yet' ? 'Showing the readings saved on this phone. Tap to reconnect.' : 'Showing readings up to ${pod.lastSync}. Tap to reconnect.',
+          body: kRealData
+              ? '${lastSyncedSentence(lastSync, now)}. Showing the readings saved on this phone. Tap to reconnect.'
+              : pod.lastSync == 'not yet'
+              ? 'Showing the readings saved on this phone. Tap to reconnect.'
+              : 'Showing readings up to ${pod.lastSync}. Tap to reconnect.',
           onTap: () => context.go('/device'),
         ),
       if (pod.offSkin)
@@ -156,12 +173,12 @@ class TodayView extends ConsumerWidget {
           body: 'The old pad comes off to charge. Next time, try your ${s.side.other.word} temporal region.',
           onTap: () => context.pushDetail('/pad'),
         )
-      else if (pod.alert == PodAlert.sync)
+      else if (!kRealData && pod.alert == PodAlert.sync)
         NoticeCard(
           icon: 'storage',
           iconColor: t.red,
           title: 'Sync soon',
-          body: 'The pod is holding ${pod.hoursHeld} hours of readings and keeps about $podLogHours. Keep your phone nearby.',
+          body: 'The pod is holding ${pod.hoursHeld} hours of readings and keeps about $podLogCapacityHours. Keep your phone nearby.',
           onTap: () => context.go('/device'),
         )
       else if (s.padHours >= 48)
@@ -175,11 +192,19 @@ class TodayView extends ConsumerWidget {
 
     final usual = d.usual;
     final body = empty
-        ? _EmptyBody(pod: pod)
+        ? Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ?syncedLine,
+              if (overdue) SyncDueNotice(lastSync: lastSync!, now: now, onTap: () => context.go('/device')),
+              _EmptyBody(pod: pod),
+            ],
+          )
         : Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Padding(padding: const EdgeInsets.fromLTRB(8, 4, 8, 22), child: StoryText(s.isEvt ? evtStory : story, center: true)),
+              Padding(padding: const EdgeInsets.fromLTRB(8, 4, 8, kRealData ? 10 : 22), child: StoryText(s.isEvt ? evtStory : story, center: true)),
+              ?syncedLine,
               ...notices,
               if (learning && !s.isEvt)
                 Padding(
@@ -293,7 +318,7 @@ class TodayView extends ConsumerWidget {
                 onTap: () => context.pushDetail('/heart'),
                 child: Hr24Chart(data: d, height: 140),
               ),
-              FootNote('Synced ${pod.lastSync} · For wellness, not medical use', center: true),
+              FootNote('${kRealData ? lastSyncedSentence(lastSync, now) : 'Synced ${pod.lastSync}'} · For wellness, not medical use', center: true),
             ],
           );
 
@@ -448,7 +473,11 @@ class _EmptyBody extends StatelessWidget {
             chevron: true,
             onTap: () => context.pushDetail('/pad'),
           ),
-          const ListRow(icon: 'storage', title: 'Keep your phone in the room', subtitle: 'The pod holds about 16 hours, so open Atrium each morning'),
+          const ListRow(
+            icon: 'storage',
+            title: 'Keep your phone in the room',
+            subtitle: 'The pod holds about $podLogCapacityHours hours, so open Atrium each morning',
+          ),
         ],
       ),
     ],

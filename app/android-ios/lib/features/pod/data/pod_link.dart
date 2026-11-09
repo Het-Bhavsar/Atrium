@@ -57,6 +57,7 @@ class LiveStatus {
     required this.flags,
     required this.socPercent,
     required this.mode,
+    this.vsysMv,
   });
 
   /// 0 worn, 1 docked, 2 power-off, 3 off-body.
@@ -73,15 +74,20 @@ class LiveStatus {
   /// Active measurement mode: 0 full, 1 smart, 2 lite, 3 sleep, 4 docked idle, 5 off-body probe.
   final int mode;
 
+  /// Bytes 6-7: VSYS in mV, the loaded cell voltage off the Plinth (about 4.5 V, regulated, on it). Null when 0.
+  final int? vsysMv;
+
   bool get docked => flags & 0x01 != 0;
   bool get onSkin => flags & 0x08 != 0;
 
   static LiveStatus? parse(Uint8List v) {
     if (v.length < 17) return null;
-    return LiveStatus(podState: v[0], chargeState: v[1], batteryState: v[2], flags: v[4], socPercent: v[5], mode: v[16]);
+    final vsys = v[6] | v[7] << 8;
+    return LiveStatus(podState: v[0], chargeState: v[1], batteryState: v[2], flags: v[4], socPercent: v[5], mode: v[16], vsysMv: vsys == 0 ? null : vsys);
   }
 
-  /// The app's card for this state (battery shown in 10 % steps).
+  /// The app's card for this state (battery shown in 10 % steps). The sync warning is not an alert here: Today and
+  /// Device show it from the last sync time (`sync_age.dart`), connected or not.
   PodStatus toPodStatus({required String lastSync, required int hoursHeld}) {
     final pct = ((socPercent / 10).round() * 10).clamp(0, 100);
     final cold = chargeState == 3 || chargeState == 4;
@@ -104,11 +110,9 @@ class LiveStatus {
       lastSync: lastSync,
       hoursHeld: hoursHeld,
       eta: cold ? 'Paused until the pod warms up' : null,
-      alert: cold
-          ? PodAlert.cold
-          : hoursHeld >= 12
-          ? PodAlert.sync
-          : null,
+      alert: cold ? PodAlert.cold : null,
+      vsysMv: vsysMv,
+      batteryLow: batteryState != 0,
     );
   }
 }
@@ -181,6 +185,15 @@ class PodLink implements PodFlutterApi {
   ({int uptime, int unix})? _anchor;
 
   Future<void> disconnect() => _host.disconnect();
+
+  /// Lets the link go and waits until native reports it down (or [timeout]), so another BLE stack (MCUmgr) can
+  /// connect to the pod. Native doesn't reconnect by itself; the app reconnects with [connect].
+  Future<void> release({Duration timeout = const Duration(seconds: 5)}) async {
+    if (linkState != LinkState.connected && linkState != LinkState.connecting) return;
+    final down = states.firstWhere((s) => s != LinkState.connected && s != LinkState.connecting).timeout(timeout, onTimeout: () => LinkState.disconnected);
+    await _host.disconnect();
+    await down;
+  }
 
   Future<void> forgetPod() => _host.forgetPod();
 

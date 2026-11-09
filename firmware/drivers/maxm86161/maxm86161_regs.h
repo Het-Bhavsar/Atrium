@@ -2,9 +2,12 @@
  * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
- * MAXM86161 register map and register encoding (MAXM86161 data sheet
- * 19-100523 Rev 1, "Register Map" and "Register Details"). The encoding
- * helpers are plain C so the host tests can check them.
+ * MAXM86161 register map and register encoding (MAXM86161A data sheet
+ * 19-102034 Rev 1, "Register Map" and "Register Details"). The pod fits the
+ * MAXM86161A; its register map, PART_ID 0x36, 128-word FIFO and pinout match
+ * the MAXM86161 (19-100523 Rev 1), so this driver runs either part. The two
+ * differ in the LEDs only. The encoding helpers are plain C so the host tests
+ * can check them.
  */
 #ifndef ATRIUM_MAXM86161_REGS_H_
 #define ATRIUM_MAXM86161_REGS_H_

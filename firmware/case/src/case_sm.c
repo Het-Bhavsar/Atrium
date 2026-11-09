@@ -170,6 +170,18 @@ static void pulse_start(struct case_sm *sm, uint8_t n, uint32_t now)
 	sm->pulse_t0 = now;
 }
 
+static void oc_fault(struct case_sm *sm, uint32_t now)
+{
+	sm->fault = true;
+	sm->oc = 0;
+	sm->retry_at = now + sm->cfg.retry_ms;
+	sm->feed = false;
+	sm->pulse = false;
+	sm->pulse_want = false;
+	sm->swd_want = false;
+	led_play(sm, LED_FAULT, LED_OFF, now);
+}
+
 static void measure(struct case_sm *sm, const struct case_in *in, bool ldo_seen)
 {
 	const struct case_cfg *c = &sm->cfg;
@@ -177,13 +189,7 @@ static void measure(struct case_sm *sm, const struct case_in *in, bool ldo_seen)
 
 	if (in->i_sat || in->i_ua > c->oc_ua) {
 		if (++sm->oc >= c->oc_count) {
-			sm->fault = true;
-			sm->retry_at = now + c->retry_ms;
-			sm->feed = false;
-			sm->pulse = false;
-			sm->pulse_want = false;
-			sm->swd_want = false;
-			led_play(sm, LED_FAULT, LED_OFF, now);
+			oc_fault(sm, now);
 			return;
 		}
 	} else {
@@ -246,6 +252,11 @@ void case_sm_step(struct case_sm *sm, const struct case_in *in, struct case_out 
 		if (!in->swd_ok) {
 			led_play(sm, LED_SWD_FAIL, LED_OFF, now);
 		}
+	}
+
+	/* main already cut VIN between ticks for an over-current */
+	if (in->fast_trip && sm->feed && !sm->fault) {
+		oc_fault(sm, now);
 	}
 
 	/* readings while VIN has been on past the blanking, outside the soft-reset pattern */
@@ -349,6 +360,7 @@ void case_sm_step(struct case_sm *sm, const struct case_in *in, struct case_out 
 	out->boost_en = vin && !in->usb;
 	out->ldo_pwr = ldo;
 	out->opa_on = sm->feed;
+	out->oc_armed = vin && sm->feed && !sm->pulse && now - sm->feed_t0 > c->blank_ms;
 	out->awake = sm->feed || in->btn || sm->show || sm->led != LED_OFF || in->usb ||
 		     sm->pulse_want || sm->swd_want || sm->swd_busy;
 

@@ -10,6 +10,9 @@ import 'package:atrium/features/insights/domain/position.dart';
 import 'package:atrium/features/insights/domain/sleep_model.dart';
 import 'package:atrium/features/pod/data/log_record.dart';
 
+/// `nightly.dart`'s function, under another name: the class has an [MetricsSource.oxygenTrend] field.
+const _oxygenTrendOf = oxygenTrend;
+
 /// Metrics computed on the phone from the pod's synced log (real-data builds), using the ML session's methods
 /// ported in `nightly.dart` and `sleep_model.dart` (ML note 2026-11-08, letters A to N):
 /// - each night (18:00 to 14:00 local): rest run, sleep/wake model, sleep period, wake-ups, resting HR, pooled RMSSD,
@@ -57,6 +60,9 @@ class PodMetrics extends MetricsSource {
   /// Minutes lying on the pod's own side last night (#5).
   int minutesOnPod = 0;
 
+  @override
+  OxygenTrend? oxygenTrend;
+
   /// Local calendar day of a Unix time, at the fixed UTC offset.
   DateTime _localDay(int t) {
     final u = DateTime.fromMillisecondsSinceEpoch((t + _off) * 1000, isUtc: true);
@@ -81,6 +87,7 @@ class PodMetrics extends MetricsSource {
     final offH = _off / 3600;
 
     final skinHistory = <double>[];
+    final oxygenHistory = <double>[];
     for (var day = _localDay(all.first.time); !day.isAfter(today); day = DateTime(day.year, day.month, day.day + 1)) {
       final dStart = _midnight(day);
       final dEnd = _midnight(DateTime(day.year, day.month, day.day + 1));
@@ -93,23 +100,36 @@ class PodMetrics extends MetricsSource {
 
       final n = models == null || lo == hi
           ? Night()
-          : summarise(times.sublist(lo, hi), epochs.sublist(lo, hi), podOnRight: podOnRight, utcOffsetH: offH, nightDateS: dStart - 6 * 3600, models: models!, up: up);
+          : summarise(
+              times.sublist(lo, hi),
+              epochs.sublist(lo, hi),
+              podOnRight: podOnRight,
+              utcOffsetH: offH,
+              nightDateS: dStart - 6 * 3600,
+              models: models!,
+              up: up,
+            );
       final skinDev = deviation(n.skinC, skinHistory);
       skinHistory.add(n.skinC);
+      final ox = _oxygenTrendOf(n.oxygenRatio, oxygenHistory);
+      final oxNights = oxygenHistory.sublist(math.max(0, oxygenHistory.length - 14)).where((x) => !x.isNaN).length;
+      oxygenHistory.add(n.oxygenRatio);
 
       final dayEpochs = epochs.sublist(dLo, dHi);
       days.add(
         DayMetrics(
-            date: day,
-            rhr: n.restingHrBpm.isNaN ? 0 : n.restingHrBpm,
-            hrv: n.rmssdMs.isNaN ? 0 : n.rmssdMs,
-            sleepMin: n.asleepMin,
-            tempDelta: skinDev ?? 0,
-            steps: dayEpochs.fold(0, (a, e) => a + e.steps),
-          )
-          ..active = (dayEpochs.where((e) => e.activityClass == ActivityClass.walk || e.activityClass == ActivityClass.run).length * epochMin).round(),
+          date: day,
+          rhr: n.restingHrBpm.isNaN ? 0 : n.restingHrBpm,
+          hrv: n.rmssdMs.isNaN ? 0 : n.rmssdMs,
+          sleepMin: n.asleepMin,
+          tempDelta: skinDev ?? 0,
+          steps: dayEpochs.fold(0, (a, e) => a + e.steps),
+        )..active = (dayEpochs.where((e) => e.activityClass == ActivityClass.walk || e.activityClass == ActivityClass.run).length * epochMin).round(),
       );
-      if (day == today && n.hasSleep) _lastNight(n);
+      if (day == today && n.hasSleep) {
+        _lastNight(n);
+        oxygenTrend = ox == null ? null : OxygenTrend(change: ox, nights: oxNights);
+      }
     }
 
     Usual u(Metric m) {

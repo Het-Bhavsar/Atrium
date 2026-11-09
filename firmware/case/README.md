@@ -31,7 +31,7 @@ Firmware for the Atrium charging case (see [`docs/charging-case.md`](../../docs/
 
 From CH32V003DS0 V1.8, table 2-1. The OPA pins are fixed by the silicon. The case netlist (`hardware/design-data/netlist/case_nets.yaml`, 2026-11-08) matches all 18 MCU pins.
 
-Board values the firmware depends on, from that netlist: TP4054 PROG 4.7k (about 213 mA [VERIFY]), boost 5.21 V (768k / 100k), SY6280 ISET 15k (0.45 A backstop above the 80 mA firmware trip), LED XL-1615RGBC-RF common anode to VDD with red 1k and green and blue 330 Ω, HAL248 pull-up R19 4.7M fitted only if the output is open drain (DNP).
+Board values the firmware depends on, from that netlist: BQ24040 ISET 2.7k (about 200 mA), boost 5.21 V (768k / 100k), SY6280 ISET 15k (0.45 A backstop above the 80 mA firmware trip), LED XL-1615RGBC-RF common anode to VDD with red 1k and green and blue 330 Ω, HAL248 pull-up R19 4.7M fitted only if the output is open drain (DNP).
 
 | Pin | Port | Net | Notes |
 |---|---|---|---|
@@ -52,7 +52,7 @@ Board values the firmware depends on, from that netlist: TP4054 PROG 4.7k (about
 | 17 | PD3 | LED_R | TIM2_CH2, cathode |
 | 18 | PD4 | OPA_OUT | OPO, read inside the chip as ADC channel 7 |
 | 19 | PD5 | LDO_PWR | powers the XC6206P182 (it has no EN pin); 1M to GND |
-| 20 | PD6 | CHRG | TP4054 CHRG, open drain, internal pull-up |
+| 20 | PD6 | CHRG | BQ24040 CHG, open drain, internal pull-up |
 
 Changes from the spec's block diagram that the schematic must carry:
 - **Shunt moved to the low side.** The 1 Ω shunt sits in the pogo GND return. The OPA input range is 0 to VDD, and VDD is the cell (≤ 4.2 V), so it cannot sense at 5.2 V.
@@ -68,7 +68,7 @@ Changes from the spec's block diagram that the schematic must carry:
 | Feed the pod | VIN on when the lid opens (2 min with no pod), while the pod charges, on USB, and for a top-up of a full pod every 4 h [ASSUMED]. Boost only without USB. The current is zeroed with VIN off before each feed; readings until 100 ms after VIN on are ignored | `full, VIN off, top-up`, `full on USB stays fed`, `lid open idle stops feeding` |
 | 1.8 V side | LDO_PWR 100 ms after VIN on; off with VIN and through every drop-out | checked on every tick of every state-machine test |
 | Pod state | Present: SWDIO high or > 0.4 mA; absent 2 s: no pod. Charging > 5 mA; full < 2.5 mA for 30 s, after which VIN goes off without USB and with the lid shut | `pod removal is seen`, `present by the SWDIO pull-up` |
-| Over-current | > 80 mA (or a clipped reading) 3 times in a row: VIN off, red fast blink, retry in 30 s. SY6280 ISET (0.4 A) is the hardware limit | `over-current trips and retries`, `inrush is blanked` |
+| Over-current | Fast path: the main loop reads the pod current every 20 ms LED frame while feeding and cuts VIN itself after two readings in a row over 80 mA (about 40 ms, inside the 50 ms that build item B-8 allows; `src/oc_fast.c`). Slow path: > 80 mA (or a clipped reading) 3 ticks in a row. Either way: VIN off, red fast blink, retry in 30 s. SY6280 ISET (0.4 A) is the hardware limit, also during the 100 ms inrush blanking | `fast: cut within 50 ms of a short`, `over-current trips and retries`, `inrush is blanked` |
 | Case cell | Below 3.4 V 3 times without USB: no feeding until 3.6 V or USB; red blinks on lid open | `low case battery` |
 | Temperature | NTC ≥ 45 °C while feeding: VIN off, retry in 10 min, and it stays off until a reading below 42 °C | `hot case cell` |
 | Case signature | Owner decision 2026-11-08. 3 s after VIN on with a pod there, and after each reset: two 200 ms VIN drop-outs. The pod reports "fed by the case" (Charge State flag bit 4) | `soft reset`, `a day of top-ups and lid opens` (no reset in 24 h) |

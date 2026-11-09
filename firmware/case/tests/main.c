@@ -11,7 +11,7 @@
 int check_fails;
 const char *check_test;
 
-extern const struct check_case sense_cases[], led_cases[], swd_cases[], sm_cases[];
+extern const struct check_case sense_cases[], led_cases[], swd_cases[], sm_cases[], fast_cases[];
 
 static int run(const struct check_case *c)
 {
@@ -29,7 +29,7 @@ static int run(const struct check_case *c)
 
 int main(void)
 {
-	int n = run(sense_cases) + run(led_cases) + run(swd_cases) + run(sm_cases);
+	int n = run(sense_cases) + run(led_cases) + run(swd_cases) + run(sm_cases) + run(fast_cases);
 
 	printf("%d tests, %d failed checks\n", n, check_fails);
 	return check_fails ? 1 : 0;

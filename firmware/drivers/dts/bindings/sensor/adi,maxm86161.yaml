@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 description: |
-  MAXM86161 optical module (AFE, green, IR and red LEDs, one photodiode),
-  I2C address 0x62.
+  MAXM86161A optical module (AFE, green, IR and red LEDs, one photodiode;
+  the MAXM86161 has the same register map), I2C address 0x62.
 
 compatible: "adi,maxm86161"
 

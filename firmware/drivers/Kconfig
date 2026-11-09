@@ -8,7 +8,8 @@ menuconfig MAXM86161
 	select I2C
 	select GPIO
 	help
-	  Driver for the MAXM86161 optical module (pod U3).
+	  Driver for the MAXM86161A optical module (pod U3). The MAXM86161
+	  has the same register map and part ID, so it runs either part.
 
 if MAXM86161
 

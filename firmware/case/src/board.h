@@ -44,7 +44,7 @@
 #define ADC_CH_OPA 7
 /* [19] XC6206P182 VIN (the GPIO powers the LDO: it has no EN pin), 1M to GND */
 #define PIN_LDO    PD5
-/* [20] TP4054 CHRG, open drain, internal pull-up */
+/* [20] BQ24040 CHG, open drain, internal pull-up */
 #define PIN_CHRG   PD6
 
 #define ADC_CH_VREFINT 8

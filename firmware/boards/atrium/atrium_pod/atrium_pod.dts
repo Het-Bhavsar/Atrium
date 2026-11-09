@@ -8,7 +8,7 @@
  *
  * Power: cell -> AP6683 protection -> BQ21061 (power path: VSYS = PMID, 4.5 V on the Plinth,
  * about VBAT on the cell). TPS7A0218 makes VDD 1.8 V from VSYS for the nRF and the MAXM86161;
- * a second TPS7A0218 (U13, no enable pin) powers the IMU. MAXM86161 VLED = VSYS.
+ * a second TPS7A0218 (U13, no enable pin) powers the IMU. MAXM86161A VLED = VSYS.
  * The nRF52832 regulator runs in DC/DC mode. No 32.768 kHz crystal: calibrated LFRC.
  * No LED, no buttons, no UART, no external flash. SWD on the flex contact pads.
  */
@@ -48,12 +48,16 @@
 		/* Cell and supply facts, read by src/main.c:
 		 * - cell: Sharvi 400909, 30 mAh, AP6683 protection;
 		 * - cut-off 3.30 V loaded on VSYS, off the Plinth;
-		 * - green needs about 3.5 V on VLED (= VSYS) at the 31 mA range [VERIFY];
+		 * - green needs about 3.1 V on VLED (= VSYS) at the 31 mA range [VERIFY]: the
+		 *   MAXM86161A green LED is 3.4 V max at 175 mA, 0.4 V under the MAXM86161's
+		 *   3.8 V at 150 mA, so the old 3.5 V estimate drops by the same 0.4 V. With the
+		 *   2.0 ohm sag the limit (3.13 V) sits under the 3.30 V cut-off: green runs to
+		 *   the end of the charge. Measure on the bench (O-16);
 		 * - cell resistance 2.0 ohm, end of life and cold [ASSUMED], set from the bench;
 		 * - VSYS_SENSE = VSYS x R41 / (R40 + R41), 2.2 MOhm / 1 MOhm. */
 		cell-capacity-mah = <30>;
 		cutoff-mv = <3300>;
-		green-min-mv = <3500>;
+		green-min-mv = <3100>;
 		cell-resistance-mohm = <2000>;
 		vsys-sense-top-ohm = <2200000>;
 		vsys-sense-bottom-ohm = <1000000>;
@@ -139,7 +143,7 @@
 	pinctrl-1 = <&i2c0_sleep>;
 	pinctrl-names = "default", "sleep";
 
-	/* U3 MAXM86161 optical module, radio island */
+	/* U3 MAXM86161A optical module, radio island (MAXM86161 register map) */
 	ppg: maxm86161@62 {
 		compatible = "adi,maxm86161";
 		reg = <0x62>;

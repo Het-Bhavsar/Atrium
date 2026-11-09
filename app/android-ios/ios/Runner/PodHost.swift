@@ -120,8 +120,16 @@ final class PodHost: NSObject, PodHostApi, CBCentralManagerDelegate, CBPeriphera
     }
   }
 
+  /// Also the hand-over to MCUmgr for a pod software update (#21): MCUmgr opens its own CBCentralManager to the same
+  /// peripheral, so this one lets go first. Cancelling a connect that is still pending fails its waiter here, since
+  /// CoreBluetooth may not call back for it.
   func disconnect() throws {
     if let p = peripheral { central?.cancelPeripheralConnection(p) }
+    if let k = connectWaiter {
+      connectWaiter = nil
+      k.resume(throwing: PodHost.error("cancelled", "Connect cancelled"))
+      emit(.disconnected)
+    }
   }
 
   func bondedPodId() throws -> String? { UserDefaults.standard.string(forKey: PodHost.bondKey) }
@@ -237,6 +245,16 @@ final class PodHost: NSObject, PodHostApi, CBCentralManagerDelegate, CBPeriphera
 
   func centralManager(_ c: CBCentralManager, didDisconnectPeripheral p: CBPeripheral, error: Error?) {
     chars = [:]
+    // Nothing answers on a dropped link: fail what is waiting, so Dart can reconnect instead of hanging.
+    let gone = PodHost.error("not_connected", "Pod disconnected")
+    connectWaiter?.resume(throwing: gone)
+    connectWaiter = nil
+    for waiting in readWaiters.values {
+      for k in waiting { k.resume(throwing: gone) }
+    }
+    readWaiters = [:]
+    for k in writeWaiters.values { k.resume(throwing: gone) }
+    writeWaiters = [:]
     emit(.disconnected)
   }
 

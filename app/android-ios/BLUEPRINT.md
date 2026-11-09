@@ -106,7 +106,7 @@ Each is ported to pure Dart in `insights/` and checked against the reference mod
 1. **Package id:** `open.atrium` (owner, 2026-11-07), on iOS and Android. Check it is free on both stores before the first upload.
 2. **Formulas:** the Recovery (#7) and Effort (#6) formulas aren't written by ML yet. The app shows sample scores until they are.
 3. **Hardware:** no EVT pod exists yet. The BLE layer is built against `ble_gatt.md` and tested with an nRF52 DK running the firmware, or a mock `PodHost`.
-4. **iOS background BLE:** it is best effort (state restoration, no guaranteed wake). The 12 h warning (#20) covers it.
+4. **iOS background BLE:** it is best effort (state restoration, no guaranteed wake). The 16 h warning on Today and Device (#20) covers it.
 5. **Android:** a foreground service needs a visible notification while syncing, and Health Connect needs its own permission screen.
 6. **Localisation:** strings are English only to start; the ARB is set up for more.
 

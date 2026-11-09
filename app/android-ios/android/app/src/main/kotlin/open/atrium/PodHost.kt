@@ -107,7 +107,20 @@ class PodHost(private val context: Context, private val events: PodFlutterApi) :
     prefs.edit().putString("bondedPod", id).apply()
   }
 
+  /** Also the hand-over to MCUmgr for a pod software update (#21): its own GATT client connects to the same device, so
+   *  this one lets go first. A connect still pending is cancelled and closed here, since Android may not call back. */
   override fun disconnect() {
+    val waiting = connected
+    if (waiting != null) {
+      connected = null
+      gatt?.disconnect()
+      gatt?.close()
+      gatt = null
+      chars.clear()
+      waiting.completeExceptionally(FlutterError("cancelled", "Connect cancelled"))
+      emit(LinkState.DISCONNECTED)
+      return
+    }
     gatt?.disconnect()
   }
 
@@ -203,7 +216,11 @@ class PodHost(private val context: Context, private val events: PodFlutterApi) :
         emit(LinkState.DISCONNECTED)
         connected?.completeExceptionally(FlutterError("connect_failed", "Disconnected (status $status)"))
         connected = null
+        // A GATT operation waiting on a dropped link never gets its callback: fail it, so the next one can run.
+        pending?.completeExceptionally(FlutterError("not_connected", "Pod disconnected"))
+        pending = null
         g.close()
+        if (gatt === g) gatt = null
       }
     }
 

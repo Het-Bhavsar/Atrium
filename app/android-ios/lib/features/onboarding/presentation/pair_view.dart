@@ -25,7 +25,8 @@ class PairView extends ConsumerStatefulWidget {
 }
 
 class _PairViewState extends ConsumerState<PairView> with SingleTickerProviderStateMixin {
-  String _firmware = '0.1.0';
+  /// Real pods: the version read from DIS 0x2A26 (major.minor.patch); null in the demo or when it can't be read.
+  String? _firmware;
   String? _error;
   static const _steps = ['Connecting', 'Securing the link', "Setting the pod's clock", 'Checking pod software'];
 
@@ -66,13 +67,20 @@ class _PairViewState extends ConsumerState<PairView> with SingleTickerProviderSt
       setState(() => _now = 0);
       await link.connect(pod.id);
       setState(() => _now = 3);
-      _firmware = (await link.firmwareRevision()).split('+').first;
+      try {
+        _firmware = (await link.firmwareRevision()).split('+').first;
+      } on Object {
+        _firmware = null; // older firmware without the string: Device shows it as unknown
+      }
       await ref.read(podSessionProvider.notifier).afterConnect(name: pod.name);
       if (mounted) setState(() => _now = _steps.length);
     } on Object catch (e) {
       if (mounted) setState(() => _error = podErrorText(e));
     }
   }
+
+  /// Whether a newer version exists is checked under Device > Pod software, not here.
+  String get _doneLine => !kRealData ? 'Paired (demo).' : (_firmware == null ? 'Paired.' : 'Paired. The pod runs software $_firmware.');
 
   @override
   void dispose() {
@@ -107,7 +115,7 @@ class _PairViewState extends ConsumerState<PairView> with SingleTickerProviderSt
         ),
         ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 40),
-          child: Text(_error ?? (_done ? 'Pod software $_firmware is up to date.' : ''), style: AtriumType.secondary(_error != null ? t.red : t.ink2)),
+          child: Text(_error ?? (_done ? _doneLine : ''), style: AtriumType.secondary(_error != null ? t.red : t.ink2)),
         ),
         const SizedBox(height: 12),
       ],
