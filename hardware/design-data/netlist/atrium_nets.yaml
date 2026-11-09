@@ -1,0 +1,151 @@
+# Atrium pod - logical netlist, LOCKED BASELINE 20.9 x 11 x 5.3 mm (2026-11-07, approved; was 19.4)
+#
+# Logical source of the schematic: every net has >= 2 pins, the jumper nets match on both
+# islands, and the pin map matches firmware/boards/atrium/atrium_pod/atrium_pod-pinctrl.dtsi.
+# The EasyEDA schematics in hardware/pod/*/schematic/ are captured from it.
+#
+# Boards:  RADIO  = radio + sensor island (rigid 4-layer, 0.6 mm, JLC)
+#          POWER  = power island (rigid 4-layer, 0.6 mm, JLC)
+#          FPC1   = jumper (JLC 2-layer flex, no impedance control, no RF)
+#          MECH   = parts that live in the shell (cell, contacts)
+# side:    top = faces the zirconia top shell; bot = faces the skin/base
+#
+# lcsc: verified on JLC/LCSC via pcbparts on 2026-11-07 unless marked TBD.
+# verify: anything not yet checked against the primary datasheet.
+
+meta:
+  envelope_mm: [20.9, 11.0, 5.3]
+  vdd: 1.8
+  i2c_addresses: {MAXM86161: 0x62, LSM6DSOX: 0x6A, BQ21061: 0x6B}
+
+components:
+  # ------------------------------------------------------------- RADIO island
+  U1: {board: RADIO, side: top, part: nRF52832-CIAA-R, pkg: WLCSP-50 3.0x3.2 0.4p, lcsc: C509405,
+       note: "Copy Nordic's 'CIAA WLCSP with DC/DC regulator setup' reference circuit and layout exactly (nRF52832 PS, Reference circuitry, Fig 5 / Table 5)."}
+  Y1: {board: RADIO, side: top, part: NX1612SA-32MHZ-STD-CIS-3 32 MHz 8 pF 1612, lcsc: C910049, note: "NDK NX1612SA (1.6 x 1.2 x 0.3): 8 pF, +/-10 ppm, +/-15 ppm -30..85 C, drive 10 (max 100) uW. Replaces the 2016 part so the Nordic decoupling fits next to U1 (review 2026-11-07).", verify: "ESR max 100 ohm at 32 MHz: Nordic allows 100 ohm only with C0 <= 3 pF (PS CLOCK, RS_HFXO_3PF); get C0 from NDK and check HFXO start-up at EVT bring-up"}
+  C1: {board: RADIO, side: top, part: 12 pF C0G 0201, lcsc: C161404, note: "XC1 load (Nordic ref: 12 pF NP0 +/-2 %)"}
+  C2: {board: RADIO, side: top, part: 12 pF C0G 0201, lcsc: C161404, note: "XC2 load"}
+  L3: {board: RADIO, side: top, part: 3.3 nH 0201, lcsc: C98045, note: "Nordic RF match series L1 in ref BOM"}
+  C3: {board: RADIO, side: top, part: 1.0 pF C0G 0201, lcsc: C237514, note: "Nordic RF match C3 in ref BOM", verify: "position (shunt) per Fig 5"}
+  C4: {board: RADIO, side: top, part: 100 nF X5R 0201, lcsc: C76928, note: DEC1}
+  C5: {board: RADIO, side: top, part: 100 nF X5R 0201, lcsc: C76928, note: "VDD (H7) decoupling"}
+  C6: {board: RADIO, side: top, part: 100 pF C0G 0201, lcsc: C62550, note: DEC3, verify: "Nordic ref C6 placement"}
+  C7: {board: RADIO, side: top, part: 100 pF C0G 0201, lcsc: C62550, note: "DEC2 (A2). Nordic CIAA DC/DC reference: DEC2 is decoupled with 100 pF on the WLCSP (was a no-connect here: fixed 2026-11-08 against nrf52832_ciaa_dcdc.SchDoc)"}
+  C8: {board: RADIO, side: top, part: 4.7 uF X5R 0201, lcsc: C335103, note: "VDD at A7 (Nordic CIAA DC/DC reference C8 4.7 uF sits at A7; H7 gets C5 100 nF). Top, beside A7."}
+  C9: {board: RADIO, side: top, part: 1.0 uF X5R 0201, lcsc: C76929, note: DEC4}
+  L1: {board: RADIO, side: top, part: 10 uH 0603 Isat >= 50 mA, lcsc: C86083, note: "DC/DC (LQM18FN100M00D). Nordic forbids other values."}
+  L2: {board: RADIO, side: top, part: 15 nH 0402, lcsc: C395049, note: "DC/DC second inductor"}
+  U2: {board: RADIO, side: bot, part: TPS7A0218PYCHR 1.8 V LDO, pkg: DSBGA-4 0.64x0.64 (YCH), lcsc: C3752366, note: "Iq 25 nA. VSYS -> VDD_1V8. LCSC stock 121 (2026-11-07), two per pod: buy early."}
+  C20: {board: RADIO, side: bot, part: 1 uF X5R 0201, lcsc: C76929, note: "U2 in"}
+  C21: {board: RADIO, side: bot, part: 1 uF X5R 0201, lcsc: C76929, note: "U2 out", verify: "TPS7A02 min output C (datasheet says >= 0.5 uF effective)"}
+  U3: {board: RADIO, side: bot, part: MAXM86161EFD+T, pkg: OLGA-14 2.9x4.3x1.4, lcsc: C3178309,
+       note: "Optical module, flush in the base window, 0.1 mm proud. Standard PCBA only. LCSC stock 89 (2026-11-07): buy early."}
+  C30: {board: RADIO, side: top, part: 10 uF X5R 0402, lcsc: C15525, note: "VLED -> PGND, directly above U3 pin 5 with its own via (ADI layout guide)"}
+  C31: {board: RADIO, side: top, part: 1 uF X5R 0201, lcsc: C76929, note: "VLDO -> GND_ANA"}
+  C32: {board: RADIO, side: bot, part: 1 uF X5R 0201, lcsc: C76929, note: "VREF -> GND_ANA"}
+  R5: {board: RADIO, side: bot, part: 1 Mohm 0201, lcsc: C295786, note: "pull-down on PPG_LDO_EN: MAXM stays off while nRF is in reset"}
+  R1: {board: RADIO, side: bot, part: 4.7 kohm 0201 1 %, lcsc: C138135, note: "I2C SDA pull-up"}
+  R2: {board: RADIO, side: bot, part: 4.7 kohm 0201 1 %, lcsc: C138135, note: "I2C SCL pull-up"}
+  R3: {board: RADIO, side: top, part: 100 kohm 0201, lcsc: C270364, note: "CHG_PG pull-up (open-drain from BQ21061)"}
+  R10: {board: RADIO, side: bot, part: 10 kohm 0201 0.1 % 25 ppm, lcsc: C852211, note: "TH1 divider top"}
+  R11: {board: RADIO, side: top, part: 10 kohm 0201 0.1 % 25 ppm, lcsc: C852211, note: "TH4 divider top"}
+  TH1: {board: RADIO, side: bot, part: NCP03XH103F05RL 10k B3380 0201, lcsc: C98098, note: "Skin temperature: window edge, copper pad + gap filler to the base, away from U1/U2"}
+  C10: {board: RADIO, side: top, part: 10 nF 0201, lcsc: C285010, dnp: true, note: "TH1 AIN filter, populate only if EVT noise needs it"}
+  R40: {board: RADIO, side: bot, part: 2.2 Mohm 0201 1 %, lcsc: C474576, note: "VSYS sense top"}
+  R41: {board: RADIO, side: bot, part: 1 Mohm 0201 1 %, lcsc: C295786, note: "VSYS sense bottom"}
+  C12: {board: RADIO, side: top, part: 100 nF X5R 0201, lcsc: C76928, note: "VSYS sense hold cap (SAADC charge reservoir)"}
+  C40: {board: RADIO, side: top, part: 0201 C0G, lcsc: TBD, dnp: true, note: "Pi-match shunt 1 (antenna side). Tune on VNA; Smith-chart match on the VNA"}
+  Z41: {board: RADIO, side: top, part: 0 ohm 0201 (series pi element), lcsc: C473473, note: "Pi-match series: 0 ohm until tuned"}
+  C42: {board: RADIO, side: top, part: 0201 C0G, lcsc: TBD, dnp: true, note: "Pi-match shunt 2 (nRF side)"}
+  ANT1: {board: RADIO, side: top, part: KH-1608-H08 2.45 GHz chip antenna 0603, lcsc: C2925416,
+         note: "At the radio-island tip. Copper-free zone through ALL layers from x = 17.26 mm. Kinghelm asks for 5 x 3 mm minimum; we have ~7.6 mm2 (~50 %). Known, accepted, tune on VNA."}
+  TP1: {board: RADIO, side: top, part: test pad 0.6 mm, note: "P0.21/nRESET, bench use only"}
+  TP2: {board: RADIO, side: bot, part: test pad 0.5 mm, note: "MAXM GPIO (pin 13), unused"}
+
+  # ------------------------------------------------------------- POWER island
+  U10: {board: POWER, side: bot, part: BQ21061YFPR I2C linear charger, pkg: DSBGA-20 2.0x1.6 0.4p, lcsc: C2869893,
+        note: "ICHG 1.25-500 mA in 1.25 mA steps; firmware sets 15 mA. PMID = VSYS. VDD (1.8 V, always on except ship mode) powers the IMU."}
+  C50: {board: POWER, side: top, part: 1 uF X5R 0201, lcsc: C76929, note: "IN (>= 1 uF)"}
+  C51: {board: POWER, side: bot, part: 22 uF X5R 0402 6.3 V, lcsc: C415703, note: "PMID (TI: 22 uF close to pins). 0402 height <= 0.65 mm fits under the island."}
+  C52: {board: POWER, side: bot, part: 1 uF X5R 0201, lcsc: C76929, note: "BAT (>= 1 uF)"}
+  C53: {board: POWER, side: bot, part: 4.7 uF X5R 0402 6.3 V, lcsc: C23733, note: "BQ21061 VDD. TI SLUSDU0A 8.2.2.2 recommends 4.7 uF, > 1 uF after derating", verify: "LCSC number (CL05A475MQ5NRNC) not yet checked on LCSC"}
+  C56: {board: POWER, side: bot, part: 1 uF X5R 0201, lcsc: C76929, note: "VINLS (>= 1 uF)", verify: "VINLS/LSLDO termination when LDO unused: copy TI BQ21061 EVM"}
+  R50: {board: POWER, side: top, part: 10 kohm 0201 1 %, lcsc: C473048, note: "TS: in parallel with TH5"}
+  TH5: {board: POWER, side: top, part: NCP03XH103F05RL 10k B3380 0201, lcsc: C98098, note: "Charger TS NTC, beside the cell: hardware charge-temperature cut-off even if firmware hangs"}
+  U11: {board: POWER, side: top, part: LSM6DSOXTR IMU, pkg: LGA-14 2.5x3.0x0.83, lcsc: C481766, note: "SA0 = GND -> 0x6A. Powered from U13 (own 1.8 V LDO): BQ21061 VDD is rated only as the charger's own I/O supply (SLUSDU0A 7.3.3)."}
+  U13: {board: POWER, side: bot, part: TPS7A0218PYCHR 1.8 V LDO, pkg: DSBGA-4 0.64x0.64 (YCH), lcsc: C3752366, note: "VSYS -> VDD_IMU. Iq 25 nA. Replaces powering the IMU from BQ21061 VDD (review 2026-11-07, B2). Input cap is C51 (22 uF, same VSYS/PMID net): place U13 within 2 mm of it (no room for a separate C62 once the clamp bands are kept out)."}
+  C63: {board: POWER, side: bot, part: 1 uF X5R 0201, lcsc: C76929, note: "U13 out (TPS7A02 needs >= 0.5 uF effective) and U11 VDDIO (pin 5) decoupling: place at pin 5. C60 sits at VDD (pin 8). C61 removed: no room once the clamp bands are kept out."}
+  C60: {board: POWER, side: top, part: 100 nF X5R 0201, lcsc: C76928, note: "IMU VDD (pin 8)"}
+  TH4: {board: RADIO, side: top, part: NCP03XH103F05RL 10k B3380 0201, lcsc: C98098, note: "Pod/room temperature, radio island top under the shell, beside R11. Moved off the power island (no room once the board clamps are kept out; review 2026-11-07); frees a jumper line, now GND."}
+  U12: {board: POWER, side: bot, part: AP6683 1-cell protection with integrated FET, pkg: DFN-4-EP 1x1, lcsc: C2849565,
+        verify: "thresholds (VCU, VDL 2.8 V, discharge OCP), RDS(on), VDD R/C values from the ALLPOWER datasheet"}
+  R51: {board: POWER, side: bot, part: 330 ohm 0201, lcsc: C274872, note: "U12 VDD series R", verify: "value per AP6683 application circuit"}
+  C55: {board: POWER, side: bot, part: 100 nF X5R 0201, lcsc: C76928, note: "U12 VDD to CELL-", verify: "value per AP6683 application circuit"}
+  D10: {board: POWER, side: bot, part: ESD5V3U04-0201 TVS, lcsc: C521889, note: "VIN, at the power-end jumper landing. Same part as D12/D13 (ESDA5-1F4 C1973991 has no EasyEDA symbol).", verify: "working voltage >= 5.25 V (Plinth 5 V +5 %) from the TECH PUBLIC datasheet"}
+  D12: {board: POWER, side: top, part: ESD5V3U04-0201, lcsc: C521889, note: "SWDIO jig contact P3, at the power-end jumper landing beside D10 (P3 is 3.6 mm from the power end, 7.6 mm from the radio end). 2026-11-08: SWD ESD moved off the radio island (no room at the radio landing), series resistors dropped."}
+  D13: {board: POWER, side: top, part: ESD5V3U04-0201, lcsc: C521889, note: "SWDCLK jig contact P4, at the power-end jumper landing beside D10", verify: "nRF52832 SWDIO/SWDCLK pin ESD rating (HBM) from the PS, with the 47 ohm series resistors removed"}
+
+  # ------------------------------------------------------------- MECH / FPC
+  P1: {board: FPC1, part: "contact pad VIN, d1.0 ENIG, flex bottom", note: "Pod centre (9.7, 5.5). Exposed through a d1.2 hole in the base."}
+  P2: {board: FPC1, part: "contact pad GND_A, d1.0 ENIG", note: "(7.3, 5.5)"}
+  P5: {board: FPC1, part: "contact pad GND_B, d1.0 ENIG", note: "(12.1, 5.5): with GND_A, makes charging rotation-proof"}
+  P3: {board: FPC1, part: "contact pad SWDIO, d1.0 ENIG", note: "(6.7, 3.3), programming jig only"}
+  P4: {board: FPC1, part: "contact pad SWDCLK, d1.0 ENIG", note: "(6.7, 7.7), programming jig only"}
+  BT1: {board: MECH, part: Sharvi HT19 400909 LiPo 3.7 V 30 mAh 4.0 x 9 x 9, note: "Tabs solder to POWER top pads CELL+ / CELL-. Second source MakerBazar KP 400909."}
+  FPC1: {board: FPC1, part: jumper flex 2-layer, note: "see hardware/design-data/constraints/jumper_fpc.md"}
+
+nets:
+  # Power
+  VIN:        [P1, FPC1.VIN_P, D10.1, U10.A1, C50.1]
+  GND:        [P2, P5, U10.A4, D10.2, D12.2, D13.2, C50.2, C51.2, C52.2, C53.2, C56.2, C60.2, R50.2, TH5.2, TH4.2,
+               U11.GND, U11.SA0, U11.SDx, U11.SCx, U10.LP, U12.VM, FPC1.GND_P,
+               FPC1.GND_R, U1.VSS, U1.VSS_PA, C1.2, C2.2, C3.2, C4.2, C5.2, C6.2, C7.2, C8.2, C9.2, U2.GND, C20.2, C21.2, U13.GND, C63.2,
+               U3.PGND, U3.GND_DIG, U3.GND_ANA, C30.2, C31.2, C32.2, R5.2, TH1.2, C10.2, R41.2, C12.2, C40.2, C42.2, ANT1.GND]
+  CELL_P:     [BT1.+, U10.A3, U10.B3, C52.1, R51.1]
+  CELL_N:     [BT1.-, U12.GND, C55.2]
+  U12_VDD:    [U12.VDD, R51.2, C55.1]
+  VSYS:       [U10.A2, U10.B2, C51.1, U13.IN, U13.EN, FPC1.VSYS_P, FPC1.VSYS_R, U2.IN, U2.EN, C20.1, U3.VLED, C30.1, R40.1]
+  VDD_1V8:    [U2.OUT, C21.1, U1.VDD, C5.1, C8.1, R1.1, R2.1, R3.1]
+  BQ_VDD:     [U10.D1, U10.E1, C53.1]
+  VDD_IMU:    [U13.OUT, C63.1, U11.VDD, U11.VDDIO, U11.CS, C60.1]
+  VINLS:      [U10.E4, U10.D4, C56.1]
+  # nRF internals (copy Nordic reference)
+  DEC1:       [U1.DEC1, C4.1]
+  DEC2:       [U1.DEC2, C7.1]
+  DEC3:       [U1.DEC3, C6.1]
+  DEC4:       [U1.DEC4, C9.1, L2.2]
+  DCC_L:      [L1.2, L2.1]
+  DCC:        [U1.DCC, L1.1]
+  XC1:        [U1.XC1, Y1.1, C1.1]
+  XC2:        [U1.XC2, Y1.3, C2.1]
+  ANT_NRF:    [U1.ANT, L3.1]
+  RF_50R:     [L3.2, C3.1, C42.1, Z41.1]
+  ANT_FEED:   [Z41.2, C40.1, ANT1.FEED]
+  # Sensors and buses
+  I2C_SDA:    [U1.P0.15, R1.2, U3.SDA, FPC1.SDA_R, FPC1.SDA_P, U11.SDA, U10.E2]
+  I2C_SCL:    [U1.P0.16, R2.2, U3.SCL, FPC1.SCL_R, FPC1.SCL_P, U11.SCL, U10.E3]
+  PPG_INT:    [U1.P0.18, U3.INTB]
+  PPG_LDO_EN: [U1.P0.20, U3.LDO_EN, R5.1]
+  PPG_VLDO:   [U3.VLDO, C31.1]
+  PPG_VREF:   [U3.VREF, C32.1]
+  IMU_INT1:   [U1.P0.12, FPC1.IMU_INT_R, FPC1.IMU_INT_P, U11.INT1]
+  CHG_PG:     [U1.P0.14, R3.2, FPC1.PG_R, FPC1.PG_P, U10.B1]
+  NTC_EN:     [U1.P0.17, R10.1, R11.1]
+  TH1_SENSE:  [U1.P0.03, R10.2, TH1.1, C10.1]
+  TH4_SENSE:  [U1.P0.02, R11.2, TH4.1]
+  TS:         [U10.B4, R50.1, TH5.1]
+  VSYS_SENSE: [U1.P0.28, R40.2, R41.1, C12.1]
+  SWDIO:      [U1.SWDIO, FPC1.SWDIO_R, P3, FPC1.SWDIO_P, D12.1]      # nRF -> flex -> jig contact P3 -> ESD at the power landing
+  SWDCLK:     [U1.SWDCLK, FPC1.SWDCLK_R, P4, FPC1.SWDCLK_P, D13.1]
+  NRESET_TP:  [U1.P0.21, TP1]
+  PPG_GPIO:   [U3.GPIO, TP2]
+
+no_connect: [U1.P0.00, U1.P0.01, U1.P0.04, U1.P0.05, U1.P0.06, U1.P0.07, U1.P0.08, U1.P0.09,
+             U1.P0.10, U1.P0.11, U1.P0.13, U1.P0.19, U1.P0.22, U1.P0.23, U1.P0.24, U1.P0.25, U1.P0.26, U1.P0.27,
+             U1.P0.29, U1.P0.30, U1.P0.31, U1.NC, U10.C1_MR, U10.C2_CE, U10.D2_INT, U10.C3, U10.C4, U11.INT2, U11.OCS_Aux, U11.SDO_Aux,
+             U3.NC6, U3.NC7, U3.NC8]
+
+jumper:   # FPC1 pads per end, 10 each. Net names; FPC1.<NET>_R / _P in the nets above.
+  radio: [GND, GND, GND, VSYS, I2C_SDA, I2C_SCL, IMU_INT1, CHG_PG, SWDIO, SWDCLK]
+  power: [GND, GND, SWDIO, SWDCLK, VSYS, VIN, I2C_SDA, I2C_SCL, IMU_INT1, CHG_PG]
+  flex_only: "Contact pads P1-P5 sit on the flex bottom. VIN runs centre -> power end; SWD runs pads -> both ends (nRF at the radio end, ESD D12/D13 at the power end)."

@@ -1,0 +1,56 @@
+Designator,Device,Footprint,Mid X,Mid Y,Ref X,Ref Y,Pad X,Pad Y,Pins,Layer,Rotation,SMD,Comment,Value,Type,Supplier,Datasheet
+C1,CL10A106KP8NNNC,C0603,9.3mm,3.4mm,9.3mm,3.4mm,9.3mm,2.7mm,2,T,90,Yes,10uF,10uF,,LCSC,https://item.szlcsc.com/datasheet/CL10A106KP8NNNC/20411.html
+C2,CL10A475KO8NNNC,C0603,11.6mm,7.9mm,11.6mm,7.9mm,11.6mm,7.2mm,2,T,90,Yes,4.7uF,4.7uF,,LCSC,https://item.szlcsc.com/datasheet/CL10A475KO8NNNC/20375.html
+C3,CL10A106KP8NNNC,C0603,4.6mm,6.9mm,4.6mm,6.9mm,4.6mm,7.6mm,2,T,270,Yes,10uF,10uF,,LCSC,https://item.szlcsc.com/datasheet/CL10A106KP8NNNC/20411.html
+C4,CL21A226MAQNNNE,C0805,8.9mm,10mm,8.9mm,10mm,7.9mm,10mm,2,T,0,Yes,22uF,22uF,,LCSC,https://item.szlcsc.com/datasheet/CL21A226MAQNNNE/46786.html
+C5,CL10A106KP8NNNC,C0603,11.95mm,-6.5mm,11.95mm,-6.5mm,11.95mm,-7.2mm,2,T,90,Yes,10uF,10uF,,LCSC,https://item.szlcsc.com/datasheet/CL10A106KP8NNNC/20411.html
+C6,CL05A105KA5NQNC,C0402,0mm,-1.6mm,0mm,-1.6mm,-0.42mm,-1.6mm,2,T,0,Yes,1uF,1uF,,LCSC,https://item.szlcsc.com/datasheet/CL05A105KA5NQNC/53938.html
+C7,CL05B104KO5NNNC,C0402,-3.2mm,9.1mm,-3.2mm,9.1mm,-3.2mm,8.68mm,2,T,90,Yes,100nF,100nF,,LCSC,https://item.szlcsc.com/datasheet/CL05B104KO5NNNC/1877.html
+C8,CL05A105KA5NQNC,C0402,-2.4mm,9.1mm,-2.4mm,9.1mm,-2.4mm,8.68mm,2,T,90,Yes,1uF,1uF,,LCSC,https://item.szlcsc.com/datasheet/CL05A105KA5NQNC/53938.html
+C9,CL05B104KO5NNNC,C0402,-11.9mm,0.15mm,-11.9mm,0.15mm,-11.9mm,0.57mm,2,T,270,Yes,100nF,100nF,,LCSC,https://item.szlcsc.com/datasheet/CL05B104KO5NNNC/1877.html
+C10,CL05B104KO5NNNC,C0402,-6.9mm,0.4mm,-6.9mm,0.4mm,-6.9mm,0.82mm,2,T,270,Yes,100nF,100nF,,LCSC,https://item.szlcsc.com/datasheet/CL05B104KO5NNNC/1877.html
+C11,CL05B104KO5NNNC,C0402,-11.9mm,-3.05mm,-11.9mm,-3.05mm,-11.9mm,-2.63mm,2,T,270,Yes,100nF,100nF,,LCSC,https://item.szlcsc.com/datasheet/CL05B104KO5NNNC/1877.html
+C12,CL05B104KO5NNNC,C0402,-6.3mm,-2.4mm,-6.3mm,-2.4mm,-6.3mm,-1.98mm,2,T,270,Yes,100nF,100nF,,LCSC,https://item.szlcsc.com/datasheet/CL05B104KO5NNNC/1877.html
+C13,CL05A105KA5NQNC,C0402,-12.2mm,4.9mm,-12.2mm,4.9mm,-11.78mm,4.9mm,2,T,180,Yes,1uF,1uF,,LCSC,https://item.szlcsc.com/datasheet/CL05A105KA5NQNC/53938.html
+C14,CL05A105KA5NQNC,C0402,-7.2mm,4.85mm,-7.2mm,4.85mm,-7.62mm,4.85mm,2,T,0,Yes,1uF,1uF,,LCSC,https://item.szlcsc.com/datasheet/CL05A105KA5NQNC/53938.html
+C15,CL05B104KO5NNNC,C0402,-12.6mm,-5.4mm,-12.6mm,-5.4mm,-13.02mm,-5.4mm,2,T,0,Yes,100nF,100nF,,LCSC,https://item.szlcsc.com/datasheet/CL05B104KO5NNNC/1877.html
+C16,CL10C101JB8NNNC,C0603,-1.45mm,7.4mm,-1.45mm,7.4mm,-1.45mm,6.7mm,2,T,90,Yes,100pF,100pF,,LCSC,https://item.szlcsc.com/datasheet/CL10C101JB8NNNC/15530.html
+D3,XL-1615RGBC-RF,LED-ARRAY-SMD_4P-L1.6-W1.5-BR_XL-1615RGBC-RF,-9mm,-10mm,-9mm,-10mm,-9.75mm,-9.575mm,4,T,180,Yes,XL-1615RGBC-RF,,,LCSC,https://item.szlcsc.com/datasheet/XL-1615RGBC-RF/1051449.html
+J1,TYPE-C 16PIN 2MD(073),USB-C-SMD_TYPE-C-16PIN-2MD-073,13mm,0mm,13mm,0mm,15.375mm,-4.325mm,16,T,90,No,TYPE-C 16PIN 2MD(073),,,LCSC,https://item.szlcsc.com/datasheet/TYPE-C%252016PIN%25202MD(073)/2901843.html
+L1,WPN252012H1R0MT,IND-SMD_L2.5-W2.0_WPN252012H,8.4mm,8.1mm,8.4mm,8.1mm,9.35mm,8.1mm,2,T,180,Yes,1uH,1uH,-,LCSC,https://item.szlcsc.com/datasheet/WPN252012H1R0MT/99557.html
+R1,0402WGF5101TCE,R0402,9.1mm,-1.25mm,9.1mm,-1.25mm,9.533mm,-1.25mm,2,T,180,Yes,5.1kΩ,5.1kΩ,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/0402WGF5101TCE/26648.html
+R2,0402WGF5101TCE,R0402,9.1mm,1.75mm,9.1mm,1.75mm,9.533mm,1.75mm,2,T,180,Yes,5.1kΩ,5.1kΩ,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/0402WGF5101TCE/26648.html
+R3,0402WGF1002TCE,R0402,9.1mm,-3mm,9.1mm,-3mm,9.533mm,-3mm,2,T,180,Yes,10kΩ,10kΩ,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/0402WGF1002TCE/26487.html
+R4,0402WGF1003TCE,R0402,7.4mm,-3mm,7.4mm,-3mm,7.833mm,-3mm,2,T,180,Yes,100kΩ,100kΩ,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/0402WGF1003TCE/26484.html
+R5,0402WGF4701TCE,R0402,15.9mm,6.4mm,15.9mm,6.4mm,15.9mm,5.967mm,2,T,90,Yes,4.7kΩ,4.7kΩ,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/0402WGF4701TCE/26643.html
+R6,0402WGF7683TCE,R0402,5.5mm,10.3mm,5.5mm,10.3mm,5.933mm,10.3mm,2,T,180,Yes,768kΩ,768kΩ,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/0402WGF7683TCE/27766.html
+R7,0402WGF1003TCE,R0402,3.6mm,9.95mm,3.6mm,9.95mm,3.6mm,9.517mm,2,T,90,Yes,100kΩ,100kΩ,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/0402WGF1003TCE/26484.html
+R8,0402WGF1004TCE,R0402,2.5mm,8.6mm,2.5mm,8.6mm,2.5mm,9.033mm,2,T,270,Yes,1MΩ,1MΩ,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/0402WGF1004TCE/26826.html
+R9,0402WGF1502TCE,R0402,14.6mm,-9.3mm,14.6mm,-9.3mm,15.033mm,-9.3mm,2,T,180,Yes,15kΩ,15kΩ,Thick Film Resistors,LCSC,https://atta.szlcsc.com/upload/public/pdf/source/20200306/C422600_1E6D84923E4A46A82E41ADD87F860B5C.pdf
+R10,0402WGF1004TCE,R0402,15.9mm,-6.9mm,15.9mm,-6.9mm,15.9mm,-6.467mm,2,T,270,Yes,1MΩ,1MΩ,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/0402WGF1004TCE/26826.html
+R11,0402WGF1002TCE,R0402,0.6mm,5.3mm,0.6mm,5.3mm,0.6mm,4.867mm,2,T,90,Yes,10kΩ,10kΩ,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/0402WGF1002TCE/26487.html
+R12,0402WGF1504TCE,R0402,-0.4mm,7mm,-0.4mm,7mm,-0.4mm,7.433mm,2,T,270,Yes,1.5MΩ,1.5MΩ,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/0402WGF1504TCE/23001.html
+R13,0402WGF1001TCE,R0402,-1.45mm,5.5mm,-1.45mm,5.5mm,-1.017mm,5.5mm,2,T,180,Yes,1kΩ,1kΩ,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/0402WGF1001TCE/12256.html
+R14,0402WGF2002TCE,R0402,-0.6mm,4.3mm,-0.6mm,4.3mm,-0.6mm,4.733mm,2,T,270,Yes,20kΩ,20kΩ,Thick Film Resistors,LCSC,https://atta.szlcsc.com/upload/public/pdf/source/20200306/C422600_1E6D84923E4A46A82E41ADD87F860B5C.pdf
+R15,0402WGF1000TCE,R0402,-4.6mm,-3.7mm,-4.6mm,-3.7mm,-5.033mm,-3.7mm,2,T,0,Yes,100Ω,100Ω,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/0402WGF1000TCE/25819.html
+R16,0402WGF1000TCE,R0402,4.6mm,-3.7mm,4.6mm,-3.7mm,5.033mm,-3.7mm,2,T,180,Yes,100Ω,100Ω,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/0402WGF1000TCE/25819.html
+R17,0402WGF1004TCE,R0402,-4.6mm,-5.18mm,-4.6mm,-5.18mm,-4.6mm,-4.747mm,2,T,270,Yes,1MΩ,1MΩ,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/0402WGF1004TCE/26826.html
+R18,0402WGF1004TCE,R0402,-12mm,2.4mm,-12mm,2.4mm,-12mm,2.833mm,2,T,270,Yes,1MΩ,1MΩ,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/0402WGF1004TCE/26826.html
+R19,0402WGF4704TCE,R0402,-13.8mm,-7mm,-13.8mm,-7mm,-13.8mm,-6.567mm,2,T,270,Yes,4.7MΩ,4.7MΩ,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/0402WGF4704TCE/480665.html
+R20,0402WGF1003TCE,R0402,-7.7mm,7.7mm,-7.7mm,7.7mm,-8.133mm,7.7mm,2,T,0,Yes,100kΩ,100kΩ,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/0402WGF1003TCE/26484.html
+R21,0402WGF1001TCE,R0402,-9.4mm,-8.3mm,-9.4mm,-8.3mm,-9.4mm,-7.867mm,2,T,270,Yes,1kΩ,1kΩ,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/0402WGF1001TCE/12256.html
+R22,0402WGF3300TCE,R0402,-6.8mm,-9.4mm,-6.8mm,-9.4mm,-6.367mm,-9.4mm,2,T,180,Yes,330Ω,330Ω,Thick Film Resistors,LCSC,https://item.szlcsc.com/datasheet/0402WGF3300TCE/25847.html
+R23,0402WGF3300TCE,R0402,-6.8mm,-10.2mm,-6.8mm,-10.2mm,-6.367mm,-10.2mm,2,T,180,Yes,330Ω,330Ω,Thick Film Resistors,LCSC,https://item.szlcsc.com/datasheet/0402WGF3300TCE/25847.html
+RS1,0603WAF100KT5E,R0603,-1.6mm,3.7mm,-1.6mm,3.7mm,-1.6mm,2.947mm,2,T,90,Yes,1Ω,1Ω,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/0603WAF100KT5E/23663.html
+SW1,SKSCLAE010,SW-SMD_4P-L3.5-W2.9-P1.30-LS4.8,9mm,-9.05mm,9mm,-9.05mm,7.05mm,-9.7mm,4,T,0,Yes,SKSCLAE010,,,LCSC,https://item.szlcsc.com/datasheet/SKSCLAE010/141733.html
+TH1,NCP15WF104F03RC,R0402,-7.7mm,8.5mm,-7.7mm,8.5mm,-7.267mm,8.5mm,2,T,180,Yes,NCP15WF104F03RC,,,LCSC,https://item.szlcsc.com/datasheet/NCP15WF104F03RC/78257.html
+U1,CH32V003F4U6,QFN-20_L3.0-W3.0-P0.40-TL-EP1.7,-4.4mm,6.4mm,-4.4mm,6.4mm,-2.9mm,5.6mm,21,T,180,Yes,CH32V003F4U6,,,LCSC,https://item.szlcsc.com/datasheet/CH32V003F4U6/6049934.html
+U2,TP4054_C382138,SOT-23-5_L2.9-W1.6-P0.95-LS2.8-BL,14mm,7.3mm,14mm,7.3mm,14.95mm,8.4mm,5,T,180,Yes,TP4054,,,LCSC,https://item.szlcsc.com/datasheet/TP4054/354933.html
+U3,TPS61023DRLT,SOT-563-6_L1.6-W1.2-P0.5-LS1.6-BR,5.5mm,9mm,5.5mm,9mm,4.86mm,9.5mm,6,T,180,Yes,TPS61023DRLT,,,LCSC,https://www.ti.com/cn/lit/ds/symlink/tps61023.pdf
+U4,SY6280AAC_C55136,SOT-23-5_L3.0-W1.7-P0.95-LS2.8-BL,14mm,-6.9mm,14mm,-6.9mm,13.05mm,-8.054mm,5,T,0,Yes,SY6280AAC,,High Side Switch,LCSC,https://item.szlcsc.com/datasheet/SY6280AAC/56162.html
+U5,SN74LVC1T45DBVR,SOT-23-6_L2.9-W1.6-P0.95-LS2.8-BR,-9.3mm,-0.4mm,-9.3mm,-0.4mm,-10.65mm,0.55mm,6,T,180,Yes,SN74LVC1T45DBVR,,,LCSC,https://www.ti.com/cn/lit/ds/symlink/sn74lvc1t45.pdf
+U6,SN74LVC1T45DBVR,SOT-23-6_L2.9-W1.6-P0.95-LS2.8-BR,-9.3mm,-3.6mm,-9.3mm,-3.6mm,-10.65mm,-2.65mm,6,T,180,Yes,SN74LVC1T45DBVR,,,LCSC,https://www.ti.com/cn/lit/ds/symlink/sn74lvc1t45.pdf
+U7,XC6206P182MR_C21659,SOT-23-3_L2.9-W1.6-P1.90-LS2.8-BR,-9.3mm,3mm,-9.3mm,3mm,-8.065mm,2.05mm,3,T,0,Yes,XC6206P182MR,,,LCSC,https://item.szlcsc.com/datasheet/XC6206P182MR/22380.html
+U8,HAL248 SW,DFN-6_HAL248_SW,-12mm,-7mm,-12mm,-7mm,-12.818mm,-6.5mm,7,T,270,Yes,HAL248 SW,,Omnipolar,LCSC,https://item.szlcsc.com/datasheet/HAL248%2520SW/7268731.html
+D1,B5819WS,SOD-323_L1.8-W1.3-LS2.5-RD,8.2mm,-4.45mm,8.2mm,-4.45mm,9.372mm,-4.45mm,2,T,180,Yes,B5819WS,,,LCSC,https://atta.szlcsc.com/upload/public/pdf/source/20180131/C179554_15173931515471329165.pdf
+D2,B5819WS,SOD-323_L1.8-W1.3-LS2.5-RD,8.2mm,-6.25mm,8.2mm,-6.25mm,9.372mm,-6.25mm,2,T,180,Yes,B5819WS,,,LCSC,https://atta.szlcsc.com/upload/public/pdf/source/20180131/C179554_15173931515471329165.pdf
