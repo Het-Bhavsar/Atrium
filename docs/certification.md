@@ -13,7 +13,7 @@ the mark must never be used to suggest either.
 | All software needed to operate it under an OSI licence | Pod and case firmware, phone app: Apache-2.0 | ready |
 | Documentation under an open licence, no NC or ND | CC BY-SA 4.0 (`docs/LICENSE`) | ready |
 | Original design files, publicly available | Schematics and boards as `.SchDoc` / `.PcbDoc` with PDFs; enclosure as STEP, STL and drawings | the repository is private until release |
-| Design files in the preferred format for making changes | Boards were drawn in EasyEDA Pro; the native project is not yet in the repository. The enclosure is published as STEP, which any CAD tool can edit | open (see below) |
+| Design files in the preferred format for making changes | Boards: the native EasyEDA Pro project in `hardware/easyeda/`, plus Altium exports. Enclosure: STEP, which any CAD tool can edit | ready |
 | Bill of materials | Every board's `production/*_BOM.csv`, with manufacturer part and LCSC numbers | ready |
 | Assembly instructions (optional) | [`build-assembly-test.md`](build-assembly-test.md), [`quick-start.md`](quick-start.md) | ready |
 | Third-party parts identified, with accessible datasheets | See below | ready |
@@ -28,10 +28,8 @@ case MCU and the passives. Their internal designs are not open, and OSHWA does n
 
 **Before applying:**
 1. Make the repository public.
-2. Add the native EasyEDA Pro project (`.epro`) next to the Altium exports, so the boards can be edited in the tool
-   they were drawn in.
-3. Confirm the version text on every board's silkscreen.
-4. Submit the form at [application.oshwa.org](https://application.oshwa.org/) as Local Forge, and register each later
+2. Confirm the version text on every board's silkscreen.
+3. Submit the form at [application.oshwa.org](https://application.oshwa.org/) as Local Forge, and register each later
    version under a new UID instead of overwriting this one.
 
 ## Product compliance (before any sale)

@@ -38,6 +38,10 @@ syncs it to your phone over Bluetooth LE. A small Plinth charges it, and a pocke
   <img src="docs/images/renders/pod_studio_dimensions.png" alt="Studio render of the pod with its dimensions: 20.9 by 11.0 by 5.3 mm" width="100%">
 </p>
 
+<p align="center">
+  <img src="docs/images/plates/pod_exploded_infographic.jpg" alt="Exploded view of the pod with each part labelled: shell, chip antenna, nRF52832, radio island, power island, cell, flex, stiffener, base and optical window" width="100%">
+</p>
+
 Every file that defines it is here: schematics, board layouts, Gerbers, BOMs, enclosure CAD and drawings, the
 simulations behind the numbers, the firmware for the pod and the case, and the phone app. Read it, build it, change it.
 
@@ -204,6 +208,7 @@ hardware/
   design-data/           netlist, pin map, PCB and flex rules, board outlines (DXF)
   simulation/            reports: RF chain, impedance, link budget, optics, power, charging, thermal, assembly
   stencil-report.md      stencil area ratios for every board
+  easyeda/               the native EasyEDA Pro project: every board, editable
 mechanical/
   pod/ case/ plinth/ programming-jig/ packaging/    drawings (PDF) · STEP · STL · GLB · DXF
   renders/                                          product and section renders

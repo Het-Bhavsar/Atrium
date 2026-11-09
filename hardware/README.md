@@ -54,6 +54,7 @@ Also here:
 | `design-data/outline/` | Board outlines and keep-outs (DXF, SVG) |
 | `simulation/` | Simulation reports and plots: RF chain, CPWG impedance, link budget, optics, power, charging tolerance, thermal, assembly |
 | `stencil-report.md` | Stencil area ratios for every board |
+| `easyeda/` | The native EasyEDA Pro project with every board, the editable source of all of the above |
 
 ## Schematics at a glance
 

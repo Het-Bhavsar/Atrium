@@ -8,6 +8,10 @@ The enclosure parts of the Atrium EVT build, as drawings, solid models and meshe
 </p>
 
 <p align="center">
+  <img src="../docs/images/plates/pod_exploded_infographic.jpg" alt="Exploded view of the pod with each part labelled: shell, chip antenna, nRF52832, radio island, power island, cell, flex, stiffener, base and optical window" width="100%">
+</p>
+
+<p align="center">
   <img src="renders/hero_pod_three_quarter.png" alt="Pod, three-quarter view" width="49%">
   <img src="renders/hero_on_plinth.png" alt="Pod on the Plinth" width="49%">
   <img src="renders/case_section_button.png" alt="Charging case section through the button" width="49%">
