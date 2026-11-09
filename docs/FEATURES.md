@@ -24,7 +24,7 @@ Sensors are the EVT pod's: PPG module MAXM86161 (green, red and IR, one photodio
 | 7 | Recovery | A morning score from resting HR, HRV, sleep and temperature deviation | 1–4 | V1 | Formula documented and versioned |
 | 8 | SpO₂ trend | Overnight relative oxygen-saturation trend | PPG red and IR | Later | Uncalibrated, so trend only. Never a % SpO₂ number |
 | 9 | Thermal trends | Skin-temperature and pod-gradient trends over the day and during exercise | TH1 and TH4 NTCs | Later | Atrium's own physiology; no composite "score" until validated |
-| 10 | Perfusion trend | Relative PPG amplitude (AC/DC) trend | PPG | Later | No brain or cerebral claims (see the simulation notes) |
+| 10 | Perfusion trend | Relative PPG amplitude (AC/DC) trend | PPG | Later | No brain or cerebral claims (see [brain-blood-flow.md](brain-blood-flow.md)) |
 | 11 | Eating detection | A prompt: "Looks like you are eating — log it?" | IMU jaw-motion pattern | Later | Opt-in. Jaw clench and talking are confounders, so test before shipping |
 | 12 | Cycle-aware view | Temperature-based phase estimate and day labels | 3 plus user input | Later | Opt-in, wellness only, never contraception guidance |
 

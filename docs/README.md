@@ -11,6 +11,7 @@
 | [story.md](story.md) | How Atrium got from a 28 mm board to the EVT capsule |
 | [architecture.md](architecture.md) | System, boards, power, radio, contacts |
 | [mechanical.md](mechanical.md) | Shell, base, skin pad, Plinth, case, jig, packaging |
+| [brain-blood-flow.md](brain-blood-flow.md) | Can a pod on the head see brain blood flow? The physics, the numbers and the tests |
 | [placement.md](placement.md) | Where on the head the pod sits, and why |
 | [charging-case.md](charging-case.md) | The case: charging, status, reset, firmware |
 | [build-assembly-test.md](build-assembly-test.md) | Fabrication, assembly, bring-up and end-of-line tests |

@@ -110,18 +110,38 @@ after EVT.
 a voice pickup, so you can tap the pod and talk to an AI assistant, with the answer heard through
 the bone and nothing in your ear. It is designed on paper and deliberately left out of EVT, so this build stays simple.
 
-**Looking deeper.** I wanted to know if a pod this small could see blood flow in the brain, so we tried two ways.
+### Brain blood flow?
 
-- *The usual way*, which Atrium uses: green, red and infrared light with the LEDs and the photodiode a couple of
-  millimetres apart. Our photon simulations say this light stays in the scalp. Green sees nothing deeper, and in red and
-  infrared the brain's share of the pulse is well under a tenth of a percent.
-- *The fNIRS way*: near-infrared light with the source and the detector about 3 cm apart, so the light travels deep
-  enough to reach the brain before it comes back. The same model puts about a tenth of the signal in the brain at that
-  spacing, which matches published work.
+It's the first thing people ask about a sensor on the side of the head, so here is the straight answer: **no, Atrium
+can't see blood flow in the brain, and neither can any sensor this small.** I wanted it to, so I tested it before
+claiming anything.
 
-So a 20 mm pod can't see the brain, and I would rather say that plainly than claim it. A 3 cm optical path needs a
-different shape, a band or a longer pod, and careful validation. It is on the research list, not in this product.
-Atrium today is a wellness device: pulse, heart-rate variability, sleep and skin temperature, nothing more.
+<p align="center">
+  <img src="docs/images/research/light_depth_explainer.jpg" alt="How deep light travels at 2 mm and at 30 mm spacing" width="100%">
+</p>
+
+An optical sensor works by shining light into the skin and catching what scatters back. The light comes back along a
+curved path, and **how deep that path goes depends on how far apart the light and the detector are.** Under the pod
+there are about 3 mm of scalp, 5 mm of jaw muscle, 2–3 mm of skull and some fluid before you reach the brain.
+
+- **The usual way, which Atrium uses.** An integrated optical module: green, red and infrared LEDs and the photodiode
+  in one 2.9 × 4.3 mm package, so they are fixed about 2 mm apart by the part itself. Our photon simulations say green never leaves the scalp, and in red and infrared the brain's share of the
+  pulse is **under 0.1 %**; the rest is scalp and the temporalis muscle. The pulse at the side of your head comes from
+  the superficial temporal artery, which feeds the scalp, not the brain.
+- **A far detector, which we tried.** Rev B.1 had a second photodiode 18.5 mm from the LEDs. At that distance the
+  brain is still only about 1 % of the pulse and the jaw muscle about three quarters, so it was dropped.
+- **The fNIRS way.** Near-infrared light with the source and the detector about **3 cm** apart, so the light that makes
+  it across has gone deep enough to reach the brain. Even then the brain is only **about 10 %** of the signal, which
+  is why research systems add a short scalp-only channel and subtract it.
+
+Better processing can't close that gap. To detect a brain signal in a 24-person study it would need to be about 2 % of
+the pulse; at the pod's spacing it is 40 to 450 times smaller, faster sampling barely helps, and the jaw muscle
+produces false "deep" results on its own. So when a small device says it reads brain blood flow, ask how far apart its
+light and detector are, whether it has a short channel, and what it was validated against.
+
+A 3 cm optical path needs a band or a longer probe and a proper study with a reference. It is on my research list, not
+in this product. Atrium is a wellness device: pulse, heart-rate variability, sleep and skin temperature, done
+honestly. The full reasoning, numbers and planned tests are in [`docs/brain-blood-flow.md`](docs/brain-blood-flow.md).
 
 If any of this is the part you want to build, start with the [roadmap](docs/roadmap.md) and open an issue.
 
