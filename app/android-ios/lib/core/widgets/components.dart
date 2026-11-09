@@ -5,6 +5,7 @@ import 'dart:ui';
 
 import 'package:atrium/core/theme/tokens.dart';
 import 'package:atrium/core/widgets/graphics.dart';
+import 'package:atrium/features/insights/domain/metrics.dart';
 import 'package:atrium/features/pod/domain/pod.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -651,5 +652,91 @@ class _RevealState extends State<Reveal> with SingleTickerProviderStateMixin {
       builder: (_, child) => Transform.translate(offset: Offset(0, 12 * (1 - _t.value)), child: child),
       child: widget.child,
     ),
+  );
+}
+
+/// One reading in a [ReadingList]: a name, the value in serif, and an optional note and bar.
+class Reading {
+  const Reading(this.name, this.value, {this.unit = '', this.note, this.color, this.fraction});
+  final String name;
+  final String value;
+  final String unit;
+  final String? note;
+
+  /// The value's colour: only the sensor's light colours for data measured with it; ink otherwise.
+  final Color? color;
+
+  /// 0-1 draws a thin bar under the row in [color].
+  final double? fraction;
+}
+
+/// Readings on one soft grey card, hairlines between: the inner pages' quiet list (no icons, no verdict words).
+class ReadingList extends StatelessWidget {
+  const ReadingList(this.readings, {super.key});
+  final List<Reading> readings;
+
+  @override
+  Widget build(BuildContext context) {
+    final t = AtriumColors.of(context);
+    return AtriumCard(
+      padding: EdgeInsets.zero,
+      child: Column(
+        children: [
+          for (var i = 0; i < readings.length; i++) ...[
+            if (i > 0) Divider(height: 1, thickness: 0.5, indent: Space.l, endIndent: Space.l, color: t.hair),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(Space.l, 14, Space.l, 14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(readings[i].name, style: AtriumType.body(t.ink)),
+                            if (readings[i].note != null) Text(readings[i].note!, style: AtriumType.caption(t.ink2)),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: Space.m),
+                      Text.rich(
+                        TextSpan(
+                          children: [
+                            TextSpan(
+                              text: readings[i].value,
+                              style: AtriumType.serifAt(28, weight: 300, color: readings[i].color ?? t.ink, height: 1),
+                            ),
+                            if (readings[i].unit.isNotEmpty) TextSpan(text: ' ${readings[i].unit}', style: AtriumType.unit(t.ink2)),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (readings[i].fraction != null) ...[
+                    const SizedBox(height: 10),
+                    Meter(readings[i].fraction!.clamp(0, 1).toDouble(), color: readings[i].color ?? t.ink, height: 4),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// The page's one range switch, right under the story (inner pages).
+class RangeSwitch extends StatelessWidget {
+  const RangeSwitch({required this.selected, required this.onChanged, super.key});
+  final Range selected;
+  final ValueChanged<Range> onChanged;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.only(bottom: Space.s),
+    child: Segmented<Range>(values: Range.values, labels: [for (final r in Range.values) r.long], selected: selected, onChanged: onChanged),
   );
 }

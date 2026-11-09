@@ -57,4 +57,12 @@ final class PermissionHost: PermissionHostApi {
   func locationServicesOn() throws -> Bool { true }
 
   func openLocationSettings() throws {}
+
+  /// CoreBluetooth wakes Atrium for the pod without Background App Refresh, but a user who turned it off for Atrium
+  /// expects nothing in the background, so the app says so.
+  func backgroundAllowed() throws -> Bool { UIApplication.shared.backgroundRefreshStatus == .available }
+
+  func openBackgroundSettings() throws {
+    if let url = URL(string: UIApplication.openSettingsURLString) { UIApplication.shared.open(url) }
+  }
 }

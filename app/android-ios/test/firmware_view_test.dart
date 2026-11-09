@@ -67,7 +67,7 @@ class _Host extends PodHostApi {
   Future<void> setNotify(int characteristic, bool enabled) async {}
 
   @override
-  Future<void> setBackgroundSync(bool enabled, int maxHours) async {}
+  Future<void> setBackgroundSync(bool enabled, int maxHours, String storeDir) async {}
 
   @override
   Future<void> syncLog(int fromPage) async {}
@@ -78,9 +78,9 @@ class _Dfu extends FakeDfu {
   final _Host host;
 
   @override
-  Future<void> upload(String deviceId, Uint8List image, {required void Function(int sent, int total) onProgress, void Function()? onReset}) async {
+  Future<void> upload(String deviceId, Uint8List image, Uint8List hash, {required void Function(int sent, int total) onProgress, void Function()? onReset}) async {
     expect(host.calls.last, 'disconnect', reason: 'the app lets go of the link before MCUmgr connects');
-    await super.upload(deviceId, image, onProgress: onProgress, onReset: onReset);
+    await super.upload(deviceId, image, hash, onProgress: onProgress, onReset: onReset);
     host.restarted = true;
   }
 }
@@ -139,7 +139,7 @@ void main() {
     await _runUpdate(tester);
     expect(c.read(firmwareUpdateProvider).phase, OtaPhase.done);
     expect(find.text('Updated'), findsOneWidget);
-    expect(find.textContaining('Pod software 0.2.0 is running'), findsOneWidget);
+    expect(find.textContaining('Pod software 0.2.0 passed the pod'), findsOneWidget);
     expect(host.calls.where((x) => x.startsWith('connect')).length, 1, reason: 'reconnected once after the restart');
     expect(c.read(podSessionProvider).handedOver, isFalse, reason: 'syncing resumes');
   });
@@ -156,7 +156,7 @@ void main() {
   testWidgets('off the Plinth with no voltage reading, the button stays off and says why', (tester) async {
     final host = _Host(after: '0.2.0');
     final c = await _open(tester, host);
-    c.read(appStateProvider.notifier).update((s) => s.copyWith(situation: PodSituation.worn, livePod: PodStatus.demo[PodSituation.worn]));
+    c.read(appStateProvider.notifier).update((s) => s.copyWith(situation: PodSituation.worn));
     await tester.pump();
     expect(find.text('Not ready to update yet'), findsOneWidget);
     expect(find.textContaining('Put the pod on the Plinth'), findsOneWidget);

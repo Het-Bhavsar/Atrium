@@ -39,68 +39,26 @@ class TemperatureView extends ConsumerWidget {
             : 'Last night was ${signed1(d.last.tempDelta)} °C from your usual.',
       ),
       children: [
-        Segmented<Range>(
-          values: Range.values,
-          labels: [for (final r in Range.values) r.short],
-          selected: range,
-          onChanged: (r) => ref.read(appStateProvider.notifier).setRange('temp', r),
-        ),
-        const SizedBox(height: Space.m),
+        RangeSwitch(selected: range, onChanged: (r) => ref.read(appStateProvider.notifier).setRange('temp', r)),
+        const SectionHeader('Each night', trailing: 'Usual ±0.3 °C'),
         AtriumCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AtriumChart(
-                points: [for (final p in r.points) (p.value * 100).round() / 100],
-                xLabels: r.xLabels,
-                color: t.red,
-                kind: range == Range.sixMonths ? ChartKind.line : ChartKind.diverging,
-                band: (-0.3, 0.3),
-                domain: (-0.6, 0.6),
-                ticks: const [-0.5, 0, 0.5],
-                tickFormat: _tick,
-                labels: [for (final p in r.points) p.label],
-                unit: '°C',
-                format: signed1,
-                semantics: 'Nightly skin temperature change',
-              ),
-              const SizedBox(height: 10),
-              Wrap(
-                spacing: 14,
-                runSpacing: 6,
-                children: [
-                  _LegendItem(color: t.red, label: 'Warmer'),
-                  _LegendItem(color: t.cool, label: 'Cooler'),
-                  _LegendItem(color: t.red.withValues(alpha: 0.15), label: 'Usual ±0.3 °C'),
-                ],
-              ),
-            ],
+          child: AtriumChart(
+            points: [for (final p in r.points) (p.value * 100).round() / 100],
+            xLabels: r.xLabels,
+            // Not measured with light, so no data colour: ink, the band shows the usual range.
+            color: t.ink,
+            kind: range == Range.sixMonths ? ChartKind.line : ChartKind.diverging,
+            band: (-0.3, 0.3),
+            domain: (-0.6, 0.6),
+            ticks: const [-0.5, 0, 0.5],
+            tickFormat: _tick,
+            labels: [for (final p in r.points) p.label],
+            unit: '°C',
+            format: signed1,
+            semantics: 'Nightly skin temperature change',
           ),
-        ),
-        const FootNote(
-          'This is the change in skin temperature, not body temperature. A warm room, late meals, alcohol, travel and your cycle can all move it.',
         ),
       ],
     );
   }
-}
-
-class _LegendItem extends StatelessWidget {
-  const _LegendItem({required this.color, required this.label});
-  final Color color;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) => Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Container(
-        width: 10,
-        height: 10,
-        decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(3)),
-      ),
-      const SizedBox(width: 5),
-      Text(label, style: AtriumType.caption(AtriumColors.of(context).ink2)),
-    ],
-  );
 }

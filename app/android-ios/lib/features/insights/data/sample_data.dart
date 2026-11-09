@@ -5,6 +5,7 @@ import 'dart:math' as math;
 
 import 'package:atrium/features/insights/domain/metrics.dart';
 import 'package:atrium/features/insights/domain/metrics_source.dart';
+import 'package:atrium/features/insights/domain/scores.dart';
 
 /// Demo data: the prototype's sample set, generated from the same seeded RNG so the
 /// numbers match `design/prototype/index.html`. Used until a pod is paired.
@@ -12,6 +13,18 @@ class SampleData extends MetricsSource {
   SampleData._();
 
   static final SampleData instance = SampleData._().._build();
+
+  // The prototype's written values for the cards the demo shows.
+  @override
+  List<double> get zoneMinutes => const [182, 64, 31, 14, 4];
+  @override
+  List<Workout> get workouts => const [Workout(kind: 'Run', startMinute: 430, minutes: 38, avgBpm: 134), Workout(kind: 'Walk', startMinute: 780, minutes: 30, avgBpm: 96)];
+  @override
+  (int, int)? get lowestHr => (49, 160);
+  @override
+  double? get restlessPerHour => 11;
+  @override
+  RecoveryParts? get recoveryParts => const RecoveryParts(hrv: 86, rhr: 80, sleep: 74, temp: 70, score: 78);
 
   static const int n = 182;
   static final DateTime demoToday = DateTime(2026, 11, 6);

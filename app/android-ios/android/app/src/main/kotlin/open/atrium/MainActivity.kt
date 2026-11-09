@@ -6,7 +6,9 @@ package open.atrium
 import android.content.Context
 import android.content.Intent
 import android.location.LocationManager
+import android.net.Uri
 import android.os.Build
+import android.os.PowerManager
 import android.provider.Settings
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -46,5 +48,19 @@ class PermissionHost(private val activity: FlutterActivity) : PermissionHostApi 
 
   override fun openLocationSettings() {
     activity.startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+  }
+
+  /** False while battery optimisation may hold back the background sync job (Doze defers it to maintenance windows). */
+  override fun backgroundAllowed(): Boolean {
+    val pm = activity.getSystemService(Context.POWER_SERVICE) as PowerManager
+    return pm.isIgnoringBatteryOptimizations(activity.packageName)
+  }
+
+  /** The system's battery optimisation list (no direct exemption request: the user decides there). Falls back to the
+   *  app's own settings page on phones without that screen. */
+  override fun openBackgroundSettings() {
+    runCatching { activity.startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)) }.onFailure {
+      activity.startActivity(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.parse("package:${activity.packageName}")))
+    }
   }
 }

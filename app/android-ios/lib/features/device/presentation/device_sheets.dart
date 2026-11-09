@@ -1,7 +1,6 @@
 // Copyright (c) 2026 Het Bhavsar
 // SPDX-License-Identifier: Apache-2.0
 
-import 'package:atrium/core/app_state.dart';
 import 'package:atrium/core/config.dart';
 import 'package:atrium/core/theme/tokens.dart';
 import 'package:atrium/core/widgets/components.dart';
@@ -99,7 +98,7 @@ Future<void> showBoxContents(BuildContext context) => showAtriumSheet<void>(
 
 /// Turn off for storage. Only possible on the Plinth: Turn off, then lift. Off it, explains that first.
 Future<void> showStorageOff(BuildContext context, WidgetRef ref) {
-  final onPlinth = ref.read(appStateProvider).pod.onPlinth;
+  final onPlinth = ref.read(podStatusProvider).onPlinth;
   if (!onPlinth) {
     return showAtriumSheet<void>(
       context,

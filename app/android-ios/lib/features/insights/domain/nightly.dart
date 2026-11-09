@@ -251,6 +251,7 @@ Night summarise(
   required SleepModels models,
   Vec3? up,
   NightConfig cfg = const NightConfig(),
+  bool withStages = true,
 }) {
   final upV = up ?? uprightFromLog(epochs, cfg);
   final m = nightWindow(times, utcOffsetH, nightDateS, cfg);
@@ -329,6 +330,8 @@ Night summarise(
   night.oxygenBursts = bursts.length;
   if (bursts.isNotEmpty) night.oxygenRatio = oxygenNightRatio(bursts);
   // Labs: same features as sleep/wake (whole window, so time and pulse normalisation match), sliced to the period.
+  // Skipped when the phone's model plan leaves stages out (Labs off, or a low-end phone).
+  if (!withStages) return night;
   final st = models.stages.predict(_features(ep));
   night.stages = [for (var i = s0; i < s1; i++) usable(ep[i]) ? st[i] : 0];
   return night;

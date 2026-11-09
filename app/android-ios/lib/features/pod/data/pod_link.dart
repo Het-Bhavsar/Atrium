@@ -8,7 +8,7 @@ import 'package:atrium/features/pod/data/epoch_store.dart';
 import 'package:atrium/features/pod/data/log_record.dart';
 import 'package:atrium/features/pod/data/pod_api.g.dart';
 import 'package:atrium/features/pod/domain/pod.dart';
-import 'package:flutter/foundation.dart' show visibleForTesting;
+import 'package:flutter/foundation.dart' show compute, visibleForTesting;
 import 'package:flutter/services.dart';
 
 /// GATT ids used by the app (docs/ble_gatt.md rev 13; the Battery service is gone, SoC is Charge State byte 5). Custom ids share the base
@@ -18,6 +18,7 @@ abstract final class Gatt {
   static const int firmwareRevision = 0x2A26;
   static const int chargeState = 0x0101;
   static const int ppgControl = 0x0201;
+  static const int ppgData = 0x0202;
   static const int fitQuality = 0x0206;
   static const int logInfo = 0x0501;
 
@@ -46,6 +47,38 @@ class LiveEpoch {
     final raw = Uint8List.fromList(v.sublist(8, 8 + recordSize));
     return LiveEpoch(TimedEpoch(t & ~uptimeBit, t & uptimeBit != 0, Epoch.decode(raw), raw), bd.getUint32(4, Endian.little));
   }
+}
+
+/// One PPG Data notification (0x0202, docs/ble_gatt.md section 4.2): u16 sequence, u8 rate (Hz), u8 mode, u32 uptime
+/// ms of the first sample, then 3-byte MAXM86161 FIFO items, big-endian: tag in bits 23..19, value in bits 18..0.
+/// [green] keeps slot 1 (tag 0x01, or 0x0D after picket-fence replacement), the green LED in every everyday mode.
+class PpgChunk {
+  const PpgChunk({required this.sequence, required this.rateHz, required this.mode, required this.green});
+  final int sequence;
+  final int rateHz;
+  final int mode;
+  final List<int> green;
+
+  static PpgChunk? parse(Uint8List v) {
+    if (v.length < 8) return null;
+    final green = <int>[];
+    for (var o = 8; o + 3 <= v.length; o += 3) {
+      final w = v[o] << 16 | v[o + 1] << 8 | v[o + 2];
+      final tag = w >> 19;
+      if (tag == 0x01 || tag == 0x0D) green.add(w & 0x7FFFF);
+    }
+    return PpgChunk(sequence: v[0] | v[1] << 8, rateHz: v[2], mode: v[3], green: green);
+  }
+}
+
+/// The last [seconds] of a PPG trace, ready to draw: detrended against its own mean, flipped (more blood absorbs more
+/// green, so the pulse is a dip in the light), and scaled to -1..1. Empty until there are a few samples.
+List<double> ppgTrace(List<int> samples) {
+  if (samples.length < 8) return const [];
+  final mean = samples.reduce((a, b) => a + b) / samples.length;
+  final xs = [for (final s in samples) mean - s];
+  final peak = xs.map((x) => x.abs()).reduce((a, b) => a > b ? a : b);
+  return peak == 0 ? [for (final _ in xs) 0.0] : [for (final x in xs) x / peak];
 }
 
 /// Live pod state parsed from Charge State (0x0101, 19 bytes) and Battery Level (0x2A19).
@@ -225,10 +258,14 @@ class PodLink implements PodFlutterApi {
     return _host.write(Gatt.sleepWindow, b.buffer.asUint8List(), true);
   }
 
-  /// Fit guide (#24): PPG Control = 4 (fit mode), then Fit Quality (0x0206) once a second.
+  /// PPG Control during the fit guide: fit mode (bit 2) and the raw PPG stream (bit 0), so the page draws the pod's
+  /// own green trace.
+  static const int fitControl = 0x05;
+
+  /// Fit guide (#24): PPG Control = fit mode plus the raw stream, then Fit Quality (0x0206) once a second.
   Stream<FitQuality> startFit() {
     _host
-      ..write(Gatt.ppgControl, Uint8List.fromList([0x04]), true)
+      ..write(Gatt.ppgControl, Uint8List.fromList([fitControl]), true)
       ..setNotify(Gatt.fitQuality, true);
     return _notify.stream.where((n) => n.$1 == Gatt.fitQuality && n.$2.length >= 2).map((n) => FitQuality(q: n.$2[0], flags: n.$2[1]));
   }
@@ -241,6 +278,9 @@ class PodLink implements PodFlutterApi {
         .map((n) => n.$2[0] & 1 == 1 && n.$2.length >= 3 ? n.$2[1] | n.$2[2] << 8 : n.$2[1]);
   }
 
+  /// Stops the 1 Hz Heart Rate notifications (the app listens only while it is in front).
+  Future<void> stopHeartRate() => _host.setNotify(Gatt.heartRateMeasurement, false);
+
   /// Each new log record as the pod writes it (rev 13). The full sync on connect fills any that were missed.
   Stream<LiveEpoch> liveEpochs() {
     _host.setNotify(Gatt.liveEpoch, true);
@@ -252,10 +292,17 @@ class PodLink implements PodFlutterApi {
   static bool needsSync({required int headPage, required int cursor}) => headPage > cursor + 1;
 
   /// Fit mode times out on the pod after 180 s; writing 4 again restarts it.
-  Future<void> renewFit() => _host.write(Gatt.ppgControl, Uint8List.fromList([0x04]), true);
+  Future<void> renewFit() => _host.write(Gatt.ppgControl, Uint8List.fromList([fitControl]), true);
+
+  /// Raw PPG (0x0202): the green slot's samples as the pod's FIFO delivers them (streamed while PPG Control bit 0 is set).
+  Stream<PpgChunk> ppg() {
+    _host.setNotify(Gatt.ppgData, true);
+    return _notify.stream.where((n) => n.$1 == Gatt.ppgData).map((n) => PpgChunk.parse(n.$2)).where((c) => c != null).cast<PpgChunk>();
+  }
 
   Future<void> stopFit() async {
     await _host.setNotify(Gatt.fitQuality, false);
+    await _host.setNotify(Gatt.ppgData, false);
     await _host.write(Gatt.ppgControl, Uint8List.fromList([0x00]), true);
   }
 
@@ -292,7 +339,8 @@ class PodLink implements PodFlutterApi {
     }
     final (first, bytes) = result;
     final anchor = _anchor;
-    var epochs = decodeBlocks(bytes);
+    // A full ring is 8 pages (32 KB); a long backlog decodes off the UI isolate.
+    var epochs = bytes.length > 2 * pageSize ? await compute(decodeBlocks, bytes) : decodeBlocks(bytes);
     if (anchor != null) epochs = rebaseLastRun(epochs, uptimeNow: anchor.uptime, unixNow: anchor.unix);
     final added = await store.add(epochs);
     await store.setCursor(nextCursor(first: first, bytes: bytes.length, cursor: from));
@@ -330,7 +378,9 @@ class PodLink implements PodFlutterApi {
     return n == 0 ? cursor : first + n - 1;
   }
 
-  Future<void> setBackgroundSync({bool enabled = true}) => _host.setBackgroundSync(enabled, podLogHours);
+  /// Background sync (#20): native downloads the log every [hours] h while the app is closed and leaves the pages
+  /// in [storeDir] (`spool.dart`).
+  Future<void> setBackgroundSync({required String storeDir, int hours = 4, bool enabled = true}) => _host.setBackgroundSync(enabled, hours, storeDir);
 
   static Uint8List _u32(int v) => (ByteData(4)..setUint32(0, v, Endian.little)).buffer.asUint8List();
 }

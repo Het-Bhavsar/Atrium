@@ -9,18 +9,31 @@ import 'package:atrium/features/profile/domain/profile.dart';
 import 'package:atrium/features/profile/presentation/profile_form.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hive_ce/hive_ce.dart';
 
 void main() {
-  test('profile survives a save and reload, and an unreadable file starts again', () async {
+  test('profile survives a save and reload, an unreadable entry starts again, and profile.json moves to Hive', () async {
     final dir = await Directory.systemTemp.createTemp('atrium_profile');
-    addTearDown(() => dir.delete(recursive: true));
-    final store = ProfileStore(File('${dir.path}/profile.json'));
+    addTearDown(() async {
+      await Hive.close();
+      await dir.delete(recursive: true);
+    });
+    Hive.init(dir.path);
+    final box = await Hive.openBox<Object?>('profile');
+    final store = ProfileStore(box);
     expect(await store.load(), isNull);
     const p = Profile(name: 'Mira', age: 41, heightCm: 170);
     await store.save(p);
     expect(await store.load(), p);
-    await store.file.writeAsString('{not json');
+    await box.put('me', '{not a map');
     expect(await store.load(), isNull);
+
+    // An earlier version's file is moved over once, then removed.
+    await box.clear();
+    final legacy = File('${dir.path}/profile.json')..writeAsStringSync('{"name":"Ravi","age":52}');
+    await ProfileStore(box, legacy: legacy).migrateLegacy();
+    expect(await store.load(), const Profile(name: 'Ravi', age: 52));
+    expect(legacy.existsSync(), isFalse);
   });
 
   test('summary leaves out what is not set; ranges are checked', () {

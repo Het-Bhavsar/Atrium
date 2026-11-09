@@ -5,6 +5,7 @@ import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:atrium/features/device/domain/firmware_update.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:mcumgr_flutter/mcumgr_flutter.dart' as mcu;
 import 'package:mcumgr_flutter/models/firmware_upgrade_mode.dart';
 
@@ -23,7 +24,7 @@ class McumgrTransport implements DfuTransport {
   static const stallTimeout = Duration(seconds: 60);
 
   @override
-  Future<void> upload(String deviceId, Uint8List image, {required void Function(int sent, int total) onProgress, void Function()? onReset}) async {
+  Future<void> upload(String deviceId, Uint8List image, Uint8List hash, {required void Function(int sent, int total) onProgress, void Function()? onReset}) async {
     _cancelled = false;
     final m = await mcu.FirmwareUpdateManagerFactory().getUpdateManager(deviceId);
     _manager = m;
@@ -34,7 +35,7 @@ class McumgrTransport implements DfuTransport {
     void arm() {
       stall?.cancel();
       stall = Timer(stallTimeout, () {
-        error ??= 'The pod stopped answering during the upload.';
+        error ??= 'timed out: the pod stopped answering during the upload';
         if (!finished.isCompleted) finished.complete();
         unawaited(m.cancel());
       });
@@ -62,6 +63,7 @@ class McumgrTransport implements DfuTransport {
       arm();
       await m.updateWithImageData(
         imageData: image,
+        hash: hash,
         configuration: const mcu.FirmwareUpgradeConfiguration(firmwareUpgradeMode: FirmwareUpgradeMode.testOnly, eraseAppSettings: false),
       );
       await finished.future;
@@ -77,8 +79,26 @@ class McumgrTransport implements DfuTransport {
       }
     }
     if (_cancelled) throw const OtaCancelled();
-    if (error != null) throw OtaFailure('The upload failed: $error');
-    if (!success) throw const OtaFailure('The upload stopped before it finished.');
+    if (error != null) throw otaErrorFor(error!);
+    if (!success) throw const OtaLinkLost('The upload stopped before it finished.');
+  }
+
+  @override
+  Future<List<PodSlot>> slots(String deviceId) async {
+    final m = await mcu.FirmwareUpdateManagerFactory().getUpdateManager(deviceId);
+    try {
+      final list = await m.readImageList().timeout(const Duration(seconds: 20));
+      return [
+        for (final s in list ?? const <mcu.ImageSlot>[])
+          PodSlot(slot: s.slot, hash: s.hash, active: s.active, confirmed: s.confirmed, pending: s.pending, version: s.version),
+      ];
+    } finally {
+      try {
+        await m.kill();
+      } on Object {
+        // Already gone.
+      }
+    }
   }
 
   @override
@@ -86,4 +106,21 @@ class McumgrTransport implements DfuTransport {
     _cancelled = true;
     await _manager?.cancel();
   }
+}
+
+/// Plain words for what MCUmgr and the BLE stack report. The pod's upload hook answers MGMT_ERR_EBUSY (10) below
+/// 3.60 V off the Plinth (`firmware/src/main.c`, `dfu_guard`); the SMP characteristic needs an encrypted, bonded link.
+@visibleForTesting
+OtaFailure otaErrorFor(String raw) {
+  final t = raw.toLowerCase();
+  if (t.contains('busy') || RegExp(r'\b(rc|error|code)[:= ]*10\b').hasMatch(t) || t.contains('(10)')) {
+    return const OtaFailure('The pod stopped the update because its battery is low. Put it on the Plinth, then try again.');
+  }
+  if (t.contains('encrypt') || t.contains('authenticat') || t.contains('bond') || t.contains('pairing')) {
+    return const OtaFailure("The pod didn't accept this phone's pairing for the update. Open Device, let it reconnect, then try again.");
+  }
+  if (t.contains('disconnect') || t.contains('connection') || t.contains('timeout') || t.contains('timed out') || t.contains('not connected')) {
+    return const OtaLinkLost('The link to the pod dropped during the upload.');
+  }
+  return OtaFailure('The upload failed: $raw');
 }

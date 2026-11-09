@@ -15,13 +15,17 @@ import 'package:atrium/features/settings/data/log_out.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hive_ce/hive_ce.dart';
 
 /// Atrium has no account: log out must leave nothing of the wearer on this phone.
 void main() {
   testWidgets('log out deletes the profile and readings and resets settings but the theme', (tester) async {
     final dir = Directory.systemTemp.createTempSync('atrium_logout');
     addTearDown(() => dir.deleteSync(recursive: true));
-    final profiles = ProfileStore(File('${dir.path}/profile.json'));
+    Hive.init(dir.path);
+    final box = (await tester.runAsync(() => Hive.openBox<Object?>('profile')))!;
+    addTearDown(() => tester.runAsync(Hive.close));
+    final profiles = ProfileStore(box);
     await tester.runAsync(() => profiles.save(const Profile(name: 'Mira', age: 41)));
     final epochs = EpochStore(File('${dir.path}/epochs.bin'));
     final raw = Uint8List(12)..[1] = 0x10;
@@ -50,7 +54,7 @@ void main() {
     await tester.runAsync(() => PhoneData.logOut(captured));
 
     expect(captured.read(profileProvider).hasName, isFalse);
-    expect(profiles.file.existsSync(), isFalse);
+    expect(box.get('me'), isNull);
     expect(epochs.count, 0);
     expect(File('${dir.path}/epochs.bin').existsSync(), isFalse);
     final s = captured.read(appStateProvider);

@@ -66,4 +66,18 @@ abstract final class PodPermissions {
 
   /// Android: the system Location settings page.
   static Future<void> openLocationSettings() => _host.openLocationSettings();
+
+  /// Background sync can run unhindered: Android, Atrium is off battery optimisation (Doze otherwise defers the sync
+  /// job to maintenance windows, still well inside the pod's 20 h); iOS, Background App Refresh is on for Atrium.
+  static Future<bool> backgroundAllowed() async {
+    if (!Platform.isAndroid && !Platform.isIOS) return true;
+    try {
+      return await _host.backgroundAllowed();
+    } on Object {
+      return true;
+    }
+  }
+
+  /// Where the user can allow it: Android's battery optimisation list (no direct exemption request), iOS Settings.
+  static Future<void> openBackgroundSettings() => _host.openBackgroundSettings();
 }

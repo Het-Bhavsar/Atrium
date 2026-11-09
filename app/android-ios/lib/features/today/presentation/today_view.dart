@@ -29,7 +29,7 @@ class TodayView extends ConsumerWidget {
     final s = ref.watch(appStateProvider);
     final d = ref.watch(metricsProvider);
     final t = AtriumColors.of(context);
-    final pod = s.pod;
+    final pod = ref.watch(podStatusProvider);
     final learning = s.data == DataState.learning;
     final empty = s.data == DataState.empty;
     final sky = empty ? Sky.night : s.sky;
@@ -54,7 +54,9 @@ class TodayView extends ConsumerWidget {
     final evtStory = pod.offSkin
         ? 'Put Atrium back on to keep measuring.'
         : 'Resting heart rate was ${last.rhr.round()} bpm last night, lower than your usual.';
-    final live = pod.connected && !pod.offSkin && !pod.onPlinth;
+    // Real builds: Heart Rate Measurement (0x2A37) while the app is in front; demo: the prototype's 62.
+    final liveBpm = kRealData ? ref.watch(podSessionProvider.select((p) => p.liveBpm)) : 62;
+    final live = pod.connected && !pod.offSkin && !pod.onPlinth && liveBpm != null;
 
     Widget gauge;
     if (empty) {
@@ -86,7 +88,7 @@ class TodayView extends ConsumerWidget {
             color: t.heart,
             noFill: true,
             onPhoto: true,
-            number: '${live ? 62 : last.rhr.round()}',
+            number: '${live ? liveBpm : last.rhr.round()}',
             inner: live ? 'BPM · LIVE' : 'RESTING BPM',
             label: 'Heart rate',
           ),

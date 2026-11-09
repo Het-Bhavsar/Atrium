@@ -37,6 +37,7 @@ String otaTitle(OtaState s, {bool blocked = false}) => switch (s.phase) {
   OtaPhase.handingOver => 'Getting the pod ready',
   OtaPhase.uploading => 'Sending to the pod',
   OtaPhase.restarting => 'Restarting the pod',
+  OtaPhase.confirming => 'Trying out the new software',
   OtaPhase.verifying => 'Checking the new version',
   OtaPhase.done => 'Updated',
   OtaPhase.failed => s.release == null ? "Couldn't check" : "Update didn't finish",
@@ -66,12 +67,12 @@ class _RealFirmwareViewState extends ConsumerState<RealFirmwareView> {
     final s = ref.watch(firmwareUpdateProvider);
     final n = ref.read(firmwareUpdateProvider.notifier);
     // Rebuild on battery and connection changes, so the gate below stays current.
-    ref.watch(appStateProvider.select((a) => a.pod));
+    ref.watch(podStatusProvider);
     final t = AtriumColors.of(context);
     final onPod = s.current ?? PodVersion.tryParse(ref.watch(podSessionProvider.select((p) => p.firmware)));
     final r = s.release;
     final blocker = s.phase == OtaPhase.available ? n.blocker : null;
-    final showMeter = s.phase == OtaPhase.downloading || s.phase == OtaPhase.uploading || s.phase == OtaPhase.restarting || s.phase == OtaPhase.verifying;
+    final showMeter = s.phase == OtaPhase.downloading || s.phase == OtaPhase.uploading || s.phase == OtaPhase.restarting || s.phase == OtaPhase.confirming || s.phase == OtaPhase.verifying;
     final pct = (s.progress * 100).clamp(0, 100).round();
 
     final detail = switch (s.phase) {
@@ -80,11 +81,11 @@ class _RealFirmwareViewState extends ConsumerState<RealFirmwareView> {
       OtaPhase.upToDate => 'Your pod runs the latest published software.',
       OtaPhase.downloading => 'Getting the signed release from GitHub.',
       OtaPhase.handingOver => 'Pausing sync so the update has the Bluetooth link to itself.',
-      OtaPhase.uploading => 'Keep the pod near your phone until this finishes.',
+      OtaPhase.uploading => s.message ?? 'Keep the pod near your phone until this finishes.',
       OtaPhase.restarting => 'The pod restarts and moves the new software into place. This takes a few seconds.',
+      OtaPhase.confirming => 'The pod keeps new software only after it has run well for a minute. Keep it close.',
       OtaPhase.verifying => 'Reconnecting to read the version the pod now runs.',
-      OtaPhase.done =>
-        'Pod software ${s.current} is running. The pod keeps it once it has run well for a minute; if it does not, it goes back to the previous version by itself.',
+      OtaPhase.done => 'Pod software ${s.current} passed the pod\'s own check and is now kept.',
       _ => s.message ?? '',
     };
 
@@ -100,7 +101,7 @@ class _RealFirmwareViewState extends ConsumerState<RealFirmwareView> {
       case OtaPhase.idle || OtaPhase.checking:
         label = 'Checking…';
         action = null;
-      case OtaPhase.handingOver || OtaPhase.restarting || OtaPhase.verifying:
+      case OtaPhase.handingOver || OtaPhase.restarting || OtaPhase.confirming || OtaPhase.verifying:
         label = 'Updating…';
         action = null;
       case OtaPhase.done || OtaPhase.upToDate || OtaPhase.failed || OtaPhase.cancelled:
@@ -233,7 +234,7 @@ class _DemoFirmwareState extends ConsumerState<_DemoFirmware> {
   Widget build(BuildContext context) {
     final s = ref.watch(appStateProvider);
     final t = AtriumColors.of(context);
-    final d = s.pod;
+    final d = ref.watch(podStatusProvider);
     final ok = d.onPlinth || d.batteryPercent >= 40;
 
     final banner = AtriumCard(

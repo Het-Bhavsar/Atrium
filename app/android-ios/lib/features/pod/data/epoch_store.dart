@@ -5,6 +5,7 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:atrium/features/pod/data/log_record.dart';
+import 'package:flutter/foundation.dart' show compute;
 import 'package:path_provider/path_provider.dart';
 
 /// On-phone store of synced epochs: an append-only file of 16-byte rows (u32 Unix time, then the
@@ -31,14 +32,15 @@ class EpochStore {
   File get _cursorFile => File('${file.path}.cursor');
   File get _syncedFile => File('${file.path}.synced');
 
+  /// Files above this are parsed off the UI isolate (about 3 days of readings), so a launch with months of
+  /// readings doesn't stall the first frames.
+  static const int isolateAbove = 128 * 1024;
+
   Future<void> load() async {
     _rows.clear();
     if (await file.exists()) {
       final b = await file.readAsBytes();
-      final bd = ByteData.sublistView(b);
-      for (var o = 0; o + rowSize <= b.length; o += rowSize) {
-        _rows[bd.getUint32(o, Endian.little)] = Uint8List.fromList(b.sublist(o + 4, o + rowSize));
-      }
+      _rows.addAll(b.length > isolateAbove ? await compute(parseRows, b) : parseRows(b));
     }
     if (await _cursorFile.exists()) syncedToPage = int.tryParse(await _cursorFile.readAsString()) ?? 0;
     lastSyncAt = null;
@@ -46,6 +48,16 @@ class EpochStore {
       final s = int.tryParse((await _syncedFile.readAsString()).trim());
       if (s != null) lastSyncAt = DateTime.fromMillisecondsSinceEpoch(s * 1000);
     }
+  }
+
+  /// Rows by time; a later row for the same time wins, as on load before.
+  static Map<int, Uint8List> parseRows(Uint8List b) {
+    final out = <int, Uint8List>{};
+    final bd = ByteData.sublistView(b);
+    for (var o = 0; o + rowSize <= b.length; o += rowSize) {
+      out[bd.getUint32(o, Endian.little)] = Uint8List.fromList(b.sublist(o + 4, o + rowSize));
+    }
+    return out;
   }
 
   /// Unix seconds in `epochs.bin.synced`, so Today and Device show the age of the last sync after a restart.

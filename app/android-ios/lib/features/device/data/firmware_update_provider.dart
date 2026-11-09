@@ -3,13 +3,11 @@
 
 import 'dart:async';
 
-import 'package:atrium/core/app_state.dart';
 import 'package:atrium/features/device/data/github_release_source.dart';
 import 'package:atrium/features/device/data/mcumgr_transport.dart';
 import 'package:atrium/features/device/domain/firmware_image.dart';
 import 'package:atrium/features/device/domain/firmware_update.dart';
 import 'package:atrium/features/insights/data/metrics_provider.dart';
-import 'package:atrium/features/pod/data/pod_api.g.dart';
 import 'package:atrium/features/pod/data/pod_session.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -51,7 +49,7 @@ class _SessionHandover implements PodHandover {
   Future<PodVersion?> readVersion() async {
     final link = ref.read(podLinkProvider);
     final session = ref.read(podSessionProvider);
-    if (link != null && session.link == LinkState.connected && !session.handedOver) {
+    if (link != null && session.connected) {
       try {
         return PodVersion.tryParse(await link.firmwareRevision());
       } on Object {
@@ -63,7 +61,7 @@ class _SessionHandover implements PodHandover {
 
   @override
   String? blocker() {
-    final pod = ref.read(appStateProvider).pod;
+    final pod = ref.read(podStatusProvider);
     return updateBlocker(connected: pod.connected, docked: pod.onPlinth, vsysMv: pod.vsysMv, batteryLow: pod.batteryLow);
   }
 

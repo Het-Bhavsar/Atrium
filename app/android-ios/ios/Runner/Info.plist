@@ -78,7 +78,7 @@
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>NSBluetoothAlwaysUsageDescription</key>
-	<string>Atrium uses Bluetooth to pair with your pod and copy its readings to this phone.</string>
+	<string>Atrium uses Bluetooth to pair with your pod and copy its readings to this phone, also while Atrium is closed so the pod never runs out of room.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>bluetooth-central</string>

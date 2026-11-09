@@ -1,4 +1,5 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <!-- Pod link (docs/ble_gatt.md). Android 12+: scan without location; older versions need location for BLE scans. -->
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
@@ -6,6 +7,11 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- Background sync (#20): a WorkManager job copies the pod's log every few hours, as a short foreground service of
+         type connectedDevice where the system allows one. No request to skip battery optimisation: the app only
+         points to the system list (Device > Background sync). -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
     <!-- Pod software (#21): fetches the latest signed release from GitHub, only when Pod software is opened. -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-feature android:name="android.hardware.bluetooth_le" android:required="true" />
@@ -41,6 +47,11 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- WorkManager's foreground service, typed for the pod link (Android 14 requires the type). -->
+        <service
+            android:name="androidx.work.impl.foreground.SystemForegroundService"
+            android:foregroundServiceType="connectedDevice"
+            tools:node="merge" />
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

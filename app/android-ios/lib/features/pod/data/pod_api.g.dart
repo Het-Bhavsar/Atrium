@@ -473,15 +473,18 @@ class PodHostApi {
     ;
   }
 
-  /// Asks native to sync in the background at least every [maxHours] hours (16 for #20).
-  Future<void> setBackgroundSync(bool enabled, int maxHours) async {
+  /// Asks native to sync in the background at least every [maxHours] hours (the app passes 4, well inside the pod's
+  /// 20 h log). Native leaves raw pages in `<storeDir>/pod_spool` and moves the cursor in `<storeDir>/epochs.bin.cursor`
+  /// (`lib/features/pod/data/spool.dart` has the format). Android: a WorkManager job; iOS: a pending connect that
+  /// CoreBluetooth state restoration completes when the pod comes in range, even with the app closed.
+  Future<void> setBackgroundSync(bool enabled, int maxHours, String storeDir) async {
     final pigeonVar_channelName = 'dev.flutter.pigeon.atrium.PodHostApi.setBackgroundSync$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[enabled, maxHours]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[enabled, maxHours, storeDir]);
     final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
 
     _extractReplyValueOrThrow(
@@ -766,6 +769,47 @@ class PermissionHostApi {
   /// Android: opens the system Location settings. iOS: nothing.
   Future<void> openLocationSettings() async {
     final pigeonVar_channelName = 'dev.flutter.pigeon.atrium.PermissionHostApi.openLocationSettings$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: true,
+    )
+    ;
+  }
+
+  /// Android: false while battery optimisation may hold back background sync (the app is not on the unrestricted
+  /// list). iOS: false when Background App Refresh is off for Atrium.
+  Future<bool> backgroundAllowed() async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.atrium.PermissionHostApi.backgroundAllowed$pigeonVar_messageChannelSuffix';
+    final pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(null);
+    final pigeonVar_replyList = await pigeonVar_sendFuture as List<Object?>?;
+
+    final Object? pigeonVar_replyValue = _extractReplyValueOrThrow(
+        pigeonVar_replyList,
+        pigeonVar_channelName,
+        isNullValid: false,
+    )
+    ;
+    return pigeonVar_replyValue! as bool;
+  }
+
+  /// Android: the battery optimisation list, where the user can let Atrium run in the background. iOS: Atrium's page in
+  /// Settings.
+  Future<void> openBackgroundSettings() async {
+    final pigeonVar_channelName = 'dev.flutter.pigeon.atrium.PermissionHostApi.openBackgroundSettings$pigeonVar_messageChannelSuffix';
     final pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,

@@ -577,7 +577,8 @@ class _ChartPainter extends CustomPainter {
         for (var i = 0; i < n; i++) {
           final v = o.points[i];
           final yv = y0 + (y(v) - y0) * _grow(i, n);
-          final c = v >= 0 ? t.red : t.cool;
+          // One colour; the side of the zero line says warmer or cooler.
+          final c = o.color;
           canvas.drawRRect(
             RRect.fromRectAndRadius(Rect.fromLTWH(x(i) - bw / 2, math.min(yv, y0), bw, math.max(1.5, (y0 - yv).abs())), Radius.circular(math.min(3, bw / 2))),
             Paint()..color = c.withValues(alpha: v.abs() > limit ? 1 : 0.55),

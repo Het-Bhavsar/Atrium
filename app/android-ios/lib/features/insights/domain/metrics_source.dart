@@ -4,6 +4,7 @@
 import 'dart:math' as math;
 
 import 'package:atrium/features/insights/domain/metrics.dart';
+import 'package:atrium/features/insights/domain/scores.dart';
 
 /// What every screen reads. Two implementations:
 /// - `SampleData`: the prototype's demo set (default build);
@@ -39,6 +40,21 @@ abstract class MetricsSource {
   /// (and always in the demo). A relative research trend, never a blood-oxygen percentage.
   OxygenTrend? get oxygenTrend => null;
   DateTime get today;
+
+  /// Today's minutes in each Effort zone (`scores.dart`, five), empty when unknown.
+  List<double> get zoneMinutes => const [];
+
+  /// Today's walks and runs, from the pod's activity class.
+  List<Workout> get workouts => const [];
+
+  /// Last night's lowest 5-min pulse: bpm and minutes after midnight (negative = the evening before); null when unknown.
+  (int, int)? get lowestHr => null;
+
+  /// Last night's moves per hour asleep (epochs with motion above rest), null when unknown.
+  double? get restlessPerHour => null;
+
+  /// What this morning's Recovery was made of, null before there is a baseline.
+  RecoveryParts? get recoveryParts => null;
 
   int stageMinutes(SleepStage s) => hypnogram.where((b) => b.stage == s).fold(0, (a, b) => a + b.minutes);
   int get inBed => hypnogram.fold(0, (a, b) => a + b.minutes);

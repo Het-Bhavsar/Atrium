@@ -58,25 +58,21 @@ class _PairViewState extends ConsumerState<PairView> with SingleTickerProviderSt
   /// Real pairing: connect and bond (steps 1-2), the clock is set on connect (3), then read the firmware (4).
   Future<void> _pairForReal() async {
     final pod = GoRouterState.of(context).extra as FoundPod?;
-    final link = ref.read(podLinkProvider);
-    if (pod == null || link == null) {
+    if (pod == null || ref.read(podLinkProvider) == null) {
       setState(() => _error = 'No pod selected. Go back and find it again.');
       return;
     }
-    try {
-      setState(() => _now = 0);
-      await link.connect(pod.id);
-      setState(() => _now = 3);
-      try {
-        _firmware = (await link.firmwareRevision()).split('+').first;
-      } on Object {
-        _firmware = null; // older firmware without the string: Device shows it as unknown
-      }
-      await ref.read(podSessionProvider.notifier).afterConnect(name: pod.name);
-      if (mounted) setState(() => _now = _steps.length);
-    } on Object catch (e) {
-      if (mounted) setState(() => _error = podErrorText(e));
+    setState(() => _now = 0);
+    // The session connects and bonds, sets the clock and sleep window, then status, live updates and a first sync.
+    final session = ref.read(podSessionProvider.notifier);
+    final ok = await session.pair(pod.id, name: pod.name);
+    if (!mounted) return;
+    if (!ok) {
+      setState(() => _error = ref.read(podSessionProvider).error ?? podErrorText(''));
+      return;
     }
+    _firmware = ref.read(podSessionProvider).firmware?.split('+').first;
+    setState(() => _now = _steps.length);
   }
 
   /// Whether a newer version exists is checked under Device > Pod software, not here.

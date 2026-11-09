@@ -32,15 +32,39 @@ class SleepView extends ConsumerWidget {
     final r = d.series(Metric.sleepMin, range);
     const stages = [('Deep', SleepStage.deep, 1.0), ('REM', SleepStage.rem, 0.6), ('Light', SleepStage.light, 0.8), ('Awake', SleepStage.awake, 0.35)];
 
+    final low = d.lowestHr;
+    final restless = d.restlessPerHour;
+    final usualHrv = d.usual[Metric.hrv]!;
     return CoverPage(
       image: 'sleep',
       title: 'Sleep',
-      subtitle: '${hm(d.asleep)} asleep',
-      reading: CoverArch(last.sleepScore.toDouble(), t.sleep, learning: learning),
+      subtitle: d.asleep == 0
+          ? 'No night yet'
+          : d.hasStages || !kRealData
+          ? '${hm(d.asleep)} asleep'
+          : '${hm(d.asleep)} asleep · estimated',
+      reading: CoverArch(last.sleepScore.toDouble(), t.sleep, learning: learning || last.sleepScore == 0),
       alignment: const Alignment(0, -0.1),
       story: story(d, demo: 'A solid night. Deep sleep came early and you woke once, briefly, just before five.', real: () => sleepStory(d)),
       children: [
-        const SectionHeader('Stages', trailing: 'Estimated'),
+        RangeSwitch(selected: range, onChanged: (r) => ref.read(appStateProvider.notifier).setRange('sleep', r)),
+        SectionHeader('Time asleep', trailing: r.mean > 0 ? 'Average ${hm(r.mean)}' : null),
+        AtriumCard(
+          child: AtriumChart(
+            points: [for (final p in r.points) p.value / 60],
+            xLabels: r.xLabels,
+            color: t.sleep,
+            kind: range == Range.sixMonths ? ChartKind.line : ChartKind.bar,
+            average: 7,
+            domain: (0, 9),
+            ticks: const [0, 3, 6, 9],
+            tickFormat: (v) => '${v.round()} h',
+            labels: [for (final p in r.points) p.label],
+            format: (v) => hm(v * 60),
+            semantics: 'Time asleep',
+          ),
+        ),
+        SectionHeader(d.hasStages ? 'Stages' : 'Last night', trailing: 'Estimated'),
         AtriumCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -68,55 +92,24 @@ class SleepView extends ConsumerWidget {
           ),
         ),
         const SectionHeader('Overnight'),
-        _TileGrid(
-          tiles: [
-            MetricTile(icon: 'heart', name: 'Lowest HR', color: t.heart, value: '49', unit: 'bpm', note: 'at 03:10'),
-            MetricTile(
-              icon: 'hrv',
-              name: 'HRV',
-              color: t.green,
-              value: '${last.hrv.round()}',
-              unit: 'ms',
-              note: learning ? 'Overnight average' : 'Above usual',
-            ),
-            MetricTile(icon: 'temp', name: 'Skin temp', color: t.red, value: signed1(last.tempDelta), unit: '°C', note: 'vs usual'),
-            MetricTile(icon: 'wave', name: 'Restless', color: t.ink2, value: 'Low', unit: '', note: '11 moves an hour'),
-          ],
-        ),
+        ReadingList([
+          Reading('Lowest pulse', low == null ? '–' : '${low.$1}', unit: 'bpm', note: low == null ? null : 'at ${clockLabel(low.$2)}', color: t.heart),
+          Reading(
+            'HRV',
+            last.hrv > 0 ? '${last.hrv.round()}' : '–',
+            unit: 'ms',
+            note: usualHrv.mean > 0 ? 'usual ${usualHrv.lo.round()}–${usualHrv.hi.round()}' : null,
+            color: t.heart,
+          ),
+          Reading('Skin temperature', d.days.length < 5 && kRealData ? '–' : signed1(last.tempDelta), unit: '°C', note: 'from your usual'),
+          Reading('Restless', restless == null ? '–' : '${restless.round()}', unit: 'an hour', note: 'moves while asleep'),
+        ]),
         const SectionHeader('Head position', trailing: 'While asleep'),
         _HeadPositionCard(side: s.side, asleep: d.asleep, positions: d.headPositions),
         if (showOxygenTrend(realData: kRealData, labs: s.labs, trend: d.oxygenTrend)) ...[
           const SectionHeader('Oxygen trend', trailing: 'Labs'),
           OxygenTrendCard(d.oxygenTrend!),
         ],
-        SectionHeader('Time asleep', trailing: 'Average ${hm(r.mean)}'),
-        Segmented<Range>(
-          values: Range.values,
-          labels: [for (final r in Range.values) r.short],
-          selected: range,
-          onChanged: (r) => ref.read(appStateProvider.notifier).setRange('sleep', r),
-        ),
-        const SizedBox(height: Space.m),
-        AtriumCard(
-          child: AtriumChart(
-            points: [for (final p in r.points) p.value / 60],
-            xLabels: r.xLabels,
-            color: t.sleep,
-            kind: range == Range.sixMonths ? ChartKind.line : ChartKind.bar,
-            average: 7,
-            domain: (0, 9),
-            ticks: const [0, 3, 6, 9],
-            tickFormat: (v) => '${v.round()} h',
-            labels: [for (final p in r.points) p.label],
-            format: (v) => hm(v * 60),
-            semantics: 'Time asleep',
-          ),
-        ),
-        FootNote(
-          d.hasStages
-              ? 'Stages are estimated from pulse, HRV and movement: a wellness guide, not a sleep study.'
-              : 'Asleep and awake are estimated from movement and pulse by a model still being checked on the pod. A wellness guide, not a sleep study.',
-        ),
       ],
     );
   }
@@ -275,29 +268,4 @@ class _HeadPositionCard extends StatelessWidget {
       ),
     );
   }
-}
-
-class _TileGrid extends StatelessWidget {
-  const _TileGrid({required this.tiles});
-  final List<Widget> tiles;
-
-  @override
-  Widget build(BuildContext context) => Column(
-    children: [
-      for (var i = 0; i < tiles.length; i += 2)
-        Padding(
-          padding: EdgeInsets.only(bottom: i + 2 < tiles.length ? Space.m : 0),
-          child: IntrinsicHeight(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(child: tiles[i]),
-                const SizedBox(width: Space.m),
-                Expanded(child: i + 1 < tiles.length ? tiles[i + 1] : const SizedBox()),
-              ],
-            ),
-          ),
-        ),
-    ],
-  );
 }

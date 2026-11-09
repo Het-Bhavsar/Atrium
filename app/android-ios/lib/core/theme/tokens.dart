@@ -42,10 +42,10 @@ class AtriumColors extends ThemeExtension<AtriumColors> {
   final Color buttonInk;
   final Color accent;
 
-  /// Light-colour data: green for heart, HRV and Recovery.
+  /// Light-colour data: green for heart, HRV and Recovery (the pod's green LED).
   final Color green;
 
-  /// Red for effort and warmth.
+  /// Red for effort (the pod's red LED). Never for temperature: it isn't measured with light.
   final Color red;
 
   /// Infrared, drawn violet, for sleep.
@@ -57,7 +57,7 @@ class AtriumColors extends ThemeExtension<AtriumColors> {
   /// Gauge halo strength (stronger in the dark).
   final double glow;
 
-  Color get heart => red;
+  Color get heart => green;
   Color get balance => green;
   Color get sleep => ir;
   Color get effort => red;

@@ -50,4 +50,6 @@ flutter {
 
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
+    // Background log sync (#20): PodSyncWorker.
+    implementation("androidx.work:work-runtime-ktx:2.10.1")
 }

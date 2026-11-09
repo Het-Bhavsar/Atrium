@@ -178,7 +178,7 @@ packages:
     source: hosted
     version: "0.3.5+5"
   crypto:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: crypto
       sha256: e3626ae6270383c9e3a549f34c9e4cd26c09ae6a9adaab2bf4737a00340efdc4
@@ -357,6 +357,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "13.3.2"
+  hive_ce:
+    dependency: "direct main"
+    description:
+      name: hive_ce
+      sha256: "72fdeccc40b89d9f05d6c16185c233d5a23781e6e77661eccaa6680deb22c9bf"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.23.2"
   hooks:
     dependency: transitive
     description:
@@ -405,6 +413,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.0"
+  isolate_channel:
+    dependency: transitive
+    description:
+      name: isolate_channel
+      sha256: bd56e1bb2787bed914158c2696943dc7254732bfea2c207aafca6bc930580fd4
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.2"
   jni:
     dependency: transitive
     description:

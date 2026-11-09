@@ -4,10 +4,14 @@
 /// Pod software update (#21) as a state machine, independent of Flutter and of the BLE stack:
 ///
 /// idle -> checking -> available | upToDate
-/// available -> downloading -> handingOver -> uploading -> restarting -> verifying -> done
+/// available -> downloading -> handingOver -> uploading -> restarting -> confirming -> verifying -> done
+/// handingOver -> verifying when the pod already runs this image, confirmed
 /// any working step -> failed; downloading or uploading -> cancelled; done/failed/cancelled/upToDate -> checking
 ///
-/// Success is only claimed after the pod has restarted, reconnected and reported the new version.
+/// The firmware contract (docs/ble_gatt.md section 9): the image goes up in MCUmgr "test" mode, so it boots once on
+/// trial; the pod confirms it itself after 60 s of healthy running (`firmware/src/dfu_health.c`) and reverts if it is
+/// still unhealthy at 300 s or resets first. The app never confirms an image. Success is only claimed once the pod's
+/// slot list shows the new image active and confirmed, and the reconnected pod reports the new version.
 library;
 
 import 'dart:async';
@@ -15,7 +19,7 @@ import 'dart:async';
 import 'package:atrium/features/device/domain/firmware_image.dart';
 import 'package:flutter/foundation.dart';
 
-enum OtaPhase { idle, checking, available, upToDate, downloading, handingOver, uploading, restarting, verifying, done, failed, cancelled }
+enum OtaPhase { idle, checking, available, upToDate, downloading, handingOver, uploading, restarting, confirming, verifying, done, failed, cancelled }
 
 /// Allowed moves; [FirmwareUpdateFlow] asserts every step against it.
 const Map<OtaPhase, Set<OtaPhase>> otaTransitions = {
@@ -24,9 +28,10 @@ const Map<OtaPhase, Set<OtaPhase>> otaTransitions = {
   OtaPhase.available: {OtaPhase.downloading, OtaPhase.checking},
   OtaPhase.upToDate: {OtaPhase.checking},
   OtaPhase.downloading: {OtaPhase.handingOver, OtaPhase.failed, OtaPhase.cancelled},
-  OtaPhase.handingOver: {OtaPhase.uploading, OtaPhase.failed},
+  OtaPhase.handingOver: {OtaPhase.uploading, OtaPhase.verifying, OtaPhase.failed},
   OtaPhase.uploading: {OtaPhase.restarting, OtaPhase.failed, OtaPhase.cancelled},
-  OtaPhase.restarting: {OtaPhase.verifying, OtaPhase.failed},
+  OtaPhase.restarting: {OtaPhase.confirming, OtaPhase.failed},
+  OtaPhase.confirming: {OtaPhase.verifying, OtaPhase.failed},
   OtaPhase.verifying: {OtaPhase.done, OtaPhase.failed},
   OtaPhase.done: {OtaPhase.checking},
   OtaPhase.failed: {OtaPhase.checking},
@@ -48,7 +53,15 @@ class OtaState {
   /// What went wrong, or why the update can't start yet.
   final String? message;
 
-  static const _working = {OtaPhase.checking, OtaPhase.downloading, OtaPhase.handingOver, OtaPhase.uploading, OtaPhase.restarting, OtaPhase.verifying};
+  static const _working = {
+    OtaPhase.checking,
+    OtaPhase.downloading,
+    OtaPhase.handingOver,
+    OtaPhase.uploading,
+    OtaPhase.restarting,
+    OtaPhase.confirming,
+    OtaPhase.verifying,
+  };
 
   /// True from the download to the check after the restart: the pod link belongs to the update.
   bool get busy => _working.contains(phase) && phase != OtaPhase.checking;
@@ -86,12 +99,56 @@ abstract interface class FirmwareSource {
   Future<Uint8List> download(FirmwareRelease r, {required void Function(int got, int total) onProgress, required bool Function() isCancelled});
 }
 
+/// One MCUboot slot as the pod's image list reports it (MCUmgr image group, state read).
+@immutable
+class PodSlot {
+  const PodSlot({required this.slot, required this.hash, this.active = false, this.confirmed = false, this.pending = false, this.version});
+  final int slot;
+  final Uint8List hash;
+  final bool active;
+  final bool confirmed;
+  final bool pending;
+  final String? version;
+
+  bool holds(Uint8List h) => listEquals(hash, h);
+}
+
+/// What the slot list says about [image] after the restart.
+enum SlotVerdict {
+  /// Running it, confirmed by the pod's health check: the update took.
+  confirmed,
+
+  /// Running it on trial, or still swapping: wait.
+  trial,
+
+  /// Back on the other image with this one no longer pending: the pod reverted.
+  reverted,
+}
+
+SlotVerdict slotVerdict(List<PodSlot> slots, Uint8List image) {
+  final active = slots.where((s) => s.active).firstOrNull;
+  if (active != null && active.holds(image)) return active.confirmed ? SlotVerdict.confirmed : SlotVerdict.trial;
+  final other = slots.where((s) => s.holds(image)).firstOrNull;
+  if (active != null && (other == null || !other.pending)) return SlotVerdict.reverted;
+  return SlotVerdict.trial;
+}
+
 /// Uploads over MCUmgr SMP (mcumgr_flutter in the app).
 abstract interface class DfuTransport {
-  /// Uploads [image] to [deviceId], marks it for test and resets the pod. Completes once the pod has been told to
-  /// reset. Throws [OtaCancelled] after [cancel], or [OtaFailure].
-  Future<void> upload(String deviceId, Uint8List image, {required void Function(int sent, int total) onProgress, void Function()? onReset});
+  /// Uploads [image] (named by its MCUboot [hash]) to [deviceId], marks it for test and resets the pod. Completes once
+  /// the pod has been told to reset. Throws [OtaCancelled] after [cancel], or [OtaFailure] ([OtaLinkLost] when the
+  /// link dropped, which the flow retries).
+  Future<void> upload(String deviceId, Uint8List image, Uint8List hash, {required void Function(int sent, int total) onProgress, void Function()? onReset});
+
+  /// The pod's image slots. Throws when the pod can't be reached.
+  Future<List<PodSlot>> slots(String deviceId);
   Future<void> cancel();
+}
+
+/// The BLE link dropped during the upload (out of range, or the pod restarted). The pod keeps what it received for the
+/// same image, so a retry can carry on [VERIFY on the bench: Zephyr img_mgmt resumes on a matching image hash].
+class OtaLinkLost extends OtaFailure {
+  const OtaLinkLost(super.message);
 }
 
 /// The app's own pod link, which has to step aside while MCUmgr uses its BLE stack.
@@ -118,6 +175,9 @@ class FirmwareUpdateFlow {
     this.onChange,
     this.swapWait = const Duration(seconds: 10),
     this.reconnectTimeout = const Duration(minutes: 3),
+    this.confirmPoll = const Duration(seconds: 10),
+    this.confirmTimeout = const Duration(minutes: 6),
+    this.uploadRetries = 2,
     Future<void> Function(Duration)? wait,
   }) : _wait = wait ?? Future<void>.delayed;
 
@@ -130,6 +190,14 @@ class FirmwareUpdateFlow {
   /// reach the old image [ASSUMED: about 10 s for a 220 KB swap on the nRF52832].
   final Duration swapWait;
   final Duration reconnectTimeout;
+
+  /// How often the slot list is read while the pod tries the new image, and for how long: past the firmware's 300 s
+  /// revert, plus the swap and a reconnect.
+  final Duration confirmPoll;
+  final Duration confirmTimeout;
+
+  /// Upload attempts after a dropped link, before giving up.
+  final int uploadRetries;
   final Future<void> Function(Duration) _wait;
 
   OtaState _s = const OtaState();
@@ -207,26 +275,35 @@ class FirmwareUpdateFlow {
         throw OtaFailure(e.message);
       }
       if (img.version != r.version) throw OtaFailure('The downloaded file is version ${img.version}, not ${r.version}. Nothing was sent to the pod.');
+      final digest = r.sha256;
+      if (digest != null && hexOf(sha256Of(bytes)) != digest) {
+        throw const OtaFailure("The downloaded file doesn't match the published one. Nothing was sent to the pod. Try again.");
+      }
 
       _go(OtaPhase.handingOver);
       // Counted as released before the call, so a hand-over that fails half-way still gets the link back.
       released = true;
       final id = await pod.release();
 
-      _go(OtaPhase.uploading);
-      await dfu.upload(
-        id,
-        bytes,
-        onProgress: (sent, total) {
-          if (_s.phase == OtaPhase.uploading) _set(_s.copyWith(progress: total > 0 ? sent / total : 0));
-        },
-        onReset: () {
-          if (_s.phase == OtaPhase.uploading) _go(OtaPhase.restarting, progress: 1);
-        },
-      );
-      if (_s.phase == OtaPhase.uploading) _go(OtaPhase.restarting, progress: 1);
+      // What the pod holds now: already this image (an update that finished earlier), or a trial still running.
+      final before = await _slotsOrNull(id);
+      final installed = before?.where((s) => s.active && s.confirmed && s.holds(img.sha256)).isNotEmpty ?? false;
+      if (!installed) {
+        if (before?.any((s) => s.active && !s.confirmed) ?? false) {
+          throw const OtaFailure('The pod is still trying out its last update. Leave it for five minutes, then try again.');
+        }
+        _go(OtaPhase.uploading);
+        await _uploadWithRetry(id, bytes, img.sha256);
+        if (_s.phase == OtaPhase.uploading) _go(OtaPhase.restarting, progress: 1);
 
-      await _wait(swapWait);
+        await _wait(swapWait);
+        _go(OtaPhase.confirming, progress: 1);
+        final verdict = await _watchConfirm(id, img.sha256);
+        if (verdict == SlotVerdict.reverted) {
+          throw OtaFailure("The new software didn't pass the pod's own check, so the pod went back to ${from ?? 'its previous software'}.");
+        }
+      }
+
       _go(OtaPhase.verifying, progress: 1);
       final now = await pod.reclaim(reconnectTimeout);
       released = false;
@@ -250,6 +327,60 @@ class FirmwareUpdateFlow {
       final still = now == null ? '' : ' The pod is on $now.';
       _go(OtaPhase.failed, current: now, message: '$why$still');
     }
+  }
+
+  /// Uploads, and after a dropped link waits and tries again up to [uploadRetries] times.
+  Future<void> _uploadWithRetry(String id, Uint8List bytes, Uint8List hash) async {
+    for (var attempt = 0; ; attempt++) {
+      try {
+        await dfu.upload(
+          id,
+          bytes,
+          hash,
+          onProgress: (sent, total) {
+            if (_s.phase == OtaPhase.uploading) _set(_s.copyWith(progress: total > 0 ? sent / total : 0));
+          },
+          onReset: () {
+            if (_s.phase == OtaPhase.uploading) _go(OtaPhase.restarting, progress: 1);
+          },
+        );
+        return;
+      } on OtaLinkLost {
+        if (_cancel || attempt >= uploadRetries || _s.phase != OtaPhase.uploading) rethrow;
+        _set(_s.copyWith(message: 'The link dropped. Trying again…'));
+        await _wait(const Duration(seconds: 5));
+      }
+    }
+  }
+
+  Future<List<PodSlot>?> _slotsOrNull(String id) async {
+    try {
+      return await dfu.slots(id);
+    } on Object {
+      return null;
+    }
+  }
+
+  /// Reads the slot list until the pod has confirmed or reverted the image, or [confirmTimeout] passes. A pod whose
+  /// slots can't be read at all is left, after about 90 s from the reset (past its 60 s check), to the version check.
+  Future<SlotVerdict?> _watchConfirm(String id, Uint8List hash) async {
+    final polls = (confirmTimeout.inMilliseconds / confirmPoll.inMilliseconds).ceil();
+    // Slots never readable: give the pod its 60 s health check plus margin, then leave it to the version check.
+    final blindPolls = (const Duration(seconds: 80).inMilliseconds / confirmPoll.inMilliseconds).ceil();
+    var read = false;
+    for (var i = 0; i < polls; i++) {
+      final slots = await _slotsOrNull(id);
+      if (slots != null) {
+        read = true;
+        final v = slotVerdict(slots, hash);
+        if (v != SlotVerdict.trial) return v;
+      } else if (!read && i >= blindPolls) {
+        return null;
+      }
+      await _wait(confirmPoll);
+    }
+    if (read) throw const OtaFailure("The pod didn't confirm the new software in time. Keep it on the Plinth; if the new software isn't healthy it goes back by itself.");
+    return null;
   }
 
   Future<PodVersion?> _reclaimQuietly() async {

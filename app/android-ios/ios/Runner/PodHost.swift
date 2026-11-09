@@ -2,11 +2,15 @@
 // SPDX-License-Identifier: Apache-2.0
 
 // Native pod link for iOS: CoreBluetooth behind the Pigeon PodHostApi (pigeons/pod.dart).
-// State restoration lets iOS relaunch the app for BLE events, so the log can sync in the background (#20).
+// Background sync (#20): after a drop the app keeps a pending connect to the bonded pod. CoreBluetooth completes it
+// whenever the pod is in range, even with the app suspended or closed (state restoration relaunches it); with the app
+// not in front, this file then downloads the log itself and leaves the raw pages for Dart (lib/features/pod/data/
+// spool.dart). Dart decodes them when the app next opens.
 // GATT layout: docs/ble_gatt.md rev 13. Custom UUIDs share the base 8f2aXXXX-4c46-4154-5249-554d2e706f64.
 import CoreBluetooth
 import Flutter
 import Foundation
+import UIKit
 
 final class PodHost: NSObject, PodHostApi, CBCentralManagerDelegate, CBPeripheralDelegate {
   private let events: PodFlutterApi
@@ -20,7 +24,10 @@ final class PodHost: NSObject, PodHostApi, CBCentralManagerDelegate, CBPeriphera
   private var connectWaiter: CheckedContinuation<Void, Error>?
   private var readWaiters: [UInt16: [CheckedContinuation<Data, Error>]] = [:]
   private var writeWaiters: [UInt16: CheckedContinuation<Void, Error>] = [:]
-  private var syncWaiter: CheckedContinuation<Void, Error>?
+  private var syncWaiter: CheckedContinuation<Data, Error>?
+  /// Set when the app (or the update hand-over) lets the link go on purpose: no pending reconnect then.
+  private var letGo = false
+  private var backgroundRun = false
   private var syncFirstPage: UInt32 = 0
   private var syncPages: [UInt32: Data] = [:]
   private var syncComplete = Set<UInt32>()
@@ -111,8 +118,14 @@ final class PodHost: NSObject, PodHostApi, CBCentralManagerDelegate, CBPeriphera
       throw PodHost.error("not_found", "Pod \(id) is not nearby")
     }
     central.stopScan()
+    letGo = false
     peripheral = p
     p.delegate = self
+    // The pending reconnect may already have the pod: nothing to wait for.
+    if p.state == .connected, chars[0x0101] != nil {
+      emit(.connected)
+      return
+    }
     emit(.connecting)
     try await withCheckedThrowingContinuation { (c: CheckedContinuation<Void, Error>) in
       connectWaiter = c
@@ -124,6 +137,7 @@ final class PodHost: NSObject, PodHostApi, CBCentralManagerDelegate, CBPeriphera
   /// peripheral, so this one lets go first. Cancelling a connect that is still pending fails its waiter here, since
   /// CoreBluetooth may not call back for it.
   func disconnect() throws {
+    letGo = true
     if let p = peripheral { central?.cancelPeripheralConnection(p) }
     if let k = connectWaiter {
       connectWaiter = nil
@@ -137,6 +151,7 @@ final class PodHost: NSObject, PodHostApi, CBCentralManagerDelegate, CBPeriphera
   /// Log out: drop the link and the stored pod so nothing reconnects. The system pairing stays until the user
   /// forgets "Atrium" in Settings > Bluetooth; the pod replaces it at the next pairing in the lift window.
   func forgetPod() throws {
+    letGo = true
     if let p = peripheral { central?.cancelPeripheralConnection(p) }
     peripheral = nil
     chars = [:]
@@ -144,6 +159,7 @@ final class PodHost: NSObject, PodHostApi, CBCentralManagerDelegate, CBPeriphera
     d.removeObject(forKey: PodHost.bondKey)
     d.removeObject(forKey: "atrium.backgroundSync")
     d.removeObject(forKey: "atrium.backgroundSyncHours")
+    d.removeObject(forKey: "atrium.storeDir")
   }
 
   func read(characteristic: Int64) async throws -> FlutterStandardTypedData {
@@ -176,30 +192,90 @@ final class PodHost: NSObject, PodHostApi, CBCentralManagerDelegate, CBPeriphera
 
   /// Log Control 0x0502 op 0x01 (read from page, count 0 = to the head); pages stream on Log Data 0x0503.
   func syncLog(fromPage: Int64) async throws {
+    let pages = try await downloadLog(from: UInt32(fromPage))
+    let bytes = FlutterStandardTypedData(bytes: pages)
+    send { try await $0.onLogPages(firstPage: fromPage, pages: bytes) }
+  }
+
+  /// The complete pages from [from] up to the first gap (the app's sync and background sync share it).
+  private func downloadLog(from: UInt32) async throws -> Data {
     guard let p = peripheral, let ctl = chars[0x0502], let data = chars[0x0503] else {
       throw PodHost.error("not_connected", "Pod not connected")
     }
-    syncFirstPage = UInt32(fromPage)
+    syncFirstPage = from
     syncPages = [:]
     syncComplete = []
     syncExpected = 0
     p.setNotifyValue(true, for: ctl)
     p.setNotifyValue(true, for: data)
     var req = Data([0x01])
-    withUnsafeBytes(of: UInt32(fromPage).littleEndian) { req.append(contentsOf: $0) }
+    withUnsafeBytes(of: from.littleEndian) { req.append(contentsOf: $0) }
     withUnsafeBytes(of: UInt32(0).littleEndian) { req.append(contentsOf: $0) }
-    try await withCheckedThrowingContinuation { (k: CheckedContinuation<Void, Error>) in
+    return try await withCheckedThrowingContinuation { (k: CheckedContinuation<Data, Error>) in
       syncWaiter = k
       armSyncTimeout()
       p.writeValue(req, for: ctl, type: .withResponse)
     }
   }
 
-  func setBackgroundSync(enabled: Bool, maxHours: Int64) throws {
-    // State restoration plus the bluetooth-central background mode keep the bonded pod reachable; the app
-    // reconnects and syncs whenever iOS wakes it. A BGAppRefreshTask hook is the next step.
-    UserDefaults.standard.set(enabled, forKey: "atrium.backgroundSync")
-    UserDefaults.standard.set(maxHours, forKey: "atrium.backgroundSyncHours")
+  func setBackgroundSync(enabled: Bool, maxHours: Int64, storeDir: String) throws {
+    // State restoration plus the bluetooth-central background mode keep the bonded pod reachable: after a drop a
+    // pending connect waits for it (didDisconnectPeripheral), and a connect with the app not in front syncs natively.
+    let d = UserDefaults.standard
+    d.set(enabled, forKey: "atrium.backgroundSync")
+    d.set(maxHours, forKey: "atrium.backgroundSyncHours")
+    d.set(storeDir, forKey: "atrium.storeDir")
+  }
+
+  private var backgroundEnabled: Bool { UserDefaults.standard.bool(forKey: "atrium.backgroundSync") }
+
+  /// With the app not in front: set the clock, read the log from the app's cursor and leave the pages in the spool.
+  private func backgroundSync() {
+    guard !backgroundRun, backgroundEnabled, let dir = UserDefaults.standard.string(forKey: "atrium.storeDir") else { return }
+    backgroundRun = true
+    var task: UIBackgroundTaskIdentifier = .invalid
+    task = UIApplication.shared.beginBackgroundTask(withName: "atrium.podSync") {
+      UIApplication.shared.endBackgroundTask(task)
+      task = .invalid
+    }
+    Task { @MainActor in
+      defer {
+        backgroundRun = false
+        if task != .invalid { UIApplication.shared.endBackgroundTask(task) }
+      }
+      do {
+        let podClock = (try? await self.readNow(0x0602)).map { self.le32($0, 0) } ?? 0
+        let now = UInt32(Date().timeIntervalSince1970)
+        var t = Data()
+        withUnsafeBytes(of: now.littleEndian) { t.append(contentsOf: $0) }
+        try await self.write(characteristic: 0x0602, value: FlutterStandardTypedData(bytes: t), withResponse: true)
+        let info = try await self.readNow(0x0501)
+        let oldest = self.le32(info, 0)
+        let head = self.le32(info, 4)
+        let cursorURL = URL(fileURLWithPath: dir).appendingPathComponent("epochs.bin.cursor")
+        let cursor = (try? String(contentsOf: cursorURL, encoding: .utf8)).flatMap { UInt32($0.trimmingCharacters(in: .whitespacesAndNewlines)) } ?? 0
+        let from = cursor >= oldest && cursor <= head ? cursor : oldest
+        let pages = try await self.downloadLog(from: from)
+        let whole = pages.count / PodHost.pageSize
+        guard whole > 0 else { return }
+        var file = Data()
+        for v in [UInt32(0x31505341), from, podClock, now] { withUnsafeBytes(of: v.littleEndian) { file.append(contentsOf: $0) } }
+        file.append(pages.prefix(whole * PodHost.pageSize))
+        let spool = URL(fileURLWithPath: dir).appendingPathComponent("pod_spool", isDirectory: true)
+        try FileManager.default.createDirectory(at: spool, withIntermediateDirectories: true)
+        let tmp = spool.appendingPathComponent("\(now)-\(from).tmp")
+        // Readable after first unlock, so a sync with the phone locked can still write.
+        try file.write(to: tmp, options: [.atomic, .completeFileProtectionUntilFirstUserAuthentication])
+        try FileManager.default.moveItem(at: tmp, to: spool.appendingPathComponent("\(now)-\(from).bin"))
+        try "\(from + UInt32(whole) - 1)".write(to: cursorURL, atomically: true, encoding: .utf8)
+      } catch {
+        // Out of reach mid-sync, or refused: the next connect tries again.
+      }
+    }
+  }
+
+  private func readNow(_ id: UInt16) async throws -> Data {
+    try await read(characteristic: Int64(id)).data
   }
 
   // MARK: CBCentralManagerDelegate
@@ -213,6 +289,8 @@ final class PodHost: NSObject, PodHostApi, CBCentralManagerDelegate, CBPeriphera
     switch c.state {
     case .poweredOn:
       if wantScan { try? startScan() } else { emit(.idle) }
+      // Keep a pending connect to the bonded pod (after a relaunch, or Bluetooth coming back on).
+      if let p = peripheral, p.state == .disconnected, !letGo, backgroundEnabled { c.connect(p, options: nil) }
     case .poweredOff: emit(.bluetoothOff)
     case .unauthorized: emit(.unauthorized)
     default: emit(.idle)
@@ -223,6 +301,8 @@ final class PodHost: NSObject, PodHostApi, CBCentralManagerDelegate, CBPeriphera
     if let ps = dict[CBCentralManagerRestoredStatePeripheralsKey] as? [CBPeripheral], let p = ps.first {
       peripheral = p
       p.delegate = self
+      // Relaunched with the pod already connected: find its characteristics, which syncs if the app isn't in front.
+      if p.state == .connected { p.discoverServices(nil) }
     }
   }
 
@@ -255,7 +335,13 @@ final class PodHost: NSObject, PodHostApi, CBCentralManagerDelegate, CBPeriphera
     readWaiters = [:]
     for k in writeWaiters.values { k.resume(throwing: gone) }
     writeWaiters = [:]
+    if syncWaiter != nil { finishSync() }
     emit(.disconnected)
+    // Fast reconnect and background sync: a pending connect has no timeout, and iOS completes it the moment the pod
+    // advertises again, waking (or relaunching) the app. Not after the app let go (log out, update hand-over).
+    if !letGo, backgroundEnabled, UserDefaults.standard.string(forKey: PodHost.bondKey) == p.identifier.uuidString {
+      c.connect(p, options: nil)
+    }
   }
 
   // MARK: CBPeripheralDelegate
@@ -268,11 +354,17 @@ final class PodHost: NSObject, PodHostApi, CBCentralManagerDelegate, CBPeriphera
     for c in s.characteristics ?? [] {
       if let id = PodHost.shortId(c.uuid) { chars[id] = c }
     }
-    if chars[0x0101] != nil, let k = connectWaiter {
+    // Ready once every service has its characteristics (the log service may come after Charge State's).
+    guard chars[0x0101] != nil, p.services?.allSatisfy({ $0.characteristics != nil }) == true else { return }
+    if let k = connectWaiter {
       UserDefaults.standard.set(p.identifier.uuidString, forKey: PodHost.bondKey)
       emit(.connected)
       connectWaiter = nil
       k.resume()
+    } else {
+      // A connect the app didn't ask for: the pending reconnect, or a restored one.
+      emit(.connected)
+      if UIApplication.shared.applicationState != .active { backgroundSync() }
     }
   }
 
@@ -344,21 +436,18 @@ final class PodHost: NSObject, PodHostApi, CBCentralManagerDelegate, CBPeriphera
     DispatchQueue.main.asyncAfter(deadline: .now() + PodHost.syncIdleSeconds, execute: w)
   }
 
-  /// Hands Dart the complete pages, in order, from the first requested page up to the first gap.
+  /// The complete pages, in order, from the first requested page up to the first gap.
   private func finishSync() {
     syncTimeout?.cancel()
     syncTimeout = nil
-    guard syncWaiter != nil else { return }
-    var all = Data()
-    var k = syncFirstPage
-    while syncComplete.contains(k), let page = syncPages[k] {
-      all.append(page)
-      k &+= 1
-    }
-    let first = Int64(syncFirstPage)
-    let bytes = FlutterStandardTypedData(bytes: all)
-    send { try await $0.onLogPages(firstPage: first, pages: bytes) }
-    syncWaiter?.resume()
+    guard let k = syncWaiter else { return }
     syncWaiter = nil
+    var all = Data()
+    var n = syncFirstPage
+    while syncComplete.contains(n), let page = syncPages[n] {
+      all.append(page)
+      n &+= 1
+    }
+    k.resume(returning: all)
   }
 }

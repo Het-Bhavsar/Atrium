@@ -361,8 +361,11 @@ protocol PodHostApi {
   func setNotify(characteristic: Int64, enabled: Bool) throws
   /// Downloads the log (service 0x0500) from [fromPage]; pages arrive through [PodFlutterApi.onLogPages].
   func syncLog(fromPage: Int64) async throws
-  /// Asks native to sync in the background at least every [maxHours] hours (16 for #20).
-  func setBackgroundSync(enabled: Bool, maxHours: Int64) throws
+  /// Asks native to sync in the background at least every [maxHours] hours (the app passes 4, well inside the pod's
+  /// 20 h log). Native leaves raw pages in `<storeDir>/pod_spool` and moves the cursor in `<storeDir>/epochs.bin.cursor`
+  /// (`lib/features/pod/data/spool.dart` has the format). Android: a WorkManager job; iOS: a pending connect that
+  /// CoreBluetooth state restoration completes when the pod comes in range, even with the app closed.
+  func setBackgroundSync(enabled: Bool, maxHours: Int64, storeDir: String) throws
 }
 
 /// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
@@ -531,15 +534,19 @@ class PodHostApiSetup {
     } else {
       syncLogChannel.setMessageHandler(nil)
     }
-    /// Asks native to sync in the background at least every [maxHours] hours (16 for #20).
+    /// Asks native to sync in the background at least every [maxHours] hours (the app passes 4, well inside the pod's
+    /// 20 h log). Native leaves raw pages in `<storeDir>/pod_spool` and moves the cursor in `<storeDir>/epochs.bin.cursor`
+    /// (`lib/features/pod/data/spool.dart` has the format). Android: a WorkManager job; iOS: a pending connect that
+    /// CoreBluetooth state restoration completes when the pod comes in range, even with the app closed.
     let setBackgroundSyncChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.atrium.PodHostApi.setBackgroundSync\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
     if let api = api {
       setBackgroundSyncChannel.setMessageHandler { message, reply in
         let args = message as! [Any?]
         let enabledArg = args[0] as! Bool
         let maxHoursArg = args[1] as! Int64
+        let storeDirArg = args[2] as! String
         do {
-          try api.setBackgroundSync(enabled: enabledArg, maxHours: maxHoursArg)
+          try api.setBackgroundSync(enabled: enabledArg, maxHours: maxHoursArg, storeDir: storeDirArg)
           reply(wrapResult(nil))
         } catch {
           reply(wrapError(error))
@@ -722,6 +729,12 @@ protocol PermissionHostApi {
   func locationServicesOn() throws -> Bool
   /// Android: opens the system Location settings. iOS: nothing.
   func openLocationSettings() throws
+  /// Android: false while battery optimisation may hold back background sync (the app is not on the unrestricted
+  /// list). iOS: false when Background App Refresh is off for Atrium.
+  func backgroundAllowed() throws -> Bool
+  /// Android: the battery optimisation list, where the user can let Atrium run in the background. iOS: Atrium's page in
+  /// Settings.
+  func openBackgroundSettings() throws
 }
 
 /// Generated setup class from Pigeon to handle messages through the `binaryMessenger`.
@@ -803,6 +816,36 @@ class PermissionHostApiSetup {
       }
     } else {
       openLocationSettingsChannel.setMessageHandler(nil)
+    }
+    /// Android: false while battery optimisation may hold back background sync (the app is not on the unrestricted
+    /// list). iOS: false when Background App Refresh is off for Atrium.
+    let backgroundAllowedChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.atrium.PermissionHostApi.backgroundAllowed\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      backgroundAllowedChannel.setMessageHandler { _, reply in
+        do {
+          let result = try api.backgroundAllowed()
+          reply(wrapResult(result))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      backgroundAllowedChannel.setMessageHandler(nil)
+    }
+    /// Android: the battery optimisation list, where the user can let Atrium run in the background. iOS: Atrium's page in
+    /// Settings.
+    let openBackgroundSettingsChannel = FlutterBasicMessageChannel(name: "dev.flutter.pigeon.atrium.PermissionHostApi.openBackgroundSettings\(channelSuffix)", binaryMessenger: binaryMessenger, codec: codec)
+    if let api = api {
+      openBackgroundSettingsChannel.setMessageHandler { _, reply in
+        do {
+          try api.openBackgroundSettings()
+          reply(wrapResult(nil))
+        } catch {
+          reply(wrapError(error))
+        }
+      }
+    } else {
+      openBackgroundSettingsChannel.setMessageHandler(nil)
     }
   }
 }

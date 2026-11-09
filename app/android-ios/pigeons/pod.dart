@@ -71,8 +71,11 @@ abstract class PodHostApi {
   @async
   void syncLog(int fromPage);
 
-  /// Asks native to sync in the background at least every [maxHours] hours (16 for #20).
-  void setBackgroundSync(bool enabled, int maxHours);
+  /// Asks native to sync in the background at least every [maxHours] hours (the app passes 4, well inside the pod's
+  /// 20 h log). Native leaves raw pages in `<storeDir>/pod_spool` and moves the cursor in `<storeDir>/epochs.bin.cursor`
+  /// (`lib/features/pod/data/spool.dart` has the format). Android: a WorkManager job; iOS: a pending connect that
+  /// CoreBluetooth state restoration completes when the pod comes in range, even with the app closed.
+  void setBackgroundSync(bool enabled, int maxHours, String storeDir);
 }
 
 /// Native calls Flutter.
@@ -116,4 +119,12 @@ abstract class PermissionHostApi {
 
   /// Android: opens the system Location settings. iOS: nothing.
   void openLocationSettings();
+
+  /// Android: false while battery optimisation may hold back background sync (the app is not on the unrestricted
+  /// list). iOS: false when Background App Refresh is off for Atrium.
+  bool backgroundAllowed();
+
+  /// Android: the battery optimisation list, where the user can let Atrium run in the background. iOS: Atrium's page in
+  /// Settings.
+  void openBackgroundSettings();
 }

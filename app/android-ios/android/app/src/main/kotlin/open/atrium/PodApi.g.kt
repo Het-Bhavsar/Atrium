@@ -374,8 +374,13 @@ interface PodHostApi {
   fun setNotify(characteristic: Long, enabled: Boolean)
   /** Downloads the log (service 0x0500) from [fromPage]; pages arrive through [PodFlutterApi.onLogPages]. */
   suspend fun syncLog(fromPage: Long)
-  /** Asks native to sync in the background at least every [maxHours] hours (16 for #20). */
-  fun setBackgroundSync(enabled: Boolean, maxHours: Long)
+  /**
+   * Asks native to sync in the background at least every [maxHours] hours (the app passes 4, well inside the pod's
+   * 20 h log). Native leaves raw pages in `<storeDir>/pod_spool` and moves the cursor in `<storeDir>/epochs.bin.cursor`
+   * (`lib/features/pod/data/spool.dart` has the format). Android: a WorkManager job; iOS: a pending connect that
+   * CoreBluetooth state restoration completes when the pod comes in range, even with the app closed.
+   */
+  fun setBackgroundSync(enabled: Boolean, maxHours: Long, storeDir: String)
 
   companion object {
     /** The codec used by PodHostApi. */
@@ -572,8 +577,9 @@ interface PodHostApi {
             val args = message as List<Any?>
             val enabledArg = args[0] as Boolean
             val maxHoursArg = args[1] as Long
+            val storeDirArg = args[2] as String
             val wrapped: List<Any?> = try {
-              api.setBackgroundSync(enabledArg, maxHoursArg)
+              api.setBackgroundSync(enabledArg, maxHoursArg, storeDirArg)
               listOf(null)
             } catch (exception: Throwable) {
               PodApiPigeonUtils.wrapError(exception)
@@ -754,6 +760,16 @@ interface PermissionHostApi {
   fun locationServicesOn(): Boolean
   /** Android: opens the system Location settings. iOS: nothing. */
   fun openLocationSettings()
+  /**
+   * Android: false while battery optimisation may hold back background sync (the app is not on the unrestricted
+   * list). iOS: false when Background App Refresh is off for Atrium.
+   */
+  fun backgroundAllowed(): Boolean
+  /**
+   * Android: the battery optimisation list, where the user can let Atrium run in the background. iOS: Atrium's page in
+   * Settings.
+   */
+  fun openBackgroundSettings()
 
   companion object {
     /** The codec used by PermissionHostApi. */
@@ -834,6 +850,37 @@ interface PermissionHostApi {
           channel.setMessageHandler { _, reply ->
             val wrapped: List<Any?> = try {
               api.openLocationSettings()
+              listOf(null)
+            } catch (exception: Throwable) {
+              PodApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.atrium.PermissionHostApi.backgroundAllowed$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              listOf(api.backgroundAllowed())
+            } catch (exception: Throwable) {
+              PodApiPigeonUtils.wrapError(exception)
+            }
+            reply.reply(wrapped)
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.atrium.PermissionHostApi.openBackgroundSettings$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { _, reply ->
+            val wrapped: List<Any?> = try {
+              api.openBackgroundSettings()
               listOf(null)
             } catch (exception: Throwable) {
               PodApiPigeonUtils.wrapError(exception)

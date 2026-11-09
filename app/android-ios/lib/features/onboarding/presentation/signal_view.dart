@@ -9,6 +9,7 @@ import 'package:atrium/core/theme/tokens.dart';
 import 'package:atrium/core/widgets/components.dart';
 import 'package:atrium/features/insights/data/metrics_provider.dart';
 import 'package:atrium/features/onboarding/presentation/onboarding_widgets.dart';
+import 'package:atrium/features/pod/data/pod_link.dart';
 import 'package:atrium/features/pod/domain/fit_checks.dart';
 import 'package:atrium/features/pod/domain/pod.dart';
 import 'package:flutter/material.dart';
@@ -52,6 +53,10 @@ enum _Phase { dark, moving, settle, good }
 class _SignalViewState extends ConsumerState<SignalView> with SingleTickerProviderStateMixin {
   ({_Phase phase, FitQuality fit})? _live;
   int? _bpm;
+
+  /// Real builds: the pod's green PPG samples, the last [_PpgPainter.window] seconds of them.
+  final _green = <int>[];
+  int _rate = 25;
   final _subs = <StreamSubscription<Object?>>[];
   Timer? _fitRenew;
 
@@ -82,6 +87,14 @@ class _SignalViewState extends ConsumerState<SignalView> with SingleTickerProvid
       _fitRenew = Timer.periodic(const Duration(seconds: 150), (_) => link.renewFit());
       _subs
         ..add(link.startFit().listen((f) => _live = _fromPod(f)))
+        ..add(
+          link.ppg().listen((c) {
+            if (c.rateHz > 0) _rate = c.rateHz;
+            _green.addAll(c.green);
+            final keep = (_rate * _PpgPainter.window).round();
+            if (_green.length > keep) _green.removeRange(0, _green.length - keep);
+          }),
+        )
         ..add(
           link.heartRate().listen((b) {
             if (mounted) setState(() => _bpm = b);
@@ -191,7 +204,14 @@ class _SignalViewState extends ConsumerState<SignalView> with SingleTickerProvid
                   height: 110,
                   width: double.infinity,
                   child: CustomPaint(
-                    painter: _PpgPainter(time: _time, color: t.green, hair: t.hair, sample: _sample),
+                    painter: _PpgPainter(
+                      time: _time,
+                      color: t.green,
+                      hair: t.hair,
+                      sample: _sample,
+                      // Real builds draw only what the pod sends: a flat line while it is off skin or silent.
+                      real: kRealData ? () => _live == null || _live!.phase == _Phase.dark ? const <double>[] : ppgTrace(_green) : null,
+                    ),
                   ),
                 ),
               ],
@@ -238,16 +258,20 @@ class _SignalViewState extends ConsumerState<SignalView> with SingleTickerProvid
   }
 }
 
-/// Live PPG trace: two Gaussian pulses per beat at 62 bpm over a 4 s window, with motion noise
-/// until the fit is good. Repaints from [time] without rebuilding the page.
+/// The PPG trace over a 4 s window. Real builds: the pod's own green samples (PPG Data 0x0202), nothing when there
+/// are none. Demo builds: two Gaussian pulses per beat at 62 bpm, with motion noise until the fit is good. Repaints
+/// from [time] without rebuilding the page.
 class _PpgPainter extends CustomPainter {
-  _PpgPainter({required this.time, required this.color, required this.hair, required this.sample}) : super(repaint: time);
+  _PpgPainter({required this.time, required this.color, required this.hair, required this.sample, this.real}) : super(repaint: time);
   final ({_Phase phase, FitQuality fit}) Function(double t) sample;
+
+  /// Real builds: the trace to draw, -1..1 ([ppgTrace]); empty draws only the baseline.
+  final List<double> Function()? real;
   final ValueNotifier<double> time;
   final Color color;
   final Color hair;
 
-  static const double _window = 4;
+  static const double window = 4;
 
   static double _g(double x, double m, double s) => math.exp(-((x - m) * (x - m)) / (2 * s * s));
 
@@ -270,12 +294,32 @@ class _PpgPainter extends CustomPainter {
       canvas.drawLine(Offset(x, base), Offset(math.min(x + 1.5, w), base), dash);
     }
 
+    final r = real;
+    if (r != null) {
+      final xs = r();
+      if (xs.length < 2) return;
+      final path = Path();
+      for (var i = 0; i < xs.length; i++) {
+        final x = i / (xs.length - 1) * w;
+        final y = base - (xs[i] * 0.5 + 0.5) * h * 0.62;
+        i == 0 ? path.moveTo(x, y) : path.lineTo(x, y);
+      }
+      canvas.drawPath(
+        path,
+        Paint()
+          ..color = color
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2
+          ..strokeJoin = StrokeJoin.round,
+      );
+      return;
+    }
     final s = sample(t);
     final q = s.fit.q / 100;
     final noise = s.phase == _Phase.good ? 0.0 : (1 - q) * 0.6;
     final path = Path();
     for (double x = 0; x <= w; x += 1.5) {
-      final tt = t - _window + x / w * _window;
+      final tt = t - window + x / w * window;
       final v = _ppg(tt) + noise * math.sin(tt * 23) * math.sin(tt * 7.1);
       final y = base - v * h * 0.62;
       x == 0 ? path.moveTo(x, y) : path.lineTo(x, y);

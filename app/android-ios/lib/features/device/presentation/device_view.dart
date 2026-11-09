@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:atrium/core/app_state.dart';
@@ -16,7 +17,10 @@ import 'package:atrium/features/device/domain/firmware_image.dart';
 import 'package:atrium/features/device/domain/firmware_update.dart';
 import 'package:atrium/features/device/presentation/device_sheets.dart';
 import 'package:atrium/features/device/presentation/device_widgets.dart';
+import 'package:atrium/features/onboarding/presentation/bluetooth_view.dart';
+import 'package:atrium/features/pod/data/pod_permissions.dart';
 import 'package:atrium/features/pod/data/pod_session.dart';
+import 'package:atrium/features/pod/domain/link_machine.dart';
 import 'package:atrium/features/pod/domain/pod.dart';
 import 'package:atrium/features/pod/domain/sync_age.dart';
 import 'package:atrium/features/pod/presentation/sync_status.dart';
@@ -26,6 +30,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 /// Device tab (#15-#21): the pod, its battery and pad, measurement mode and pod actions.
+/// Whether background sync can run unhindered (battery optimisation, Background App Refresh); read again on return.
+final backgroundAccessProvider = FutureProvider.autoDispose<bool>((ref) => PodPermissions.backgroundAllowed());
+
 class DeviceView extends ConsumerStatefulWidget {
   const DeviceView({super.key});
 
@@ -69,8 +76,8 @@ class _DeviceViewState extends ConsumerState<DeviceView> {
   Widget build(BuildContext context) {
     final s = ref.watch(appStateProvider);
     final t = AtriumColors.of(context);
-    final d = s.pod;
-    final name = s.podName ?? 'Atrium 3F2A';
+    final d = ref.watch(podStatusProvider);
+    final name = s.podName ?? (kRealData ? 'Atrium' : 'Atrium 3F2A');
     // Real builds: sync age from the saved last-sync time (#20), and the pod software from DIS and the update flow (#21).
     final lastSync = kRealData ? ref.watch(lastSyncProvider) : null;
     final now = DateTime.now();
@@ -85,6 +92,41 @@ class _DeviceViewState extends ConsumerState<DeviceView> {
         : 'Last seen at ${d.lastSync}';
 
     final children = <Widget>[];
+
+    // One calm notice for whatever stands between the pod and this phone, with the way to fix it.
+    final phase = kRealData ? ref.watch(podSessionProvider.select((p) => p.phase)) : null;
+    final background = kRealData ? ref.watch(backgroundAccessProvider).value ?? true : true;
+    if (phase == LinkPhase.needsPermission) {
+      children.addAll([
+        NoticeCard(
+          icon: 'bt',
+          title: 'Bluetooth is off for Atrium',
+          body: 'Atrium needs it to reach the pod and copy its readings. Tap to allow it.',
+          onTap: () => showBluetoothProblem(context, BluetoothAccess.denied),
+        ),
+        const SizedBox(height: Space.m),
+      ]);
+    } else if (phase == LinkPhase.bluetoothOff) {
+      children.addAll([
+        const NoticeCard(icon: 'bt', title: 'Bluetooth is off', body: 'Turn it on in Control Centre or quick settings, and Atrium reconnects by itself.'),
+        const SizedBox(height: Space.m),
+      ]);
+    } else if (!background && phase != LinkPhase.noPod) {
+      children.addAll([
+        NoticeCard(
+          icon: 'storage',
+          title: 'Background sync may wait',
+          body: Platform.isIOS
+              ? 'Background App Refresh is off for Atrium, so readings only copy while the app is open. Tap to turn it on.'
+              : 'Battery saving can hold back syncing while Atrium is closed. Tap, then let Atrium run in the background.',
+          onTap: () async {
+            await PodPermissions.openBackgroundSettings();
+            ref.invalidate(backgroundAccessProvider);
+          },
+        ),
+        const SizedBox(height: Space.m),
+      ]);
+    }
 
     if (!d.connected) {
       children.addAll([
@@ -279,7 +321,8 @@ class _DeviceViewState extends ConsumerState<DeviceView> {
                 chevron: true,
                 onTap: () => context.pushDetail('/firmware'),
               ),
-            const ListRow(icon: 'device', title: 'Hardware', value: 'EVT · 3F2A'),
+            // The pod has no readable serial (privacy, ble_gatt.md section 2): real builds show only the build stage.
+            const ListRow(icon: 'device', title: 'Hardware', value: kRealData ? 'EVT' : 'EVT · 3F2A'),
           ],
         ),
         const SizedBox(height: 22),

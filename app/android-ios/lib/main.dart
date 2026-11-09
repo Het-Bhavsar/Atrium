@@ -1,12 +1,18 @@
 // Copyright (c) 2026 Het Bhavsar
 // SPDX-License-Identifier: Apache-2.0
 
+import 'dart:async';
+
 import 'package:atrium/core/app_state.dart';
 import 'package:atrium/core/config.dart';
 import 'package:atrium/core/routes/app_router.dart';
+import 'package:atrium/core/storage/local_store.dart';
 import 'package:atrium/core/theme/app_theme.dart';
 import 'package:atrium/features/device/presentation/device_sheets.dart';
+import 'package:atrium/features/insights/data/device_tier.dart';
 import 'package:atrium/features/insights/data/metrics_provider.dart';
+import 'package:atrium/features/insights/domain/metrics_snapshot.dart';
+import 'package:atrium/features/insights/domain/model_plan.dart';
 import 'package:atrium/features/insights/domain/sleep_model.dart';
 import 'package:atrium/features/pod/data/pod_api.g.dart';
 import 'package:atrium/features/pod/data/pod_session.dart';
@@ -21,28 +27,53 @@ import 'package:path_provider/path_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  // Readings and the profile stay on this phone: keep the data folder out of device and cloud backups.
-  try {
-    await FilesHostApi().keepOnDevice((await getApplicationSupportDirectory()).path);
-  } on Object catch (e) {
-    debugPrint('keepOnDevice: $e');
-  }
-  final store = await ProfileStore.open();
-  final saved = await store.load();
+  // Readings and the profile stay on this phone: keep the data folder out of device and cloud backups. Not awaited:
+  // nothing on screen depends on it.
+  unawaited(_keepOnDevice());
   // The sleep model's training data asks for attribution (ODC-By 1.0); it shows in Settings > Open source.
   LicenseRegistry.addLicense(
     () => Stream.value(
       const LicenseEntryWithLineBreaks(['Sleep model training data'], 'The sleep and wake model (sleep_v1) was trained on the sleep-accel dataset 1.0.0, used under the Open Data Commons Attribution License (ODC-By) 1.0.'),
     ),
   );
-  // The sleep model is data: a retrained file ships without a code change.
-  final models = kRealData ? SleepModels.parse(await rootBundle.loadString(SleepModels.asset)) : null;
+  // Everything the first frame needs, read in parallel: the profile, and on real builds the sleep model (data: a
+  // retrained file ships without a code change), this phone's tier for the model plan and the metrics saved last
+  // time, so Today opens with numbers while the log is read and recomputed off the UI isolate.
+  final storeF = ProfileStore.open();
+  final modelsF = kRealData ? rootBundle.loadString(SleepModels.asset).then(SleepModels.parse) : Future<SleepModels?>.value();
+  final tierF = kRealData ? probeDeviceTier() : Future.value(DeviceTier.mid);
+  final cacheF = kRealData ? MetricsCache.load() : Future<MetricsSnapshot?>.value();
+  // Opening the profile store opens the Hive boxes (settings, profile, metrics: `local_store.dart`).
+  final store = await storeF;
+  final saved = await store.load();
+  final settings = LocalStore.box(LocalStore.settings);
+  // Someone who finished onboarding opens on Today, not the welcome pages.
+  final onboarded = (settings?.get('app') as Map<Object?, Object?>?)?['onboarded'] == true;
   runApp(
     ProviderScope(
-      overrides: [profileStoreProvider.overrideWithValue(store), savedProfileProvider.overrideWithValue(saved), sleepModelsProvider.overrideWithValue(models)],
+      overrides: [
+        settingsBoxProvider.overrideWithValue(settings),
+        startRouteProvider.overrideWithValue(onboarded && !const bool.hasEnvironment('ATRIUM_START') ? '/today' : kStartRoute),
+        profileStoreProvider.overrideWithValue(store),
+        savedProfileProvider.overrideWithValue(saved),
+        sleepModelsProvider.overrideWithValue(await modelsF),
+        deviceTierProvider.overrideWithValue(await tierF),
+        metricsCacheProvider.overrideWithValue(await cacheF),
+      ],
       child: const AtriumApp(),
     ),
   );
+}
+
+/// The first screen: Today once onboarding is done, else `kStartRoute`.
+final startRouteProvider = Provider<String>((ref) => kStartRoute);
+
+Future<void> _keepOnDevice() async {
+  try {
+    await FilesHostApi().keepOnDevice((await getApplicationSupportDirectory()).path);
+  } on Object catch (e) {
+    debugPrint('keepOnDevice: $e');
+  }
 }
 
 class AtriumApp extends ConsumerStatefulWidget {
@@ -53,7 +84,7 @@ class AtriumApp extends ConsumerStatefulWidget {
 }
 
 class _AtriumAppState extends ConsumerState<AtriumApp> {
-  late final GoRouter _router = buildRouter(initial: kStartRoute, onQuery: kDebugMode ? _applyQuery : null);
+  late final GoRouter _router = buildRouter(initial: ref.read(startRouteProvider), onQuery: kDebugMode ? _applyQuery : null);
 
   /// Debug builds: the HTML prototype's URL switches (build, dev, data, glasses, labs, sheet), so each screen
   /// and state can be opened by deep link for side-by-side checks.

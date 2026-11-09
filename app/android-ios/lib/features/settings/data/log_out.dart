@@ -4,6 +4,7 @@
 import 'package:atrium/core/app_state.dart';
 import 'package:atrium/features/insights/data/metrics_provider.dart';
 import 'package:atrium/features/pod/data/pod_session.dart';
+import 'package:atrium/features/pod/data/spool.dart';
 import 'package:atrium/features/profile/data/profile_store.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -13,6 +14,14 @@ abstract final class PhoneData {
   static Future<void> deleteReadings(WidgetRef ref) async {
     final store = await ref.read(epochStoreProvider.future);
     await store.clear();
+    // The saved screen numbers and any pages background sync left hold the same readings.
+    await MetricsCache.clear();
+    try {
+      final spool = Spool.dirIn(store.file.parent.path);
+      if (spool.existsSync()) spool.deleteSync(recursive: true);
+    } on Object {
+      // Nothing waiting.
+    }
     ref.invalidate(metricsProvider);
   }
 
