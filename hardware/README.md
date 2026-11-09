@@ -8,6 +8,10 @@ ordering, and the charging-case board. All dimensions are in mm.
 </p>
 
 <p align="center">
+  <img src="../docs/images/plates/layout_flex.jpg" alt="Flex jumper layout, top and bottom" width="100%">
+</p>
+
+<p align="center">
   <img src="../docs/images/plates/layout_case.jpg" alt="Charging case board, top" width="100%">
 </p>
 
