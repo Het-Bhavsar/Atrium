@@ -143,11 +143,6 @@ If any of this is the part you want to build, start with the [roadmap](docs/road
 | **Build** | Parts from the LCSC / JLCPCB catalogue; both islands on one panel for one PCBA order |
 | **Software** | Pod firmware on Zephyr (nRF Connect SDK), case firmware for the CH32V003, Flutter app for Android and iOS. No account and no cloud: data stays on the phone |
 
-<p align="center">
-  <img src="hardware/pod/radio-island/pcb/Atrium_Radio_Island_render_top.png" alt="Radio island, top" height="190">
-  <img src="hardware/pod/power-island/pcb/Atrium_Power_Island_render_top.png" alt="Power island, top" height="190">
-  <img src="hardware/pod/flex-jumper/pcb/Atrium_Flex_Jumper_render_top.png" alt="Flex jumper" height="110">
-</p>
 
 ## Get the app
 
