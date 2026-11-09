@@ -25,7 +25,7 @@
 #define PIN_LID    PC2
 /* [10] button to GND, internal pull-up. EXTI3. */
 #define PIN_BTN    PC3
-/* [11] A2: NTC, TH1 NCP15WF104F03RC (100k, B 4250 K) to GND, R20 100k to VIN_EN */
+/* [11] A2: NTC, TH1 NCU15WF104F6SRC (100k, B 4250 K class) to GND, R20 100k to VIN_EN */
 #define PIN_NTC    PC4
 #define ADC_CH_NTC 2
 /* [12] U5 A (DIR tied to VCCA: A to B) */

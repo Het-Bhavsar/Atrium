@@ -22,7 +22,7 @@ Sensors are the EVT pod's: PPG module MAXM86161A (green, red and IR, one photodi
 | 5 | Sleep head position | While asleep only: which way the head lies through the night, as time on the back, front, left and right sides, and **time lying on the pod's side** (head on the pillow on the side the pod is worn). If most of the night is on the pod's side, the app suggests the other side for the next pad | IMU orientation and the wear side (#26) | V1 | Head orientation from the accelerometer. Left and right are named from the wear side, so #26 must be right. Lying on the pod presses it into the pillow: its readings in those epochs are marked lower quality |
 | 6 | Activity and effort | Active minutes, workouts detected, an effort score from HR zones | IMU, HR | V1 | Atrium's own effort score, with the formula documented in `app/` |
 | 7 | Recovery | A morning score from resting HR, HRV, sleep and temperature deviation | 1–4 | V1 | Formula documented and versioned |
-| 8 | SpO₂ trend | Overnight relative oxygen-saturation trend | PPG red and IR | Later | Uncalibrated, so trend only. Never a % SpO₂ number |
+| 8 | SpO₂ trend | Overnight relative oxygen-saturation trend | PPG red and IR | EVT | The pod logs a red/IR ratio from 30 s bursts: every 5 min asleep, every 30 min in Smart. Uncalibrated, so trend only. Never a % SpO₂ number |
 | 9 | Thermal trends | Skin-temperature and pod-gradient trends over the day and during exercise | TH1 and TH4 NTCs | Later | Atrium's own physiology; no composite "score" until validated |
 | 10 | Perfusion trend | Relative PPG amplitude (AC/DC) trend | PPG | Later | No brain or cerebral claims (see [brain-blood-flow.md](brain-blood-flow.md)) |
 | 11 | Eating detection | A prompt: "Looks like you are eating — log it?" | IMU jaw-motion pattern | Later | Opt-in. Jaw clench and talking are confounders, so test before shipping |
@@ -42,9 +42,9 @@ Sensors are the EVT pod's: PPG module MAXM86161A (green, red and IR, one photodi
 | 15 | Pairing | BLE pairing and bonding, device name, firmware version | BLE | EVT |
 | 16 | Battery and charging | Pod % in 10 % steps with the time left for the chosen mode (#27); charging, on the Plinth, full; cold or hot "charging paused" | VSYS sense, BQ21061 /PG and status, TS limits | EVT |
 | 17 | Plinth status | "On the Plinth: charging / charged" | BQ21061 /PG and status | EVT |
-| 18 | Wear detection | Off-body, so pause measurement and save power | PPG DC, TH1 | EVT |
+| 18 | Wear detection | Off-body, so pause measurement and save power | PPG DC and pulse, TH1, IMU motion | EVT |
 | 19 | Ship mode | Store and ship with the cell disconnected: set on the Plinth, takes effect on lift, wakes on the Plinth | BQ21061 ship mode | EVT |
-| 20 | Log sync | Compact offline log on the pod (about 20 h: 19.8–22.6 h, 12 B per 30 s epoch) and sync when the phone is near; the app shows when it last synced and warns after 16 h without a sync that older readings will soon be overwritten. Background sync on Android and iOS is not done yet | Internal flash, GATT log service | EVT |
+| 20 | Log sync | Compact offline log on the pod (about 20 h: 19.8–22.7 h, 12 B per 30 s epoch) and sync when the phone is near; the app shows when it last synced and warns after 16 h without a sync that older readings will soon be overwritten. Background sync on Android and iOS is not done yet | Internal flash, GATT log service | EVT |
 | 21 | Firmware update | Over the air, signed, with rollback | MCUmgr SMP | EVT |
 | 22 | Data export and delete | CSV export of the user's data; delete everything | App, cloud | V1 |
 | 23 | Privacy | Works without an account. Cloud features are opt-in. No sale or sharing of health data | App, cloud | EVT |

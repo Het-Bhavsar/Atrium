@@ -13,7 +13,7 @@
  *    fixed in ADC counts, and a reading with VIN off before each feed is the zero. The
  *    offset is a fixed voltage, so as VDD moves after the zero it drifts by about 0.1 mA
  *    per 100 mV (typ 3 mV), 0.35 mA at the 13 mV maximum: small against 2.5 mA.
- *  - NTC: TH1 Murata NCP15WF104F03RC (100k, B 4250 K) to GND, R20 100k to VIN_EN
+ *  - NTC: TH1 Murata NCU15WF104F6SRC (100k, B 4250 K class) to GND, R20 100k to VIN_EN
  *    (powered only while feeding) [VERIFY B against Murata's R-T table].
  * Readings are sums of `n` conversions (oversampling).
  */

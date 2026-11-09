@@ -2,7 +2,7 @@
  * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
- * Measurement modes and their current budgets, Rev B.2 (MAXM86161). The
+ * Measurement modes and their current budgets, EVT pod (MAXM86161A). The
  * module runs all of a mode's LEDs at one sample rate, and each LED at most
  * once per sample. Slots, rates and duty follow the ML data contract (green at
  * 25 Hz in every worn mode, accelerometer at 12.5 Hz), except the research modes. Budgets are uA at the
@@ -74,11 +74,10 @@ struct mode_cfg {
 	uint16_t budget_wc_ua;
 };
 
-/* The docked-and-full idle mode must stay at or below 0.07 mA (SCHEMATIC_SIM.md 5.4 item 2). */
+/* The docked-and-full idle mode must stay at or below 0.07 mA (design target). */
 #define DOCKED_IDLE_LIMIT_UA 70
 
-/* Green stays on the MAXM86161's 31 mA range, which is the only one green can reach
- * from the cell (REV_B2_COMPACT.md, green headroom). */
+/* Green stays on the 31 mA range, the only one green can reach from the cell (headroom.h). */
 #define GREEN_MAX_MA 30
 
 /* The on-pod pulse, HRV and fit filters run at this rate; faster modes are averaged down. */

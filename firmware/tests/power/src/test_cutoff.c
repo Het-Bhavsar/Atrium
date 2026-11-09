@@ -18,10 +18,11 @@ static void before(void *f)
 
 ZTEST_SUITE(cutoff, NULL, NULL, before, NULL, NULL);
 
-/* Cut-off above LPB1010 VDL max 2.90 V. Rev B.2: under a 30 mA peak (a 15 mA LED pulse plus
- * radio TX) a 2.0 ohm cell [ASSUMED] sags 60 mV, and 3.24 V still leaves the red LED (Vf
- * 2.4 V max at 20 mA, MAXM86161A data sheet) about 0.8 V of driver compliance. The green
- * limit (green-min-mv plus sag, headroom.c) now sits below the cut-off. */
+/* Cut-off above the protection IC's VDL (AP6683 2.8 V; the LPB1010 fallback is 2.90 V max).
+ * Under a 30 mA peak (a 15 mA LED pulse plus radio TX) a 2.0 ohm cell [ASSUMED] sags 60 mV,
+ * and 3.24 V still leaves the red LED (Vf 2.4 V max at 20 mA, MAXM86161A data sheet) about
+ * 0.8 V of driver compliance. The green limit (green-min-mv plus sag, headroom.c) now sits
+ * below the cut-off. */
 ZTEST(cutoff, test_limits_hold_rev_b2_headroom)
 {
 	zassert_equal(c.cfg.cutoff_mv, 3300);
@@ -84,7 +85,7 @@ ZTEST(cutoff, test_charger_present_without_reading)
 ZTEST(cutoff, test_invalid_readings_ignored)
 {
 	cutoff_update(&c, false, 3200);
-	cutoff_update(&c, false, 0);     /* gauge not ready */
+	cutoff_update(&c, false, 0);     /* no VSYS reading yet */
 	cutoff_update(&c, false, 65535); /* bus error */
 	cutoff_update(&c, false, 3200);
 	zassert_equal(c.state, BATT_LOW);

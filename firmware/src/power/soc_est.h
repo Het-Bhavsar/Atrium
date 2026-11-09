@@ -2,16 +2,16 @@
  * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
- * State of charge without a fuel gauge (the r5 Pill board has none). Inputs: VBAT from
- * VBAT_SENSE (VBAT/2 on P0.29/AIN5), and the pod's own current, known from
- * the active mode's budget. It combines two estimates:
+ * State of charge without a fuel gauge (the pod has none). Inputs: the cell voltage from
+ * VSYS_SENSE (VSYS x 1 M / 3.2 M on P0.28/AIN4; VSYS is about VBAT off the Plinth), and the
+ * pod's own current, known from the active mode's budget. It combines two estimates:
  *  - Coulomb count: every second, subtract the mode current; on the dock,
  *    add the charge current while the charger runs.
  *  - Voltage: open-circuit voltage = VBAT + I x R_cell, mapped through a
  *    generic LiCoO2 OCV curve [ASSUMED, the one in logic_sim.py]. This
  *    pulls the count back, slowly, and only at light load, where I x R
  *    error is small.
- * The charger ending its cycle (CHG# released after being low) means full.
+ * The BQ21061 reporting charge done means full.
  * Plain C, no Zephyr.
  */
 #ifndef ATRIUM_SOC_EST_H_

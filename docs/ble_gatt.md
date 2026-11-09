@@ -42,33 +42,7 @@ Feature numbers (#n) refer to [`FEATURES.md`](FEATURES.md).
 - Command 0x02 works on and off the Plinth.
 - New pairings only in the 60 s after a lift from the Plinth.
 
-**Rev 9** follows the r5 Pill board: no fuel gauge and no TH3.
-- Battery Level and Charge State byte 5 come from the pod's estimate again; byte 6 is VBAT from VBAT_SENSE.
-- Charge State bytes 12–15 and 17–18 are reserved with fixed "no reading" values. The length stays 19 bytes, so decoders need no change.
-- The charge policy uses TH4 alone.
-
-**Rev 8** adds the motion level and the oxygen trend, and the Pill board's 16 Mbit flash:
-- Log records grow from 20 to 24 bytes (bytes 20–23: motion level and class, steps/min, pulse-present seconds, oxygen-trend burst). The log holds 11.8 days at 15 s; the phone syncs daily.
-- Activity (0x0401) gains max motion level, class and steps/min.
-- New Oxygen Ratio (0x0205): the relative red/IR ratio per burst, research only.
-
-**Rev 7** follows the B.2 decision (no heater, MAX17262H fuel gauge):
-- Battery Level and Charge State byte 5 come from the gauge's RepSOC. Byte 6 is the gauge's VCell.
-- Charge State byte 14 now carries gauge flags (was the heater interlock), byte 15 the gauge die temperature, and new bytes 17–18 the measured average current. Charge State is 19 bytes.
-- The NTC roles moved: TH1 is the skin sensor (Skin Temperature, log bytes 6–7, wear detection), and TH3 sits on the board near the cell (Charge State bytes 12–13).
-
-**Rev 6** follows the ML algorithm port:
-- PPG Data gains a time stamp (header 8 bytes).
-- PPG Control bit 1 starts a raw accelerometer stream on the new Motion Data (0x0204).
-- Heart Rate is sent while worn and the spectral track is valid.
-- Log byte 15 bit 6 marks an IR pulse source.
-
-**Rev 5** follows the final Rev B.2 netlist:
-- The TMP117 and the fuel gauge are gone. Skin and top temperatures come from the NTCs TH3 and TH4, and battery % from the pod's own estimate.
-- Charge State byte 14 now reports the heater interlock.
-- Modes follow the ML data contract: 25 Hz green, and lite duty-cycled.
-
-**Rev 4** renumbered the modes 0 to 5, moved the PPG stream to the MAXM86161 FIFO format, and put VBAT and head pitch and roll in log bytes 12, 13 and 19 (#5).
+Revs 4 to 9 described earlier boards and log formats (a fuel gauge, external flash, a third NTC). They no longer apply; what still holds from them (the PPG Data header, Motion Data, Oxygen Ratio and Activity's motion fields) is in the sections below.
 
 ## Conventions
 
@@ -79,21 +53,21 @@ Feature numbers (#n) refer to [`FEATURES.md`](FEATURES.md).
   - The pod pairs with LE Secure Connections only (`CONFIG_BT_SMP_SC_PAIR_ONLY`), Just Works, since it has no display or buttons. It bonds, with 16-byte keys. That is Zephyr security level 2. Levels 3 and 4 need MITM protection, which a passkey would give.
   - It accepts a new pairing only in the 60 s after a lift from the Plinth, and in the 60 s after boot. Outside that, pairing fails with Pairing Not Allowed (0x05). Bonded phones reconnect at any time.
   - A link with a legacy bond or a short key is dropped (HCI 0x05, authentication failure). So is a link still not encrypted 30 s after it connects, so a stranger can't hold the pod's one connection.
-  - Every characteristic except the four Device Information strings needs an encrypted link. Without one, reads and writes fail with Insufficient Encryption (0x0F).
+  - Every characteristic except Device Information (four strings and the PnP ID) and Zephyr's GAP and GATT services needs an encrypted link. Without one, a bonded phone gets Insufficient Encryption (0x0F) and an unbonded one Insufficient Authentication (0x05) [VERIFY on a phone]. CCC descriptors read without encryption; writing them needs it.
   - A phone that has lost its bond (forgotten in its settings, reinstalled) pairs again the same way: lift the pod from the Plinth, then pair within 60 s. The new bond replaces its old one (`CONFIG_BT_SMP_ALLOW_UNAUTH_OVERWRITE`, 2026-11-08). Outside the window the pod refuses with 0x05, so replacing a bond needs the pod in hand. A build without the window check doesn't compile (`BUILD_ASSERT` in `ble.c`).
   - At most 4 bonds are held, and the oldest is not overwritten: a fifth phone fails to pair until command 0x04 (forget bonds) or 0x05 (factory reset) from a bonded phone.
-- Default ATT MTU is 23. The pod asks for 247 and uses Data Length Extension. Notifications that carry arrays fill whatever MTU was negotiated.
+- Default ATT MTU is 23. The pod accepts up to 247 when the phone asks; it has no GATT client, so it cannot start the exchange. It asks for Data Length Extension and 2M PHY only in modes 10 and 11 (§4.4). Notifications that carry arrays fill whatever MTU was negotiated.
 - Custom UUIDs share one base: `8f2aXXXX-4c46-4154-5249-554d2e706f64`. In the tables below, `0xXXXX` means that base with those 16 bits filled in.
 
 ## Advertising
 
 | State | Interval | Payload |
 |---|---|---|
-| Worn, not connected | 1 s [ASSUMED] | Flags, name `Atrium`, Power service UUID (0x0100) |
-| Docked idle, off-body | 2 s | Same as above. Counted in the docked-idle and off-body budgets (`firmware/src/power/modes.c`) |
+| Not connected, any mode except docked idle (off-body included) | 1 s [ASSUMED] | Flags and the Power service UUID (0x0100); name `Atrium` in the scan response |
+| Docked idle (on the Plinth) | 2 s | Same as above. Counted in the docked-idle budget (`firmware/src/power/modes.c`) |
 | Power-off (cut-off), ship mode | none | The pod is off until the next Plinth |
 
-Connection interval follows the measurement mode: 200 ms (full), 400 ms (smart), 1 s (lite), 4 s (sleep), 30 ms (research) (`firmware/src/power/modes.c`).
+Connection interval follows the mode, with latency 0: 200 ms (full), 400 ms (smart), 1 s (lite), 4 s (sleep), 2 s (docked idle and off-body), 30 ms (modes 6 and 7), 100 ms (modes 8 and 9), 15 ms (modes 10 and 11) (`firmware/src/power/modes.c`). A log read asks for 15–30 ms instead (§7).
 
 ## 1. Device Information (SIG 0x180A): #15
 
@@ -103,6 +77,7 @@ Connection interval follows the measurement mode: 200 ms (full), 400 ms (smart),
 | Model Number | 0x2A24 | `Atrium pod` |
 | Hardware Revision | 0x2A27 | `EVT` |
 | Firmware Revision | 0x2A26 | `<major>.<minor>.<patch>+<commit>`, e.g. `0.1.0+41f1d65` (`-dirty` for an uncommitted build). Tag every recording with it: the board's IMU rotation is tied to the commit |
+| PnP ID | 0x2A50 | Zephyr's defaults: vendor ID source 1, vendor 0, product 0, version 1 |
 
 Device Information is open without encryption (Zephyr's built-in service), so it carries no serial number or other per-unit identifier.
 
@@ -133,7 +108,7 @@ Notified on any change of bytes 0–5 (states, flags and SoC), and every 60 s wh
 | 16 | u8 | active measurement mode: 0 to 3 as in 8, 4 docked idle, 5 off-body probe, 6 to 9 research (§4.3), 10 and 11 research vibration (§4.4) |
 | 17 | i16 | reserved: −32768 |
 
-**Case battery and "case empty":** both are app-side. The pod cannot see the case battery, and a dead case looks the same as a lift: both release /PG. The app estimates the case level from the SoC rise while fed by the case (flag bit 4) × 30 mAh, integrated against the 500 mAh case cell (KP-502030; about 8 pod charges, `docs/charging-case.md`). It shows "charge your case" when the pod reports undocked while it is off-body and still, inside the user's usual dock window (SCHEMATIC_SIM.md 5.4 item 5).
+**Case battery and "case empty":** both are app-side. The pod cannot see the case battery, and a dead case looks the same as a lift: both release /PG. The app estimates the case level from the SoC rise while fed by the case (flag bit 4) × 30 mAh, integrated against the 500 mAh case cell (KP-502030; about 8 pod charges, `docs/charging-case.md`). It shows "charge your case" when the pod reports undocked while it is off-body and still, inside the user's usual dock window.
 
 ## 4. Pulse: #1, #2
 
@@ -144,7 +119,8 @@ The SIG service, so standard fitness apps can read the pulse estimate.
 | Characteristic | UUID | Props | Value |
 |---|---|---|---|
 | Heart Rate Measurement | 0x2A37 | N | Flags `0x06` (uint8 format, contact detected), then `uint8` pulse rate in bpm. Sent once a second while the spectral track is valid (confidence ≥ 0.12, `firmware/src/pulse.c`) and the pod is worn. In fit mode (§4.2) it is also sent before wear says worn, with a pulse present (`pulse_report_bpm`). The log records only the worn rate. No notification means no estimate |
-| Body Sensor Location | 0x2A38 | R | `0x00` (other: temporal region) |
+| Body Sensor Location | 0x2A38 | R | `0x01` (chest): Zephyr's fixed value. The firmware does not set it, so ignore it; the pod sits on the temporal region |
+| Heart Rate Control Point | 0x2A39 | W | Present in Zephyr's service; the pod registers no handler, so writes fail |
 
 ### 4.2 PPG stream (0x0200)
 
@@ -153,7 +129,7 @@ The SIG service, so standard fitness apps can read the pulse estimate.
 | PPG Control | 0x0201 | W | `u8`: bit 0 raw PPG stream, bit 1 raw accelerometer stream, bit 2 fit mode (0 stops all). Streams and fit mode stop on disconnect; fit mode also after 180 s |
 | PPG Data | 0x0202 | N | Header, then FIFO words (below) |
 | Pulse Detail | 0x0203 | R, N | `u8` bpm (0 = none), `u8` confidence of the motion-weighted spectrum (0 to 255 = 0 to 1), `u16` window in s (8), `u8` sample rate in Hz |
-| Motion Data | 0x0204 | N | `u16` sequence, `u16` rate, `u32` uptime ms of the first sample, then up to 12 × (`i16` x, y, z in mg). Rate: bit 15 clear, mHz (12500 = 12.5 Hz); bit 15 set, bits 0–14 in 10 mHz (0xA8A0 = 104 Hz, research modes) (`gatt_motion_rate`) |
+| Motion Data | 0x0204 | N | `u16` sequence, `u16` rate, `u32` uptime ms of the first sample, then 12 × (`i16` x, y, z in mg), 80 bytes, sent only with an ATT MTU of 83 or more. None in docked idle, off-body or modes 10 and 11. Rate: bit 15 clear, mHz (12500 = 12.5 Hz); bit 15 set, bits 0–14 in 10 mHz (0xA8A0 = 104 Hz, research modes) (`gatt_motion_rate`) |
 | Oxygen Ratio | 0x0205 | R, N | Relative red/IR ratio, research only (#8): `u32` time, `u16` R × 1000 (0 = no good window), `u8` confidence (0–255 = 0–1), `u8` good windows of 12. Notified at the end of each 30 s burst. No percentage: the app shows the change against the last 14 nights |
 | Fit Quality | 0x0206 | R, N | Fit guide (#24), below. Notified once a second while subscribed, off the Plinth |
 | Vibration Data | 0x0207 | N | Research modes 10 and 11 only: the accelerometer's skin-normal axis at 3.33 or 6.66 kHz (§4.4) |
@@ -166,14 +142,14 @@ The SIG service, so standard fitness apps can read the pulse estimate.
 | 2 | u8 | sample rate, Hz (every slot of the mode runs at it) |
 | 3 | u8 | measurement mode |
 | 4 | u32 | uptime ms of the first sample, the same clock as Motion Data [ASSUMED within one sample] |
-| 8 | 3 × n bytes | MAXM86161 FIFO items as read, **big-endian**: bits 23..19 are the tag, bits 18..0 the unsigned value: ambient-cancelled for a LED slot, the raw photodiode level for the direct-ambient slot |
+| 8 | 3 × n bytes | MAXM86161A FIFO items as read, **big-endian**: bits 23..19 are the tag, bits 18..0 the unsigned value: ambient-cancelled for a LED slot, the raw photodiode level for the direct-ambient slot |
 
-Tags follow the MAXM86161 data sheet (Table 3):
+Tags follow the MAXM86161A data sheet (Table 3):
 - 0x01 to 0x04 are the mode's slots 1 to 4, in the order of `firmware/src/power/modes.c`. LED1 is green, LED2 IR and LED3 red. Slot 4 exists only in the research modes: 0x04 is direct ambient (§4.3).
 - 0x0D to 0x0F are slots 1 to 3 after picket-fence replacement. The data sheet has no picket-fence tag for slot 4.
 - 0x1D is a sub-DAC update, 0x1E invalid and 0x1F a time stamp.
 
-When the battery is below the green limit, the pod drops the green slot, and the remaining slots move up one place (see `firmware/src/power/headroom.c`). Stream size is `stream_bps` in `modes.c`: 3 bytes × slots × rate. In lite, the stream only flows during the 30 s optics phase. A research mode never drops green: below the limit the pod runs full instead, and the header's mode byte says 0.
+When VSYS is below the green headroom limit (`firmware/src/power/headroom.c`), green becomes IR at the same current in the same slot (smart, lite, sleep, the probe). In full, which already has IR, the green slot is dropped and IR and red move up one place (`mode_green_to_ir` in `modes.c`). During an oxygen-trend burst (30 s, smart and sleep only), IR (tag 0x02) and red (tag 0x03) join green in the stream. Stream size is `stream_bps` in `modes.c`: 3 bytes × slots × rate. In lite, the stream only flows during the 30 s optics phase. A research mode never drops green: below the limit the pod runs full instead, and the header's mode byte says 0.
 
 ### 4.3 Research modes (depth study)
 
@@ -197,7 +173,7 @@ Research only: for the depth study's ambient and timing questions (E1), never a 
 - Select: write `u8` 6, 7, 8 or 9 to Mode (0x0601) off the Plinth, then 3 to PPG Control for both streams. On the Plinth the write fails with Value Not Allowed (0x13). Mode reads back the value while it runs.
 - Ends: on disconnect, on the Plinth, at reboot, or when 0 to 3 is written. None of these is stored, so the stored mode comes back.
 - The usual rules still apply. On the Plinth the pod is docked idle and off the body it runs the probe. In the sleep window it runs sleep and on a low battery lite. Below the green headroom limit (`firmware/src/power/headroom.c`) it runs full, so the slot table is always the one above.
-- **Direct ambient (DA):** LEDC code 0x9 (MAXM86161 data sheet, Table 2). The photodiode is sampled with no LED, after the three LED exposures, and the module does not cancel ambient for it. Its tag is its slot, 0x04, as in the data sheet's FIFO example. Decode: `tag 4 → "ambient"` for modes 6 to 9.
+- **Direct ambient (DA):** LEDC code 0x9 (MAXM86161A data sheet, Table 2). The photodiode is sampled with no LED, after the three LED exposures, and the module does not cancel ambient for it. Its tag is its slot, 0x04, as in the data sheet's FIFO example. Decode: `tag 4 → "ambient"` for modes 6 to 9.
 - **Averaged output (modes 8 and 9).** The PPG Data header's mode byte is the flag: 8 and 9 are averaged on the module, and every other mode is one integration per sample. Byte 2 is the output rate.
   - Each FIFO word is the mean of 4 (mode 8) or 8 (mode 9) adjacent 200 Hz samples of its own slot. The module averages each channel separately (data sheet, SMP_AVE), so it averages DA too [VERIFY on the bench].
   - The 4 exposures take 4 × 129.8 µs (tINT 117.3 µs + settling 12 µs + 0.5 µs) per 5 ms frame. The data sheet allows 400 sps for 4 exposures at this tINT.
@@ -217,7 +193,7 @@ Research only: a feasibility capture of whether the pod's accelerometer, pressed
 | Accelerometer (LSM6DSOX) | 3333 Hz, high-performance, ±2 g | 6667 Hz, same |
 | Output filter | LPF1 only (CTRL1_XL LPF2_XL_EN = 0): −3 dB at about ODR/2 = 1.67 kHz | same: about 3.33 kHz |
 | Noise, 70 µg/√Hz × √bandwidth | 2.9 mg RMS | 4.0 mg RMS |
-| Gyroscope, LEDs, MAXM86161 | off | off |
+| Gyroscope, LEDs, MAXM86161A | off | off |
 | Samples | 6667 B/s + 406 B/s of headers (29 notifications/s of 115) | 13333 B/s + 812 B/s (58/s), while capturing |
 | I²C at 400 kHz | 0.56 s of every second | the whole bus: windows with gaps (below) |
 | Connection interval | 15 ms | 15 ms |
@@ -304,7 +280,7 @@ Before the EVT pod exists, the voice study (rig A) records mode 11 from an LSM6D
 
 | Characteristic | UUID | Props | Value |
 |---|---|---|---|
-| Skin Temperature | 0x0301 | R, N | `i16` skin (TH1, skin side under the window), `i16` top (TH4, under the lid), `u8` flags (bit 0 skin valid, bit 1 top valid), `u32` time. Notified at the mode's NTC rate: 1 s, or 10 s in sleep and docked |
+| Skin Temperature | 0x0301 | R, N | `i16` skin (TH1, skin side under the window), `i16` top (TH4, under the lid), `u8` flags (bit 0 skin valid, bit 1 top valid), `u32` time. Notified at the mode's NTC rate: 10 s in sleep and off-body, every second otherwise, including on the Plinth |
 
 Both sensors sit at the pod, so these are skin-side and pod temperatures, not core body temperature.
 
@@ -400,7 +376,15 @@ Stored in internal flash (Zephyr settings on the 8 KB `storage` partition, with 
 | Time | 0x0602 | R, W | `u32` Unix seconds |
 | Sleep Window | 0x0603 | R, W | `u16` start, `u16` end (minutes after local midnight), `i16` UTC offset in minutes. Inside the window the pod uses sleep mode. Default 23:00 to 07:00 |
 | Log Interval | 0x0604 | R | `u16` seconds: the fixed 30 s epoch |
-| Command | 0x0605 | W | `u8` op, `u32` key `0x41545249`: 0x01 reboot, 0x02 ship now (on the Plinth: BQ21061 ship mode at the next lift, 10 nA; off it: power off until the next Plinth), 0x03 erase log, 0x04 forget bonds, 0x05 factory reset (log, settings and bonds, then reboot) |
+| Command | 0x0605 | W | `u8` op, `u32` key `0x41545249`: 0x01 reboot, 0x02 ship now (on the Plinth: BQ21061 ship mode at the next lift, 10 nA; off it: power off until the next Plinth), 0x03 erase log, 0x04 forget bonds (and disconnects), 0x05 factory reset (log, settings and bonds, then reboot) |
+
+Write errors (`firmware/src/ble/gatt_atrium.c`, `gatt_encode.c`):
+- Any settings write at a non-zero offset: 0x07 (Invalid Offset).
+- Mode: 4, 5 or above 11, or a research mode on the Plinth: 0x13 (Value Not Allowed).
+- Time: a length other than 4: 0x0D (Invalid Attribute Length).
+- Sleep Window: a length other than 6, a minute value of 1440 or more, or an offset beyond ±14 h: 0x13. It applies only once Time has been written; start equal to end turns it off.
+- Command: a wrong length, key or op: 0x13; a ship-mode failure: 0x80.
+- PPG Control (§4.2): a length other than 1 or a value above 7: 0x13.
 
 ## 9. Firmware update: #21
 
@@ -410,7 +394,7 @@ MCUmgr SMP over BLE. Service `8d53dc1d-1db7-4cd3-868b-8a527460aa84`, characteris
 - A new image confirms itself only after 60 s of healthy running: BLE up, PPG and IMU ready, a VSYS reading off the Plinth (or on the Plinth). If it is still unhealthy at 300 s, it reboots and MCUboot restores the previous image. An image that was never confirmed also reverts on any reset.
 - The images are signed with ECDSA P-256. The development key is MCUboot's sample key [VERIFY: replace it before any release build].
 - Version: `firmware/src/VERSION` alone sets the MCUboot header version and the x.y.z of Firmware Revision (0x2A26). The app compares the two to confirm an update; `fw.sh build` fails if they differ.
-- Updates are refused below 3.60 V VSYS unless the pod is docked [ASSUMED].
+- Off the Plinth, image upload chunks are refused (MCUmgr EBUSY) while VSYS is below 3.60 V (`CONFIG_ATRIUM_DFU_MIN_MV`).
 - This is the only field update path. The SWD pads on the base are for the programming jig and recovery.
 
 ## 10. Privacy: #23

@@ -2,7 +2,7 @@
  * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
- * ppg.h backend for the MAXM86161 (pod Rev B.2 U2).
+ * ppg.h backend for the MAXM86161A (pod U3; the MAXM86161 has the same register map).
  */
 #include <zephyr/device.h>
 #include <zephyr/kernel.h>

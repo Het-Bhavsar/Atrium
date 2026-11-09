@@ -9,9 +9,9 @@
 #define S(l, m) {.led = (l), .ma = (m)}
 
 /*
- * Budget = s4's non-optical current for the matching B.1 mode (CPU, I2C, BLE, IMU, gauge,
- * protection; conservative for the B.2 3.3 V DC/DC rail [VERIFY]), plus the MAXM86161
- * figures from its data sheet:
+ * Budget = s4's non-optical current for the matching mode (CPU, I2C, BLE, IMU, protection;
+ * s4 modelled an earlier board, so this is conservative for the EVT pod's 1.8 V rail
+ * [VERIFY on the bench, O-15]), plus the MAXM86161A figures from its data sheet:
  *  - module: 400 uA typ / 600 uA max at 100 sps x 3 exposures with the LEDs off,
  *    i.e. 1.33 / 2.0 uA per exposure per sps;
  *  - LED: I x 123.8 us x 1.21 per pulse (one LED at full scale and 100 sps is 600 uA).

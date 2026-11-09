@@ -39,7 +39,7 @@ A cell 0.2 mm over nominal uses the whole swell gap (stack tolerance analysis in
 
 - Pi-match values.
 - VLED cut-off voltage.
-- HRV sampling strategy: 25 sps with interpolation, or 100 sps windows.
+- HRV timing: the firmware runs at 25 sps with parabolic beat timing; the bench confirms it against ECG (O-18).
 - Flex copper and polyimide thickness.
 - Skin pad material and thickness.
 
@@ -52,8 +52,8 @@ A cell 0.2 mm over nominal uses the whole swell gap (stack tolerance analysis in
   BQ21061 charger  (0x6B) <--VIN--------------'                                           nRF52832-CIAA  (VDD 1.8 V)
     IN  <- VIN (+ESDA5 TVS)                SWDIO  SWDCLK ---------------------------->     SWD (47 R + ESD)
     PMID = VSYS ---------------------------------------------------------------------->   TPS7A0218 -> VDD_1V8
-    BAT  <-> CELL+  (400909)                                                              MAXM86161 VLED <- VSYS
-    VDD 1.8 V -> own VIO (BQ_VDD)                                                         MAXM86161 (0x62) on I2C
+    BAT  <-> CELL+  (400909)                                                              MAXM86161A VLED <- VSYS
+    VDD 1.8 V -> own VIO (BQ_VDD)                                                         MAXM86161A (0x62) on I2C
     /PG ----------------------------------------------------------------------------->   P0.14 (100 k pull-up)
   LSM6DSOX INT1 -------------------------------------------------------------------->    P0.12
   I2C SDA/SCL <======================================================================>   P0.15 / P0.16 (4.7 k pull-ups)
@@ -79,11 +79,11 @@ A cell 0.2 mm over nominal uses the whole swell gap (stack tolerance analysis in
 |---|---|---|---|
 | P0.15 | H4 | I2C_SDA | TWIM0, 400 kHz, 4.7 k pull-ups |
 | P0.16 | H3 | I2C_SCL | |
-| P0.18 | H2 | PPG_INT | MAXM86161 INTB, open-drain, internal pull-up |
-| P0.20 | G2 | PPG_LDO_EN | High = MAXM86161 on; a 1 M pull-down holds it off in reset |
+| P0.18 | H2 | PPG_INT | MAXM86161A INTB, open-drain, internal pull-up |
+| P0.20 | G2 | PPG_LDO_EN | High = MAXM86161A on; a 1 M pull-down holds it off in reset |
 | P0.12 | H6 | IMU_INT1 | Push-pull, **no pull** (INT1 must be low or floating at IMU power-up) |
-| P0.14 | H5 | CHG_PG | BQ21061 /PG, low when docked; wake source for "pair on lift" |
-| P0.17 | G3 | NTC_EN | Drives the top of both NTC dividers, pulsed about 100 µs per second |
+| P0.14 | H5 | CHG_PG | BQ21061 /PG, low when docked. Wakes the pod from System OFF on the Plinth; a lift opens the 60 s pairing window |
+| P0.17 | G3 | NTC_EN | Drives the top of both NTC dividers for about 0.5 ms per reading: every second when worn or docked, every 10 s in Sleep and off-body |
 | P0.03/AIN1 | D6 | TH1_SENSE | Skin NTC |
 | P0.02/AIN0 | C6 | TH4_SENSE | Top NTC (radio island top, beside R11) |
 | P0.28/AIN4 | A3 | VSYS_SENSE | 2.2 M / 1 M + 100 nF |
@@ -109,9 +109,9 @@ Risk: the SWD pads face the skin. The nRF52832 SWD pins have weak internal pulls
 
 ## Wake and pairing (no buttons, no LEDs on the pod)
 
-- On skin: MAXM86161 proximity and IMU motion start sampling.
+- On skin: the off-body green probe (5 mA, 8 Hz) sees reflected light for 2 s, then a pulse within 15 s, and the pod starts measuring in the chosen mode.
 - On the Plinth: /PG goes low, the pod charges, and the Plinth light line breathes.
-- Lifted off the Plinth: /PG rises and the pod advertises for pairing for 60 s.
+- Lifted off the Plinth: /PG rises and the pod accepts a new pairing for 60 s (also for 60 s after boot). It advertises at all times for bonded phones.
 - Ship mode (factory): BQ21061 ship mode; the first time on a Plinth or in the case wakes it.
 
 ## Known compromises (accepted)

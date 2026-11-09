@@ -7,9 +7,9 @@
  * 19-102034 Rev 1; the MAXM86161 was 3.8 V at 150 mA), plus the driver's
  * compliance. That puts green at about 3.1 V on the 31 mA range [VERIFY Vf
  * against current], below the 3.3 V cut-off. The cell sags by I x R during each LED pulse, so the
- * limit applied to the VCELL reading is green-min-mv plus that sag. Below it,
- * green slots are dropped and the pulse comes from IR, or red when a mode has
- * no IR slot. Plain C, no Zephyr.
+ * limit applied to the VSYS reading is green-min-mv plus that sag. Below it,
+ * green becomes IR at the same current in the same slot; a mode that already
+ * has IR (full) drops its green slot (mode_green_to_ir). Plain C, no Zephyr.
  */
 #ifndef ATRIUM_HEADROOM_H_
 #define ATRIUM_HEADROOM_H_

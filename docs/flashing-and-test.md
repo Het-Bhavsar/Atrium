@@ -30,21 +30,21 @@ CAD in `mechanical/programming-jig/` (STEP, STL, drawings).
 
 ## Programming the nRF52832
 
-Build with `firmware/tests/fw.sh build` (Docker, Zephyr v4.4.2). It writes `build/atrium_pod_merged.hex` (MCUboot and the signed app) for SWD and `build/src/zephyr/zephyr.signed.bin` for BLE updates. It then checks that the signed image's header version and the Firmware Revision string inside it both match `firmware/src/VERSION`.
+Build with `firmware/tests/fw.sh build` (Docker, Zephyr v4.4.2). It writes `firmware/build/atrium_pod_merged.hex` (MCUboot and the signed app) for SWD and `firmware/build/src/zephyr/zephyr.signed.bin` for BLE updates. It then checks that the signed image's header version and the Firmware Revision string inside it both match `firmware/src/VERSION`.
 
 ```bash
 nrfutil device recover
 ```
 
 ```bash
-nrfutil device program --firmware build/atrium_pod_merged.hex --options chip_erase_mode=ERASE_ALL
+nrfutil device program --firmware firmware/build/atrium_pod_merged.hex --options chip_erase_mode=ERASE_ALL
 ```
 
 ```bash
 nrfutil device reset
 ```
 
-With nrfjprog the same steps are `nrfjprog --recover`, `nrfjprog --program build/atrium_pod_merged.hex --chiperase --verify` and `nrfjprog --reset`. `west flash` from the build directory also works. [VERIFY the option names with `nrfutil device --help` before scripting a jig.]
+With nrfjprog the same steps are `nrfjprog --recover`, `nrfjprog --program firmware/build/atrium_pod_merged.hex --chiperase --verify` and `nrfjprog --reset`. `west flash` from the build directory also works. [VERIFY the option names with `nrfutil device --help` before scripting a jig.]
 
 - **Flash map** (512 KB): MCUboot 0x00000 (32 KB), slot 0 0x08000 (220 KB), slot 1 0x3F000 (220 KB), settings and bonds 0x76000 (8 KB), log 0x78000 (32 KB).
 - **Debug access.** The build uses `CONFIG_NRF_APPROTECT_USE_UICR` and the hex holds no UICR records, so a recovered chip stays open to the debugger after programming. The production lock (UICR.APPROTECT written at the end of the factory flash) is a DVT decision; `recover` always works, and wipes the chip.
@@ -53,7 +53,7 @@ With nrfjprog the same steps are `nrfjprog --recover`, `nrfjprog --program build
 
 ## Programming the charging case
 
-The case MCU is a CH32V003 on a single-wire debug interface (SWIO), programmed with a WCH-LinkE and `minichlink` through TP1 (SWIO, PD1), TP2 (3.3 V) and TP3 (GND) on the case board, before the case is closed, with no cell fitted when TP2 is used: `minichlink -w atrium_case.bin flash -b`, then `minichlink -D` once so PD7 is a GPIO. Build steps are in [`firmware/case/README.md`](../firmware/case/README.md). The case has no field update path.
+The case MCU is a CH32V003 on a single-wire debug interface (SWIO), programmed with a WCH-LinkE and `minichlink` through TP1 (SWIO, PD1), TP2 (3.3 V) and TP3 (GND) on the case board, before the case is closed, with no cell fitted when TP2 is used: `minichlink -w firmware/case/build/atrium_case.bin flash -b`, then `minichlink -D` once so PD7 is a GPIO. Build steps are in [`firmware/case/README.md`](../firmware/case/README.md). The case has no field update path.
 
 ## Field updates
 
@@ -65,7 +65,7 @@ MCUboot with two 220 KB slots, updated over BLE (SMP / mcumgr). The SWD pads are
 |---|---|---|
 | 1 | VIN current, cell disconnected | < 20 mA |
 | 2 | Flash and verify | Pass |
-| 3 | I2C IDs (IMU 0x6C WHO_AM_I, MAXM86161 PART_ID, BQ21061 STAT0 readable) | Pass |
+| 3 | I2C IDs (IMU 0x6C WHO_AM_I, MAXM86161A PART_ID 0x36, BQ21061 STAT0 readable) | Pass |
 | 4 | TH1, TH4 vs ambient | ±1.0 °C |
 | 5 | Charge current at the 15 mA setting | 13–17 mA |
 | 6 | RSSI at 1 m vs a golden pod | Within 4 dB |

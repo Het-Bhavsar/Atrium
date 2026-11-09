@@ -6,14 +6,14 @@ Firmware for the Atrium charging case (see [`docs/charging-case.md`](../../docs/
 |---|---|
 | `src/case_sm.c` | Behaviour: feeding, pod state, faults, button, LED choice, standby. Plain C |
 | `src/swd.c` | SWD host as far as the nRF52832 CTRL-AP: line reset, DP and AP access, hard reset. Plain C over pin callbacks |
-| `src/sense.c`, `src/led.c` | ADC readings to µA, mV, °C and %; the LED patterns as colour over time. Plain C |
-| `src/main.c`, `src/board.h` | Hardware: pins, ADC and OPA, TIM2 PWM, translators, EXTI and AWU standby |
+| `src/sense.c`, `src/led.c`, `src/oc_fast.c` | ADC readings to µA, mV, °C and %; the LED patterns as colour over time; the fast over-current cut-off. Plain C |
+| `src/main.c`, `src/board.h`, `src/funconfig.h` | Hardware (ch32fun settings in `funconfig.h`): pins, ADC and OPA, TIM2 PWM, translators, EXTI and AWU standby |
 | `tests/` | Host tests, a bit-level SW-DP target model (`swd_sim.c`) and a small runner |
 | `tools/` | The toolchain image and its script |
 
 ## Toolchain
 
-[ch32fun](https://github.com/cnlohr/ch32fun) (MIT), pinned at `b28d285`, with Ubuntu 24.04's `gcc-riscv64-unknown-elf` (rv32ec, ilp32e). It is fetched into the Docker image, not stored in the repo. It was chosen over the vendor SDK because it is bare-metal headers with a plain Makefile, small (the image is 7.4 KB of 16 KB flash, 200 B of 2 KB RAM), and flashes over SWIO with `minichlink` or a WCH-LinkE.
+[ch32fun](https://github.com/cnlohr/ch32fun) (MIT), pinned at `b28d285`, with Ubuntu 24.04's `gcc-riscv64-unknown-elf` (rv32ec, ilp32e). It is fetched into the Docker image, not stored in the repo. It was chosen over the vendor SDK because it is bare-metal headers with a plain Makefile, small (the image is 7.6 KB of 16 KB flash, 200 B of 2 KB RAM), and flashes over SWIO with `minichlink` or a WCH-LinkE.
 
 | Script | Usage | Does |
 |---|---|---|
@@ -29,7 +29,7 @@ Firmware for the Atrium charging case (see [`docs/charging-case.md`](../../docs/
 
 ## Pins (QFN-20)
 
-From CH32V003DS0 V1.8, table 2-1. The OPA pins are fixed by the silicon. The case netlist (`hardware/design-data/netlist/case_nets.yaml`, 2026-11-08) matches all 18 MCU pins.
+From CH32V003DS0 V1.8, table 2-1. The OPA pins are fixed by the silicon. The case netlist (`hardware/design-data/netlist/case_nets.yaml`, Rev B, 2026-11-10) matches all 18 MCU pins.
 
 Board values the firmware depends on, from that netlist: BQ24040 ISET 2.7k (about 200 mA), boost 5.21 V (768k / 100k), SY6280 ISET 15k (0.45 A backstop above the 80 mA firmware trip), LED XL-1615RGBC-RF common anode to VDD with red 1k and green and blue 330 Ω, HAL248 pull-up R19 4.7M fitted only if the output is open drain (DNP).
 
@@ -43,7 +43,7 @@ Board values the firmware depends on, from that netlist: BQ24040 ISET 2.7k (abou
 | 8 | PC1 | VBUS_DET | 5 V tolerant; 10k from VBUS, 100k to GND; EXTI1 |
 | 9 | PC2 | LID | HAL248 output, 5 V tolerant; EXTI2 |
 | 10 | PC3 | BTN | to GND, internal pull-up; EXTI3 |
-| 11 | PC4 | NTC | ADC A2: TH1 NCP15WF104F03RC (100k, B 4250 K [VERIFY against Murata's R-T table]) to GND, R20 100k to VIN_EN |
+| 11 | PC4 | NTC | ADC A2: TH1 NCU15WF104F6SRC (100k, B 4250 K class [VERIFY B against the firmware table]) to GND, R20 100k to VIN_EN |
 | 12 | PC5 | SWDCLK | U5 A; U5 DIR tied to VCCA |
 | 13 | PC6 | SWDIO | U6 A |
 | 14 | PC7 | SWDIO_DIR | U6 DIR: high when the case drives |
@@ -54,7 +54,7 @@ Board values the firmware depends on, from that netlist: BQ24040 ISET 2.7k (abou
 | 19 | PD5 | LDO_PWR | powers the XC6206P182 (it has no EN pin); 1M to GND |
 | 20 | PD6 | CHRG | BQ24040 CHG, open drain, internal pull-up |
 
-Changes from the spec's block diagram that the schematic must carry:
+Board choices the firmware relies on (all in the case netlist):
 - **Shunt moved to the low side.** The 1 Ω shunt sits in the pogo GND return. The OPA input range is 0 to VDD, and VDD is the cell (≤ 4.2 V), so it cannot sense at 5.2 V.
 - **External gain resistors.** The OPA is a plain op-amp with no internal gain, so ×21 comes from Rf 20k and Rg 1k.
 - **Pedestal.** OPA offset is up to ±13 mV (DS table 3-26), which is ±13 mA on 1 Ω. A pedestal from VDD keeps the output above 0 V. It moves with VDD, as the ADC reference does, so a reading with VIN off is the zero.
@@ -66,12 +66,12 @@ Changes from the spec's block diagram that the schematic must carry:
 | Rule | Implementation | Test |
 |---|---|---|
 | Feed the pod | VIN on when the lid opens (2 min with no pod), while the pod charges, on USB, and for a top-up of a full pod every 4 h [ASSUMED]. Boost only without USB. The current is zeroed with VIN off before each feed; readings until 100 ms after VIN on are ignored | `full, VIN off, top-up`, `full on USB stays fed`, `lid open idle stops feeding` |
-| 1.8 V side | LDO_PWR 100 ms after VIN on; off with VIN and through every drop-out | checked on every tick of every state-machine test |
+| 1.8 V side | LDO_PWR 100 ms after VIN on; off with VIN and through every drop-out | `1.8 V side waits for VIN`, and checked on every tick of every state-machine test |
 | Pod state | Present: SWDIO high or > 0.4 mA; absent 2 s: no pod. Charging > 5 mA; full < 2.5 mA for 30 s, after which VIN goes off without USB and with the lid shut | `pod removal is seen`, `present by the SWDIO pull-up` |
-| Over-current | Fast path: the main loop reads the pod current every 20 ms LED frame while feeding and cuts VIN itself after two readings in a row over 80 mA (about 40 ms, inside the 50 ms that build item B-8 allows; `src/oc_fast.c`). Slow path: > 80 mA (or a clipped reading) 3 ticks in a row. Either way: VIN off, red fast blink, retry in 30 s. SY6280 ISET (0.4 A) is the hardware limit, also during the 100 ms inrush blanking | `fast: cut within 50 ms of a short`, `over-current trips and retries`, `inrush is blanked` |
+| Over-current | Fast path: the main loop reads the pod current every 20 ms LED frame while feeding and cuts VIN itself after two readings in a row over 80 mA (about 40 ms, inside the 50 ms that build item B-8 allows; `src/oc_fast.c`). Slow path: > 80 mA (or a clipped reading) 3 ticks in a row. Either way: VIN off, red fast blink, retry in 30 s. SY6280 ISET (0.45 A) is the hardware limit, also during the 100 ms inrush blanking | `fast: cut within 50 ms of a short`, `over-current trips and retries`, `inrush is blanked` |
 | Case cell | Below 3.4 V 3 times without USB: no feeding until 3.6 V or USB; red blinks on lid open | `low case battery` |
 | Temperature | NTC ≥ 45 °C while feeding: VIN off, retry in 10 min, and it stays off until a reading below 42 °C | `hot case cell` |
-| Case signature | Owner decision 2026-11-08. 3 s after VIN on with a pod there, and after each reset: two 200 ms VIN drop-outs. The pod reports "fed by the case" (Charge State flag bit 4) | `soft reset`, `a day of top-ups and lid opens` (no reset in 24 h) |
+| Case signature | Owner decision 2026-11-08. 3 s after VIN on with a pod there, and after each reset: two 200 ms VIN drop-outs. The pod reports "fed by the case" (Charge State flag bit 4) | `soft reset reboots the pod`, `hard reset`, `a day of top-ups and lid opens` (no reset in 24 h) |
 | Soft reset | Hold 5–12 s, release: three 200 ms drop-outs 300 ms apart (1.2 s), at least 2.5 s clear of the signature. The pod reboots on the third | `soft reset reboots the pod` (through the pod's detector) |
 | Hard reset | Hold ≥ 12 s, release. Once the 1.8 V side has been on 100 ms: line reset, JTAG-to-SWD, DPIDR, ABORT, debug power-up, CTRL-AP IDR = 0x02880000 [VERIFY], RESET 1 then 0, debug power-up released. 2 slow red blinks if it fails [ASSUMED] | `hard reset`, `hard reset with VIN off`, swd suite |
 | LED | Spec patterns: amber breathe 5 s, green 5 s, battery 3/2/1 blinks at > 60 / 20–60 / < 20 %, red fast blink, white flash and double flash at 5 s and 12 s of a hold. USB in: amber or green steady, below any pod pattern. Colours [ASSUMED] | led suite, `short press`, `full pod shows green at once` |
