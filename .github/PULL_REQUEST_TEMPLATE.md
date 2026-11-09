@@ -19,6 +19,7 @@ Closes #
 - [ ] Mechanical: STEP, STL and drawing updated; fit checked against the reference bodies
 - [ ] `docs/ble_gatt.md` updated if the BLE interface changed
 - [ ] No medical claims; original work only; no third-party documents added
+- [ ] Every commit is signed off (`git commit -s`, Developer Certificate of Origin)
 
 ## Evidence
 

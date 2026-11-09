@@ -36,6 +36,10 @@ places where help is most useful.
   third-party datasheets or documents. Link to them instead.
 - **Licences.** By contributing you agree that your work is licensed under the licence of the folder it goes into:
   CERN-OHL-S-2.0 for `hardware/` and `mechanical/`, Apache-2.0 for `firmware/` and `app/`, CC BY-SA 4.0 for `docs/`.
+  You keep the copyright in your own contribution.
+- **Sign-off.** Sign every commit (`git commit -s`). The `Signed-off-by` line certifies the
+  [Developer Certificate of Origin](https://developercertificate.org/): that you wrote the change, or have the right to
+  submit it under the folder's licence.
 - **Parts.** New parts should be available from the LCSC / JLCPCB catalogue, with the LCSC number in the BOM.
 - **Words.** The pod is worn on the "temporal region"; the no-glasses spot is the "temporal hollow".
 - **Privacy.** Health data stays on the user's phone unless the user chooses otherwise.

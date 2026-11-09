@@ -13,11 +13,11 @@ the mark must never be used to suggest either.
 | All software needed to operate it under an OSI licence | Pod and case firmware, phone app: Apache-2.0 | ready |
 | Documentation under an open licence, no NC or ND | CC BY-SA 4.0 (`docs/LICENSE`) | ready |
 | Original design files, publicly available | Schematics and boards as `.SchDoc` / `.PcbDoc` with PDFs; enclosure as STEP, STL and drawings | the repository is private until release |
-| Design files in the preferred format for making changes | Boards: the native EasyEDA Pro project in `hardware/easyeda/`, plus Altium exports. Enclosure: STEP, which any CAD tool can edit | ready |
+| Design files in the preferred format for making changes | Boards: the native EasyEDA Pro project in `hardware/easyeda/`, plus Altium exports. Enclosure: STEP, which any CAD tool can edit; the parametric CAD scripts it was generated from are not published | ready for boards; STEP for the enclosure |
 | Bill of materials | Every board's `production/*_BOM.csv`, with manufacturer part and LCSC numbers | ready |
 | Assembly instructions (optional) | [`build-assembly-test.md`](build-assembly-test.md), [`quick-start.md`](quick-start.md) | ready |
 | Third-party parts identified, with accessible datasheets | See below | ready |
-| Hardware labelled with a version or release date | Each board needs a version or date in its silkscreen [VERIFY every board] | to check |
+| Hardware labelled with a version or release date | No board carries one yet. Board silkscreen text is open item O-42; until then, print the release tag on each unit's packaging label | open |
 
 **What is open and what is not.** Everything I made for Atrium (Het Bhavsar, publishing as Local Forge) is open: schematics, board layouts, Gerbers, enclosure
 CAD, firmware, app, documentation and images. The parts on the boards are ordinary catalogue parts made by others,
@@ -28,7 +28,7 @@ case MCU and the passives. Their internal designs are not open, and OSHWA does n
 
 **Before applying:**
 1. Make the repository public.
-2. Confirm the version text on every board's silkscreen.
+2. Add the version text to the boards (open item O-42), or mark the version on each unit's label until then.
 3. Submit the form at [application.oshwa.org](https://application.oshwa.org/) as Het Bhavsar (individual), and register each later
    version under a new UID instead of overwriting this one.
 
