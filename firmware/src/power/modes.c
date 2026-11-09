@@ -16,6 +16,18 @@
  *    i.e. 1.33 / 2.0 uA per exposure per sps;
  *  - LED: I x 123.8 us x 1.21 per pulse (one LED at full scale and 100 sps is 600 uA).
  * Slots, rates and lite's 30 s in 120 s duty: ML data contract (ml_firmware_handoff).
+ *
+ * LED currents with the MAXM86161A (data sheet 19-102034 Rev 1). Its green LED returns about
+ * 1.7 x the MAXM86161's light at the same current: production-test count 115000 at the 32 uA
+ * range against 135000 at 16 uA, both at 124 mA (2.4 x by radiant power, 70 mW at 175 mA against
+ * 25 mW at 150 mA). Red and IR give the same counts on both parts. The table keeps green at
+ * 15 / 10 / 5 mA, so the extra light becomes signal margin on darker skin (in the
+ * hardware/simulation/ppg_optics.md model, Fitzpatrick V-VI meets the per-sample SNR target in
+ * 49 % of cases at 15 mA, against 9 %). It does not become battery. At the MAXM86161's light
+ * (9 / 6 / 3 mA) green would draw 22.5 uA less in full and smart, 15.0 uA less in sleep, 3.7 uA
+ * less in lite and 2.4 uA less in the probe, and that margin would be lost. The budgets below
+ * stay at the table currents. The stream contract also fixes the currents (POD_CONTRACT: no LED
+ * AGC), so any green trim waits for the bench (docs/open-items.md, O-43).
  * Docked idle and off-body use the s4 model with no optics, CPU 0.5 ms/s, NTCs at
  * 0.1 Hz and advertising every 2 s (3 x 0.4 ms TX).
  *

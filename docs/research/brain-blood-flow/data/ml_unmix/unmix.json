@@ -1,0 +1,250 @@
+{
+ "simulated": true,
+ "date": "2026-11-10",
+ "question": "Can a learned model recover the individual brain response from the pod's green, red and IR channels at 2 mm?",
+ "method": {
+  "generator": "window-level responses with the depth study's own simulator (atrium_ml depth_sim: subject(), channel_change(), weights()), with the per-window truth kept",
+  "weights": "layered photon Monte Carlo at 2 mm: data/monte_carlo/s1_mc.json (typical) and s1_mc_thin.json (thin; green from the typical run)",
+  "deep_gain": "multiplies the brain weight; 1 = physics",
+  "noise": "per window: 3 % SD per compartment (vasomotion, respiration) and 0.5 % per channel, as in the depth study",
+  "target": "each window's brain response minus its protocol's population mean (the individual part a measurement would have to give)",
+  "features": "r_green, r_red, r_ir, plus the protocol (known context)",
+  "train_test": "300 simulated subjects to train, 150 others to test (4 windows per protocol repeat); R^2 on the test subjects",
+  "models": {
+   "ridge": "RidgeCV, alpha 1e-8 to 1e2",
+   "boosting": "HistGradientBoostingRegressor, 300 iterations",
+   "mlp": "MLPRegressor 64-64, early stopping"
+  },
+  "oracle_r2": "best linear estimator per protocol fitted in sample on 5,000 subjects; about 0.001 is its estimation floor"
+ },
+ "brain_share_sweep": [
+  {
+   "layers": "typical",
+   "deep_gain": 1,
+   "brain_share_ir_pct": 0.0083,
+   "brain_share_red_pct": 0.0062,
+   "oracle_r2": 0.0012,
+   "ridge": -0.0043,
+   "boosting": -0.0258,
+   "mlp": -0.0416
+  },
+  {
+   "layers": "typical",
+   "deep_gain": 30,
+   "brain_share_ir_pct": 0.247,
+   "brain_share_red_pct": 0.1871,
+   "oracle_r2": 0.0013,
+   "ridge": -0.0054,
+   "boosting": -0.0321,
+   "mlp": -0.0417
+  },
+  {
+   "layers": "typical",
+   "deep_gain": 100,
+   "brain_share_ir_pct": 0.8187,
+   "brain_share_red_pct": 0.621,
+   "oracle_r2": 0.0073,
+   "ridge": -0.003,
+   "boosting": -0.0336,
+   "mlp": -0.0405
+  },
+  {
+   "layers": "typical",
+   "deep_gain": 300,
+   "brain_share_ir_pct": 2.4165,
+   "brain_share_red_pct": 1.8403,
+   "oracle_r2": 0.0523,
+   "ridge": 0.0116,
+   "boosting": -0.0118,
+   "mlp": -0.0129
+  },
+  {
+   "layers": "typical",
+   "deep_gain": 1000,
+   "brain_share_ir_pct": 7.625,
+   "brain_share_red_pct": 5.8817,
+   "oracle_r2": 0.3003,
+   "ridge": 0.1083,
+   "boosting": 0.1052,
+   "mlp": 0.1574
+  },
+  {
+   "layers": "typical",
+   "deep_gain": 3000,
+   "brain_share_ir_pct": 19.8481,
+   "brain_share_red_pct": 15.788,
+   "oracle_r2": 0.6104,
+   "ridge": 0.3315,
+   "boosting": 0.3831,
+   "mlp": 0.4318
+  },
+  {
+   "layers": "typical",
+   "deep_gain": 10000,
+   "brain_share_ir_pct": 45.2186,
+   "brain_share_red_pct": 38.4588,
+   "oracle_r2": 0.7933,
+   "ridge": 0.5014,
+   "boosting": 0.5599,
+   "mlp": 0.5948
+  },
+  {
+   "layers": "thin",
+   "deep_gain": 1,
+   "brain_share_ir_pct": 0.049,
+   "brain_share_red_pct": 0.0435,
+   "oracle_r2": 0.0011,
+   "ridge": -0.0043,
+   "boosting": -0.0308,
+   "mlp": -0.0417
+  },
+  {
+   "layers": "thin",
+   "deep_gain": 30,
+   "brain_share_ir_pct": 1.4496,
+   "brain_share_red_pct": 1.2877,
+   "oracle_r2": 0.0192,
+   "ridge": 0.001,
+   "boosting": -0.0174,
+   "mlp": -0.0306
+  },
+  {
+   "layers": "thin",
+   "deep_gain": 100,
+   "brain_share_ir_pct": 4.6738,
+   "brain_share_red_pct": 4.1672,
+   "oracle_r2": 0.1533,
+   "ridge": 0.0441,
+   "boosting": 0.0258,
+   "mlp": 0.0599
+  },
+  {
+   "layers": "thin",
+   "deep_gain": 300,
+   "brain_share_ir_pct": 12.8228,
+   "brain_share_red_pct": 11.5398,
+   "oracle_r2": 0.4778,
+   "ridge": 0.2081,
+   "boosting": 0.2457,
+   "mlp": 0.2951
+  },
+  {
+   "layers": "thin",
+   "deep_gain": 1000,
+   "brain_share_ir_pct": 32.8993,
+   "brain_share_red_pct": 30.3058,
+   "oracle_r2": 0.7387,
+   "ridge": 0.4417,
+   "boosting": 0.5002,
+   "mlp": 0.5493
+  },
+  {
+   "layers": "thin",
+   "deep_gain": 3000,
+   "brain_share_ir_pct": 59.5288,
+   "brain_share_red_pct": 56.6069,
+   "oracle_r2": 0.8285,
+   "ridge": 0.5344,
+   "boosting": 0.5976,
+   "mlp": 0.6187
+  },
+  {
+   "layers": "thin",
+   "deep_gain": 10000,
+   "brain_share_ir_pct": 83.0594,
+   "brain_share_red_pct": 81.3028,
+   "oracle_r2": 0.854,
+   "ridge": 0.5659,
+   "boosting": 0.636,
+   "mlp": 0.6468
+  }
+ ],
+ "variants_thin_layers_physics": [
+  {
+   "variant": "noiseless sensor",
+   "layers": "thin",
+   "deep_gain": 1,
+   "ridge": 0.0599,
+   "boosting": -0.026,
+   "mlp": -0.0435
+  },
+  {
+   "variant": "A part green (noise / 1.7)",
+   "layers": "thin",
+   "deep_gain": 1,
+   "ridge": -0.0043,
+   "boosting": -0.0283,
+   "mlp": -0.0419
+  },
+  {
+   "variant": "no physiological noise, real sensor",
+   "layers": "thin",
+   "deep_gain": 1,
+   "ridge": -0.0105,
+   "boosting": -0.0731,
+   "mlp": -0.066
+  }
+ ],
+ "channel_noise_sweep_ridge": [
+  {
+   "layers": "s1_mc.json",
+   "ch_noise": 1e-09,
+   "ridge_r2": 0.0143
+  },
+  {
+   "layers": "s1_mc.json",
+   "ch_noise": 1e-07,
+   "ridge_r2": 0.0142
+  },
+  {
+   "layers": "s1_mc.json",
+   "ch_noise": 1e-06,
+   "ridge_r2": 0.013
+  },
+  {
+   "layers": "s1_mc.json",
+   "ch_noise": 1e-05,
+   "ridge_r2": -0.0011
+  },
+  {
+   "layers": "s1_mc.json",
+   "ch_noise": 0.0001,
+   "ridge_r2": -0.0058
+  },
+  {
+   "layers": "s1_mc.json",
+   "ch_noise": 0.005,
+   "ridge_r2": -0.0043
+  },
+  {
+   "layers": "s1_mc_thin.json",
+   "ch_noise": 1e-09,
+   "ridge_r2": 0.0599
+  },
+  {
+   "layers": "s1_mc_thin.json",
+   "ch_noise": 1e-07,
+   "ridge_r2": 0.0599
+  },
+  {
+   "layers": "s1_mc_thin.json",
+   "ch_noise": 1e-06,
+   "ridge_r2": 0.0589
+  },
+  {
+   "layers": "s1_mc_thin.json",
+   "ch_noise": 1e-05,
+   "ridge_r2": 0.0322
+  },
+  {
+   "layers": "s1_mc_thin.json",
+   "ch_noise": 0.0001,
+   "ridge_r2": -0.0047
+  },
+  {
+   "layers": "s1_mc_thin.json",
+   "ch_noise": 0.005,
+   "ridge_r2": -0.0043
+  }
+ ]
+}

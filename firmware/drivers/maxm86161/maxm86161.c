@@ -141,7 +141,10 @@ int maxm86161_start(const struct device *dev, const struct maxm86161_slot *slots
 	ret = ret ? ret : wr(dev, MAXM86161_REG_SYS_CTRL, MAXM86161_SHDN | MAXM86161_SINGLE_PPG);
 	ret = ret ? ret : rd(dev, MAXM86161_REG_INT_STATUS1, &st);
 	ret = ret ? ret : rd(dev, MAXM86161_REG_INT_STATUS2, &st);
-	/* tINT 117.3 us, ADC 16 uA full scale (data sheet example) */
+	/* tINT 117.3 us, ADC 16 uA full scale (data sheet example). The MAXM86161A's brighter green
+	 * does not crowd it: at 15 mA on skin the modelled green DC is 21 to 30 % of full scale at most
+	 * (hardware/simulation/ppg_optics.md). Red and IR are unchanged from the MAXM86161; IR at
+	 * 10 mA on light skin is the closest to full scale [VERIFY on the bench, O-43] */
 	ret = ret ? ret : wr(dev, MAXM86161_REG_PPG_CFG1, (0x2 << 2) | 0x3);
 	ret = ret ? ret : wr(dev, MAXM86161_REG_PPG_CFG2, r.ppg_cfg2);
 	ret = ret ? ret : wr(dev, MAXM86161_REG_PPG_CFG3, 0x3 << 6); /* LED settling 12 us, CDM */

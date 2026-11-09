@@ -8,7 +8,7 @@
 
 | Item | Value | Source |
 |---|---|---|
-| Optical module | MAXM86161, one photodiode | data sheet; `firmware/drivers/maxm86161` |
+| Optical module | MAXM86161, one photodiode. From 2026-11-10 the pod fits the MAXM86161A: same package, spacing, photodiode, ADC and register map; only the LEDs are brighter (green about 1.7× the detected light) | data sheets 19-100523 and 19-102034; `firmware/drivers/maxm86161` |
 | LED centroids | green 520–535 nm, red 660 nm, IR 880 nm | data sheet, LED characteristics |
 | Photodiode | peak 860 nm, 420–1020 nm | data sheet |
 | LED-to-photodiode spacing | not dimensioned; about 1.5–2.5 mm from the 2.9 × 4.3 mm package | [VERIFY] package drawing F142A4+1 |

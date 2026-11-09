@@ -18,6 +18,7 @@ answers, and real finger recordings from a public dataset. Every simulated outpu
 | Could a study on the pod detect it? | No. 80 % power needs a brain share of 3.8 % (12 people) or 2.0 % (24 people): 20–450 times more than physics gives | 500 simulated studies per point, `data/power/`, `figures/f7_power.png` |
 | Does sampling faster help? | Barely. 25 → 200 Hz moves the shortfall from 454× to 360× (12 people); a noiseless sensor is still 346× short | `data/research_mode/` |
 | Can a "deeper than green" result be trusted? | No. A 5 % temporalis response alone gives a false deep result in 48 % (12 people) to 76 % (24 people) of studies | `data/sim_muscle/`, `figures/f3_co2_challenges.png` |
+| Can machine learning unmix it? | No. Ridge, gradient boosting and a neural network trained on 300 simulated people score R² ≤ 0 on 150 others at the physical share. They need 1000× (typical layers) or 300× (thin) more brain signal to recover even a sixth to a third of it. The MAXM86161A's brighter green changes nothing | `data/ml_unmix/` |
 | Is an IR–green timing lag depth evidence? | No. In real finger data IR leads green by a median 25 ms (IQR 16–36 ms, 21 of 22 people), and a finger has no brain | `data/finger/` |
 | Does the analysis find the right answer when it is known? | Yes, after two method faults were found and fixed. Null study: nothing found (b = −0.1 % [−0.7, +0.5]); false-positive rate 7 % over 2,000 studies | `data/sim_null/`, `data/sim_deep1000/` |
 
@@ -66,6 +67,7 @@ answers, and real finger recordings from a public dataset. Every simulated outpu
 | `data/research_mode/` | The same at 25, 50, 100 and 200 Hz, and for a noiseless sensor |
 | `data/sim_null/`, `data/sim_muscle/`, `data/sim_deep1000/` | Full simulated studies: per-session and per-subject results and the study verdict. SIMULATED |
 | `data/finger/` | Per-record timing on real finger PPG |
+| `data/ml_unmix/` | Learned unmixing test: held-out R² against brain share, layers, sensor noise and model. SIMULATED |
 
 **Session format** for future head recordings: one folder per session with a `session.json` (subject, session, site,
 sample rate, protocol events on the PPG time base, reference devices, a `simulated` flag) and a `signals.npz` holding

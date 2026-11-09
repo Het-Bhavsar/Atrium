@@ -546,7 +546,8 @@ bool sensors_pulse(struct pulse_out *out)
 
 void sensors_sigq(struct sigq_out *out)
 {
-	/* no LED AGC: each mode drives the pulse LED at one fixed current, its maximum */
+	/* no LED AGC: each mode drives the pulse LED at one fixed current, its maximum (the ML
+	 * data contract; a MAXM86161A green trim waits for the bench, modes.c and O-43) */
 	struct sigq_in in = {.led_at_max = true};
 
 	k_mutex_lock(&lock, K_FOREVER);

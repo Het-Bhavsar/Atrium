@@ -56,7 +56,37 @@ Atrium is a wellness and research device. Nothing here is a medical measurement.
 
    An earlier version of this claim gave whole-record error SDs: 5.2 ms (lag), 13.6 ms (pulse arrival) and 40 ms (rise time). Those SDs are set by the 1 % of beats where the foot detector jumps, which happens at every rate. They measured the detector, not the sample rate.
 
-6. **The analysis pipeline gives the right answer when the answer is known.** Source: simulation, 12 subjects, 25 Hz, end-to-end from raw counts.
+6. **No learned model recovers the brain component from the pod's channels.** Source: simulation, 2026-11-10
+   (`data/ml_unmix/unmix.json`). The test used the depth study's own simulator, with the per-window truth kept.
+   - Three learned models (ridge regression, gradient boosting, a two-layer neural network) were trained on 300
+     simulated people to predict each window's individual brain response from green, red and IR. They were scored
+     on 150 different people.
+   - At the physical brain share, every model scores R² ≤ 0 on the held-out people: no better than predicting zero.
+     That share is 0.008 % of the IR pulse with typical layers and 0.05 % with thin layers. The best linear estimator,
+     fitted on the test data itself, reaches 0.001, which is its estimation floor.
+   - Recovery needs the brain share raised far above physics:
+
+     | Layers | Brain share of the IR pulse | Best held-out R² | Linear bound |
+     |---|---|---|---|
+     | Typical | 0.008 % (physics) | ≤ 0 | 0.001 |
+     | Typical | 2.4 % (300×) | 0.01 | 0.05 |
+     | Typical | 7.6 % (1000×) | 0.16 | 0.30 |
+     | Thin | 0.05 % (physics) | ≤ 0 | 0.001 |
+     | Thin | 4.7 % (100×) | 0.06 | 0.15 |
+     | Thin | 12.8 % (300×) | 0.30 | 0.48 |
+
+     Even at 12.8 %, above what 30 mm fNIRS gives (10.6 %), three channels at one spacing recover under a third of
+     the individual response. Scalp, muscle and the systemic term move every channel together.
+   - A better sensor does not change this:
+     - the MAXM86161A's green, with 1/1.7 of the green noise, scores ≤ 0;
+     - removing all physiological noise but keeping the sensor's 0.5 % per window scores ≤ 0;
+     - only a noiseless sensor gives a non-zero score: R² 0.014 (typical) and 0.06 (thin). That score needs channel
+       noise of 10⁻⁵ or less per window, 500 times below the model's. It also needs every person's mixing weights to
+       be known exactly. Both are out of reach.
+   - The limit is information, not the algorithm. Any feature of the optical signal, timing included, carries the brain
+     only through its share of the detected light.
+
+7. **The analysis pipeline gives the right answer when the answer is known.** Source: simulation, 12 subjects, 25 Hz, end-to-end from raw counts.
    - STA compression: recovered red and IR falls of 0.92 of green's [0.90, 0.94]. The model truth is about 0.91.
    - Null: H3 finds nothing (b = −0.1 % [−0.7, +0.5]).
    - The false-positive rate of H3 with no deep signal is **7 %, not the nominal 5 %**, over 2,000 simulated studies at 2 mm.

@@ -34,4 +34,5 @@ Average current per load in uA. Estimates until measured with a Nordic PPK2.
 - HRV at 100 sps *continuously* would add ~112 uA typ (LED alone), cutting life to ~4.3 days. Use 100 sps windows, or 25 sps with interpolation (see hrv_timing).
 - The LED and the MCU's DSP are the two biggest levers. BLE interval matters less than people expect at 1 s.
 - Gyro: every 1 % of always-on time costs ~5.5 uA.
-- VLED headroom: the MAXM86161 needs VLED >= 3.0 V; green LED forward voltage plus driver compliance is the real limit. Firmware stops green sampling below VSYS = 3.3 V (VBAT_MIN_OPT) until EVT measurements say otherwise.
+- VLED headroom: green LED forward voltage plus driver compliance (253 mV max at the 31 mA range) is the real limit. The MAXM86161A's green is 3.4 V max at 175 mA (the MAXM86161 was 3.8 V), so firmware's green limit is 3.1 V plus the pulse sag, under the 3.3 V cut-off: green runs to the end of the charge (`green-min-mv` in `atrium_pod.dts`; measure with O-16).
+- MAXM86161A LED current: the green terms here stay at the firmware's 15 / 10 mA. The brighter green (about 1.7× the detected light) goes to signal margin on darker skin, not to battery. A green trim would save 2–9 % for lighter skin (`ppg_optics.md`, MAXM86161A section); it waits for the bench (O-43).

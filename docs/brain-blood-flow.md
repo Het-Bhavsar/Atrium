@@ -92,6 +92,12 @@ The obvious reply is "the brain part is small, so filter harder". We tested that
 - **Faster sampling does not help.** At 200 samples a second instead of 25, the shortfall barely moves (from 454 to 360
   times). A perfect, noiseless sensor is still 346 times short (231 times with 24 people). The limit is the natural beat-to-beat change in scalp
   and muscle blood, which looks exactly like a deeper pulse would.
+- **Machine learning can't find it either.** I trained three kinds of learned model, from a straight-line fit to a
+  small neural network, on 300 simulated people to pull the brain part out of the green, red and infrared signals,
+  then tested them on 150 others. At the brain share physics gives, none did better than guessing zero. They only
+  start to work when the brain's share is raised 300 to 1000 times above physics, and even then they recover under a
+  third of it. A model can only find what the light carries, and at 2 mm the light carries almost nothing from the
+  brain. The MAXM86161A's brighter green does not change this: brighter is not deeper.
 - **Muscle fools the test.** The temporalis also responds to CO₂. In simulation, a 5 % muscle response alone produced a
   false "deeper than skin" result in 48 % of 12-person studies and 76 % of 24-person studies, with no brain signal at
   all.
@@ -155,6 +161,9 @@ all result data (photon model output, 500-study power sweeps, simulated studies 
   3 mm or 2 mm skull, 2 mm CSF [ASSUMED for any one person]. Output for the earlier sensor layout is in
   [`legacy/rev-b1/hardware/simulation/results/`](../legacy/rev-b1/hardware/simulation/results/).
 - **Study power:** 500 simulated studies per point, with the analysis fixed before any data was looked at.
+- **Learned unmixing:** ridge regression, gradient boosting and a two-layer neural network on the study's simulator,
+  300 simulated people to train and 150 to test, at the physical brain share and up to 10,000 times it
+  ([`data/ml_unmix/`](research/brain-blood-flow/data/ml_unmix/unmix.json)). SIMULATED.
 - **Finger timing:** pulse-transit-time-ppg 1.1.0 (PhysioNet, ODbL 1.0), 22 people, sitting, 500 Hz.
 - **Published work:**
   - Strangman, Li and Zhang (2013), *PLoS ONE* 8(8): e66319: brain sensitivity of 8–13 % at 25–35 mm on the Colin27

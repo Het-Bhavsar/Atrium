@@ -51,6 +51,7 @@ Build-specific items (B-1 to B-10) are in [build-assembly-test.md](build-assembl
 | O-19 | Skin pad wear: 5–10 people, desk day, run, shower, side-sleep; days per pad (1–2 estimated), edge lift, removal comfort | No lift-off within a day; no irritation |
 | O-20 | ~~Skin cradle retention~~: superseded by the skin pad (2026-11-07) | – |
 | O-21 | Swell: 300 cycles, measure cell growth | ≤ 0.2 mm (the swell gap) |
+| O-43 | MAXM86161A optics, first pods (no recording exists yet): (a) green DC per mA and perfusion on 10 people across skin types at 5, 10 and 15 mA, and whether DC is linear in current; (b) dark noise in counts at each ADC range (4, 8, 16, 32 µA), LEDs off; (c) IR and red DC at 10 mA on light skin at the 16 µA range (saturation; the optics model's IR efficiency is under the data sheet's); (d) green Vf at 5–15 mA (with O-16); (e) whether a LEDx_PA write while sampling glitches the FIFO | Sets whether a green trim ships, with its target and floor, and whether the ADC range changes. Until then the LED currents stay at the mode table (`hardware/simulation/ppg_optics.md`) |
 | O-34 | Skin pad tape: double-coated medical, opaque skin-tone, about 0.15 mm total (the bed depth follows the tape) | 3M / Solventum data sheets; converter |
 | O-35 | Pad converter: die-cut registration ≤ 0.10 mm so the pad lands in the bed off the card | Converter sample |
 | O-36 | NCVM silver shell: antenna return loss and efficiency, bare vs coated shell; re-tune the match if it moves | VNA, with O-13 |
