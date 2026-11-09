@@ -19,6 +19,14 @@ Where Atrium goes after EVT, and where help is most useful. Items marked **help 
 - Firmware: signed OTA updates, debug lock for production.
 - App: background sync on Android and iOS, Health Connect and HealthKit export. **Help wanted**
 
+## Next version
+
+- **Custom cell.** A cell shaped to the shell, to bring the pod from 20.9 mm to around 17 mm long.
+- **Voice.** Bone-conduction audio and a voice pickup for tap-to-talk with an AI assistant. Designed on paper, left out of EVT.
+- **Deeper optics (research).** A source–detector spacing of about 3 cm (the fNIRS approach) is what reaches the brain; the
+  pod's 2 mm spacing stays in the scalp. Needs a different form factor and validation, and makes no claim until then.
+  **Help wanted**
+
 ## Signal and algorithms
 
 - Sleep staging and recovery formulas validated on recorded nights. **Help wanted**

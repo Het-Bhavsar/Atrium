@@ -2,7 +2,7 @@
 
 | Folder | Contents |
 |---|---|
-| `android-ios/` | Phone app: pairing, live view, sync |
-| `python/` | Desktop tools: BLE capture, log decoding, analysis notebooks |
+| `android-ios/` | The Atrium phone app (Flutter, Android and iOS): pairing, fit guide, daily views, sync and pod updates. Build and run steps are in its README |
 
-Not started. Licence: Apache-2.0 (see `LICENSE`).
+Prebuilt Android APKs are on the [Releases page](https://github.com/Het-Bhavsar/Atrium/releases/latest). Licence:
+Apache-2.0 (see `LICENSE`).

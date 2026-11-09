@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/images/renders/pod_threequarter.png" alt="Atrium pod, satin silver-grey capsule" width="72%">
+  <img src="docs/images/photos/hero_mono.jpg" alt="A man in profile wearing the Atrium pod beside his eye" width="100%">
 </p>
 
 <p align="center">
@@ -14,11 +14,13 @@
 </p>
 
 <p align="center">
+  <a href="docs/quick-start.md">Quick start</a> ·
   <a href="#the-story">Story</a> ·
+  <a href="#inside">Inside</a> ·
+  <a href="#whats-next">What's next</a> ·
   <a href="#at-a-glance">At a glance</a> ·
   <a href="#get-the-app">Get the app</a> ·
   <a href="#whats-in-this-repository">Repository</a> ·
-  <a href="#status">Status</a> ·
   <a href="CONTRIBUTING.md">Contribute</a> ·
   <a href="#licence">Licence</a>
 </p>
@@ -31,13 +33,29 @@ Atrium is a 20.9 × 11 × 5.3 mm pod worn on the temporal region, the flat of th
 with light and motion: pulse, heart-rate variability, skin-temperature trend, sleep and activity. It keeps a log and
 syncs it to your phone over Bluetooth LE. A small Plinth charges it, and a pocket case charges it on the go.
 
+<p align="center">
+  <img src="docs/images/renders/pod_studio_dimensions.png" alt="Studio render of the pod with its dimensions: 20.9 by 11.0 by 5.3 mm" width="100%">
+</p>
+
 Every file that defines it is here: schematics, board layouts, Gerbers, BOMs, enclosure CAD and drawings, the
 simulations behind the numbers, the firmware for the pod and the case, and the phone app. Read it, build it, change it.
 
 <p align="center">
-  <img src="docs/images/renders/boards_open_dark.png" alt="The two pod boards joined by the flex" width="46%">
-  <img src="docs/images/renders/case_open.png" alt="Charging case, open, pod inside" width="46%">
+  <img src="docs/images/plates/boards.jpg" alt="The two pod boards joined by the flex" width="100%">
 </p>
+
+<p align="center">
+  <img src="docs/images/plates/case.jpg" alt="Charging case, open, with the pod in its nest" width="100%">
+</p>
+
+## Quick start
+
+| I want to | Start here |
+|---|---|
+| Try the app without a pod | Install the demo APK from [Releases](https://github.com/Het-Bhavsar/Atrium/releases/latest) |
+| Read the design | Schematic and PCB PDFs in `hardware/`, drawings in `mechanical/` |
+| Build the firmware | `firmware/tests/fw.sh image`, then `test` and `build` (Docker only) |
+| Make, flash and pair pods | [`docs/quick-start.md`](docs/quick-start.md) |
 
 ## The story
 
@@ -45,15 +63,69 @@ Every great building has a centre. In a Roman house it was the atrium: an open h
 in there, people gathered there, and nothing was hidden. Your heart has one too: the chamber where blood arrives before
 every beat.
 
-Atrium is named after both. It reads your pulse with light, and like the hall it is named after, it is open: every
-schematic, every line of firmware and every data format is public.
+I named Atrium after both. It reads your pulse with light, and like the hall, it is open: every schematic, every line of
+firmware and every data format is public.
 
-It started as a 28 × 14 mm board with a discrete optical front end. That was too big to forget on your head, so the
-optics became one module, the cell became 30 mAh, and the electronics split into two small boards in the rounded ends of
-the pod, joined by a flex under a centred cell. Each step, and what was tried and left behind, is in
+It started as a 28 × 14 mm board with a discrete optical front end. That was too big to forget on your head, so I moved
+the optics into one module, dropped to a 30 mAh cell, and split the electronics into two small boards in the rounded
+ends of the pod, joined by a flex under a centred cell. Each step, and what I tried and left behind, is in
 [`docs/story.md`](docs/story.md) and [`legacy/`](legacy/).
 
+<p align="center">
+  <img src="docs/images/photos/pod_worn.jpg" alt="The pod worn upright in the temporal hollow, beside the eye" width="100%">
+  <br><sub>Worn upright in the temporal hollow, a thumb-width behind the eye. Illustrations, with the pod at true scale.</sub>
+</p>
+
 **Atrium. Open to the sky. Open to everyone.**
+
+## Inside
+
+Every board is routed by hand: no autorouter, arc bends on the antenna feed, a copper-free zone under the chip antenna
+on every layer, and ground stitching along each edge.
+
+<p align="center">
+  <img src="docs/images/plates/layout_islands.jpg" alt="Radio and power island layouts, top and bottom" width="100%">
+</p>
+
+<p align="center">
+  <img src="docs/images/plates/layout_case.jpg" alt="Charging case board layout, top" width="100%">
+</p>
+
+<p align="center">
+  <img src="hardware/pod/islands-panel/Pod_Islands_Panel_render.png" alt="The islands panel: six pods on one 6-layer panel" width="100%">
+  <br><sub>One 45 × 47.4 mm panel builds six pods: one PCB order, one stencil per side, one assembly run.</sub>
+</p>
+
+## What's next
+
+The EVT build is about proving the basics on real heads. While that happens, these are the three directions I care
+most about.
+
+**Smaller, with a custom cell.** The pod is 20.9 mm long today because the cell is an off-the-shelf 9 × 9 × 4 mm
+pouch, and the radio island, cell and power island have to sit in a row. With a cell made to the shape of the shell I
+think we can bring the pod to around 17 mm. That is the size I wanted from the start, and the first thing I will chase
+after EVT.
+
+**A voice on the head.** The temporal region sits right on the bone. The next version could add bone-conduction audio and
+a voice pickup, so you can tap the pod and talk to an AI assistant, with the answer heard through
+the bone and nothing in your ear. It is designed on paper and deliberately left out of EVT, so this build stays simple.
+
+**Looking deeper.** I wanted to know if a pod this small could see blood flow in the brain, so we tried two ways.
+
+- *The usual way*, which Atrium uses: green, red and infrared light with the LEDs and the photodiode a couple of
+  millimetres apart. Our photon simulations say this light stays in the scalp. Green sees nothing deeper, and in red and
+  infrared the brain's share of the pulse is well under a tenth of a percent.
+- *The fNIRS way*: near-infrared light with the source and the detector about 3 cm apart, so the light travels deep
+  enough to reach the brain before it comes back. The same model puts about a tenth of the signal in the brain at that
+  spacing, which matches published work.
+
+So a 20 mm pod can't see the brain, and I would rather say that plainly than claim it. A 3 cm optical path needs a
+different shape, a band or a longer pod, and careful validation. It is on the research list, not in this product.
+Atrium today is a wellness device: pulse, heart-rate variability, sleep and skin temperature, nothing more.
+
+If any of this is the part you want to build, start with the [roadmap](docs/roadmap.md) and open an issue.
+
+— Het
 
 ## At a glance
 
