@@ -249,7 +249,8 @@ used for medical decisions.
 
 ## Licence
 
-Copyright 2026 Het Bhavsar. Atrium is published under the Local Forge name. Source location:
+Copyright 2026 Het Bhavsar. Atrium is published through [Local Forge](https://localforge.in), an open-source
+community that enables made-in-India hardware development. Source location:
 <https://github.com/Het-Bhavsar/Atrium>.
 
 | Folder | What it covers | Licence | SPDX |

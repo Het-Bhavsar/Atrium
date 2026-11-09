@@ -19,7 +19,7 @@ the mark must never be used to suggest either.
 | Third-party parts identified, with accessible datasheets | See below | ready |
 | Hardware labelled with a version or release date | Bottom silkscreen: `ATRIUM EVT v0.1.0 2026-11` on the case board, `EVT v0.1` on the flex inside each pod (O-42) | ready |
 
-**What is open and what is not.** Everything I made for Atrium (Het Bhavsar, publishing as Local Forge) is open: schematics, board layouts, Gerbers, enclosure
+**What is open and what is not.** Everything I made for Atrium (Het Bhavsar, published through the Local Forge open-source community) is open: schematics, board layouts, Gerbers, enclosure
 CAD, firmware, app, documentation and images. The parts on the boards are ordinary catalogue parts made by others,
 each with a public datasheet reached through the LCSC number in the BOM: the nRF52832 radio SoC, the MAXM86161 optical
 module, the LSM6DSOX motion sensor, the BQ21061 charger, the cell and its protection, the chip antenna, the CH32V003
