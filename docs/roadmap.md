@@ -32,6 +32,9 @@ Where Atrium goes after EVT, and where help is most useful. Items marked **help 
 - Sleep staging and recovery formulas validated on recorded nights. **Help wanted**
 - Motion-artefact rejection for heart rate during walking and chewing. **Help wanted**
 - Relative blood-oxygen trend (research only), with its limits stated.
+- **Stroke volume: not planned.** Impedance cardiography needs a bioimpedance front end and tetrapolar electrodes across
+  the chest, and the pod has neither. PPG from the temporal region reads scalp. A head-ballistocardiography trend at
+  rest is a bench question only ([`research/stroke-volume.md`](research/stroke-volume.md)).
 
 ## Openness
 
