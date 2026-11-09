@@ -17,7 +17,7 @@ the mark must never be used to suggest either.
 | Bill of materials | Every board's `production/*_BOM.csv`, with manufacturer part and LCSC numbers | ready |
 | Assembly instructions (optional) | [`build-assembly-test.md`](build-assembly-test.md), [`quick-start.md`](quick-start.md) | ready |
 | Third-party parts identified, with accessible datasheets | See below | ready |
-| Hardware labelled with a version or release date | No board carries one yet. Board silkscreen text is open item O-42; until then, print the release tag on each unit's packaging label | open |
+| Hardware labelled with a version or release date | Bottom silkscreen: `ATRIUM EVT v0.1.0 2026-11` on the case board, `EVT v0.1` on the flex inside each pod (O-42) | ready |
 
 **What is open and what is not.** Everything I made for Atrium (Het Bhavsar, publishing as Local Forge) is open: schematics, board layouts, Gerbers, enclosure
 CAD, firmware, app, documentation and images. The parts on the boards are ordinary catalogue parts made by others,
@@ -28,8 +28,7 @@ case MCU and the passives. Their internal designs are not open, and OSHWA does n
 
 **Before applying:**
 1. Make the repository public.
-2. Add the version text to the boards (open item O-42), or mark the version on each unit's label until then.
-3. Submit the form at [application.oshwa.org](https://application.oshwa.org/) as Het Bhavsar (individual), and register each later
+2. Submit the form at [application.oshwa.org](https://application.oshwa.org/) as Het Bhavsar (individual), and register each later
    version under a new UID instead of overwriting this one.
 
 ## Product compliance (before any sale)
