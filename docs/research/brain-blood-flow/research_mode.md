@@ -1,6 +1,6 @@
 # Research mode: what 100–200 Hz adds, and where it stops (2026-11-08)
 
-**Status.** Firmware research modes 6 (100 Hz) and 7 (200 Hz) stream green, IR, red and direct ambient, with the IMU at 104 Hz (`ble_gatt.md` rev 14). They are uncommitted in the firmware worktree and not bench-tested. No head recording exists.
+**Status.** Firmware research modes 6 (100 Hz) and 7 (200 Hz) stream green, IR, red and direct ambient, with the IMU at 104 Hz (`ble_gatt.md` rev 14). They are planned and not bench-tested. No head recording exists.
 
 Every number below names its source:
 - **finger** is real data: pulse-transit-time-ppg 1.1.0, 22 adults sitting, MAX30101 at 500 Hz, with ECG.

@@ -72,7 +72,7 @@ Atrium is a wellness and research device. Nothing here is a medical measurement.
 - **That a red or IR residual beyond green is intracranial.** At most it is "consistent with muscle, subcutis or deeper tissue".
 - **Modified Beer–Lambert ΔHbO and ΔHbR as concentrations.** They assume a uniform change along the Monte Carlo's mean path. In layered tissue they are a dermis-weighted mean, so they are relative indices only.
 - **That the jaw-artefact detector works.** Its AUC of 1.00 is on simulated artefacts, which are cleaner than real ones. The real value comes from P6.
-- **Ambient-light leakage.** It is unknown. The released firmware has no direct-ambient slot; research modes 6 and 7 add one (`ble_gatt.md` rev 14), but they are uncommitted and not bench-tested.
+- **Ambient-light leakage.** It is unknown. The released firmware has no direct-ambient slot; research modes 6 and 7 add one (`ble_gatt.md` rev 14), but they are planned and not bench-tested.
 - **The source–detector spacing.** It is unknown to better than about ±0.5 mm [VERIFY].
 
 ## What would change our mind
