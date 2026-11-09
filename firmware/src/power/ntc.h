@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Local Forge
+ * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
  * NTCs TH1 (skin) and TH4 (top): Murata NCP03XH103F05RL, 10 kOhm 1 % at 25 C, each under

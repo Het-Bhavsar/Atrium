@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Local Forge
+ * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
  * The cases of app/python/tests/test_wear.py on the port, with the firmware's own part:

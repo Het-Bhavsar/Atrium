@@ -249,24 +249,29 @@ used for medical decisions.
 
 ## Licence
 
-Copyright 2026 Local Forge. Source location: <https://github.com/Het-Bhavsar/Atrium>.
+Copyright 2026 Het Bhavsar. Atrium is published under the Local Forge name. Source location:
+<https://github.com/Het-Bhavsar/Atrium>.
 
 | Folder | What it covers | Licence | SPDX |
 |---|---|---|---|
-| `hardware/`, `mechanical/` | Schematics, layout, production files, CAD, drawings, simulations | [CERN Open Hardware Licence v2, Strongly Reciprocal](LICENSE) | `CERN-OHL-S-2.0` |
+| `hardware/`, `mechanical/` | Schematics, layout, the EasyEDA Pro project, production files, CAD, drawings, simulations | [CERN Open Hardware Licence v2, Strongly Reciprocal](LICENSE) | `CERN-OHL-S-2.0` |
 | `firmware/` | Pod and case firmware | [Apache License 2.0](firmware/LICENSE) | `Apache-2.0` |
 | `app/` | Phone app | [Apache License 2.0](app/LICENSE) | `Apache-2.0` |
-| `docs/`, `legacy/`, `README.md` | Documentation and images | [Creative Commons Attribution-ShareAlike 4.0](docs/LICENSE) | `CC-BY-SA-4.0` |
+| `docs/`, `README.md` and the other Markdown files | Documentation, images, renders, photographs and research data | [Creative Commons Attribution-ShareAlike 4.0](docs/LICENSE) | `CC-BY-SA-4.0` |
+| `legacy/` | Earlier revisions: design files under `CERN-OHL-S-2.0`, text and images under `CC-BY-SA-4.0` | [legacy/LICENSE.md](legacy/LICENSE.md) | both |
 
 - **Hardware.** CERN-OHL-S-2.0 is strongly reciprocal: if you make and convey a product from these files, or a modified
   version of them, you must make the complete source of your version available under the same licence, keep the
   copyright and licence notices, and keep or add a source location that points to it.
 - **Software.** Apache-2.0 allows use, change and redistribution, including commercial, with a patent grant. Keep the
   licence and copyright notices and mark the files you change.
-- **Documents.** CC BY-SA 4.0 requires credit ("Atrium by Local Forge", with a link to the source location), a link to
+- **Documents.** CC BY-SA 4.0 requires credit ("Atrium by Het Bhavsar / Local Forge", with a link to the source location), a link to
   the licence, a note of changes, and the same licence on adaptations.
 - **Names and marks.** The licences cover the design, code and text. They do not grant rights to the names "Atrium" and
   "Local Forge" or their logos. A product built from these files must not suggest that Local Forge made or endorses it.
+- **Third-party material.** Libraries the firmware and app build against, the app font, the datasets behind the sleep
+  model and the depth study, and the component library parts keep their own licences; see
+  [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 - **No warranty.** Each licence disclaims all warranties and liability to the extent the law allows.
 
 Atrium aims for [OSHWA certification](docs/certification.md) at its first public release.

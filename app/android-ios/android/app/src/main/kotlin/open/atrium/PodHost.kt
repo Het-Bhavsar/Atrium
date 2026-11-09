@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Het Bhavsar
+// SPDX-License-Identifier: Apache-2.0
+
 // Native pod link for Android behind the Pigeon PodHostApi (pigeons/pod.dart).
 // GATT layout: docs/ble_gatt.md rev 13. Custom UUIDs share the base 8f2aXXXX-4c46-4154-5249-554d2e706f64.
 // Android allows one GATT operation at a time, so every read, write and descriptor write is serialized.

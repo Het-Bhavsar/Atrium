@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Local Forge
+ * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
  * Synthetic epoch k, the same in app/python/atrium_ml/logrec.py terms (the vectors in

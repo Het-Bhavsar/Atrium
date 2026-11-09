@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Local Forge
+ * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
  * The case LED language (docs/charging-case.md, "LED and button language") as colour

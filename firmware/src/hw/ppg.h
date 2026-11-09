@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Local Forge
+ * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
  * Optical front end behind one interface. A mode's LED slots go in; samples

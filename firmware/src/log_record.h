@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Local Forge
+ * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
  * 12-byte log record, one per 30 s epoch (docs/ble_gatt.md section 7; the reference codec

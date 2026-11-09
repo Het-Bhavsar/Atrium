@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Het Bhavsar
+// SPDX-License-Identifier: Apache-2.0
+
 import 'package:atrium/core/config.dart';
 import 'package:atrium/core/util/format.dart';
 import 'package:atrium/features/insights/domain/metrics_source.dart';

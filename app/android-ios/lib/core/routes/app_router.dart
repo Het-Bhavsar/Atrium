@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Het Bhavsar
+// SPDX-License-Identifier: Apache-2.0
+
 import 'package:atrium/core/widgets/scaffolds.dart';
 import 'package:atrium/features/device/presentation/device_view.dart';
 import 'package:atrium/features/device/presentation/firmware_view.dart';

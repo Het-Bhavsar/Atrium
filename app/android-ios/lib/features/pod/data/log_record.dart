@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Het Bhavsar
+// SPDX-License-Identifier: Apache-2.0
+
 import 'dart:typed_data';
 
 /// Pod log decoder: a port of `app/python/atrium_ml/logrec.py` (the EVT compact log).

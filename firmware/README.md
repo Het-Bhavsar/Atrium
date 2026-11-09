@@ -268,3 +268,8 @@ All of it is plain C in `src/power/`, stepped once a second by `src/main.c`.
     - The idle current with the P0.14 edge interrupt on SENSE.
     - CTRL-AP RESET from the case with APPROTECT on, and the current after it (the debug power-up is released).
 16. **SWD pads on skin.** Sweat between SWDIO, SWDCLK and the other pads (open item O-12): watch for leakage current in System OFF.
+
+## Licence
+
+Apache-2.0 (see [`LICENSE`](LICENSE)). Copyright 2026 Het Bhavsar. Third-party code used by the build is listed in
+[`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md).

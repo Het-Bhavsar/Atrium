@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Local Forge
+ * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
  * The log in the internal-flash "log" partition (8 pages, 32 KB): logpack.h on Zephyr's

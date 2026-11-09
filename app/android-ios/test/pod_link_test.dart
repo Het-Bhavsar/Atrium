@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Het Bhavsar
+// SPDX-License-Identifier: Apache-2.0
+
 import 'package:atrium/features/pod/data/log_record.dart';
 import 'package:atrium/features/pod/data/pod_link.dart';
 import 'package:atrium/features/pod/domain/pod.dart';

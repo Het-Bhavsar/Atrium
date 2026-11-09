@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Het Bhavsar
+// SPDX-License-Identifier: Apache-2.0
+
 import 'package:atrium/core/theme/app_theme.dart';
 import 'package:atrium/core/widgets/graphics.dart';
 import 'package:flutter/material.dart';

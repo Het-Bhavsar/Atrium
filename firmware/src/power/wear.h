@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Local Forge
+ * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
  * Wear detection (docs/FEATURES.md #18; port of app/python/atrium_ml/wear.py update()),

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Local Forge
+ * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
  * BQ21061 settings against TI SLUSDU0A section 7.5 and the firmware review (2026-11-07).

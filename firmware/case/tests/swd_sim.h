@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Local Forge
+ * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
  * A bit-level SW-DP target with an nRF52832 CTRL-AP, for the host tests. It sees only the

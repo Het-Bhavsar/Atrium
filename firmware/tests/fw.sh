@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Copyright (c) 2026 Het Bhavsar
+# SPDX-License-Identifier: Apache-2.0
 # Build and test the Atrium pod firmware in Docker (Zephyr v4.4.2, SDK 1.0.1).
 # Usage: firmware/tests/fw.sh image | test | build | debug | bench | shell
 set -euo pipefail

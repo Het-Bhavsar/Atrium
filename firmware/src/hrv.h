@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Local Forge
+ * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
  * Beat-to-beat intervals and RMSSD (port of app/python/atrium_ml/hrv.py, "max-slope PPI",

@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Het Bhavsar
+// SPDX-License-Identifier: Apache-2.0
+
 import 'package:flutter/foundation.dart';
 
 /// The person wearing Atrium. Kept only on this phone (Atrium has no accounts and no cloud).

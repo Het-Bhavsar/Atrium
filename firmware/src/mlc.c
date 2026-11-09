@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Local Forge
+ * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
  *
  * mlc_program below is ST's motion_intensity example for the LSM6DSOX

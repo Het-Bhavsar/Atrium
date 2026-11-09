@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Het Bhavsar
+// SPDX-License-Identifier: Apache-2.0
+
 // Pigeon contract between Flutter and the native pod layer (BLUEPRINT.md section 7).
 // Native owns BLE (CoreBluetooth on iOS with state restoration; Nordic Android-BLE-Library in a
 // foreground service on Android) so log sync (#20) can run while the app is in the background.

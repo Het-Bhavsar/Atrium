@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Het Bhavsar
+// SPDX-License-Identifier: Apache-2.0
+
 // Native pod link for iOS: CoreBluetooth behind the Pigeon PodHostApi (pigeons/pod.dart).
 // State restoration lets iOS relaunch the app for BLE events, so the log can sync in the background (#20).
 // GATT layout: docs/ble_gatt.md rev 13. Custom UUIDs share the base 8f2aXXXX-4c46-4154-5249-554d2e706f64.

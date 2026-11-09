@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Het Bhavsar
+// SPDX-License-Identifier: Apache-2.0
+
 // Icon set from the design prototype (24 x 24, stroke-drawn). Rendered with flutter_svg.
 // ignore_for_file: lines_longer_than_80_chars
 const Map<String, String> kIconPaths = {

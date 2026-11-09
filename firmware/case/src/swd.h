@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Local Forge
+ * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
  * A bit-banged SWD host (ARM ADIv5 SW-DP), only as far as the nRF52832 CTRL-AP: line

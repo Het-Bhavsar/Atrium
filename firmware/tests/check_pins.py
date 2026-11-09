@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Het Bhavsar
+# SPDX-License-Identifier: Apache-2.0
 """Check the atrium_pod board files against the pod netlist.
 
 Every nRF52832 pin the firmware uses must sit on the net the netlist puts there, and every

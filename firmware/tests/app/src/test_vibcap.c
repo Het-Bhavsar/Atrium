@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Local Forge
+ * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
  * Vibration capture, research modes 10 and 11 (vibcap.h, docs/ble_gatt.md 4.4).

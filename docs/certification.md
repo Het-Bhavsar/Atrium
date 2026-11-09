@@ -2,7 +2,7 @@
 
 ## Open hardware: OSHWA
 
-Atrium will self-certify with OSHWA ([requirements](https://certification.oshwa.org/requirements.html)) under the
+Het Bhavsar will self-certify Atrium with OSHWA as an individual ([requirements](https://certification.oshwa.org/requirements.html)), under the
 standard certification, project type **Wearables**, country code IN. It is a wellness device, so the Open Healthware
 track does not apply. Certification covers the openness of the design. It says nothing about safety or quality, and
 the mark must never be used to suggest either.
@@ -19,7 +19,7 @@ the mark must never be used to suggest either.
 | Third-party parts identified, with accessible datasheets | See below | ready |
 | Hardware labelled with a version or release date | Each board needs a version or date in its silkscreen [VERIFY every board] | to check |
 
-**What is open and what is not.** Everything Local Forge made is open: schematics, board layouts, Gerbers, enclosure
+**What is open and what is not.** Everything I made for Atrium (Het Bhavsar, publishing as Local Forge) is open: schematics, board layouts, Gerbers, enclosure
 CAD, firmware, app, documentation and images. The parts on the boards are ordinary catalogue parts made by others,
 each with a public datasheet reached through the LCSC number in the BOM: the nRF52832 radio SoC, the MAXM86161 optical
 module, the LSM6DSOX motion sensor, the BQ21061 charger, the cell and its protection, the chip antenna, the CH32V003
@@ -29,7 +29,7 @@ case MCU and the passives. Their internal designs are not open, and OSHWA does n
 **Before applying:**
 1. Make the repository public.
 2. Confirm the version text on every board's silkscreen.
-3. Submit the form at [application.oshwa.org](https://application.oshwa.org/) as Local Forge, and register each later
+3. Submit the form at [application.oshwa.org](https://application.oshwa.org/) as Het Bhavsar (individual), and register each later
    version under a new UID instead of overwriting this one.
 
 ## Product compliance (before any sale)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Local Forge
+ * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
  * Case board pin map, CH32V003F4U6 QFN-20 (CH32V003DS0 V1.8, table 2-1). QFN pin numbers

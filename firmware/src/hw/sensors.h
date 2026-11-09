@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Local Forge
+ * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
  * Measurement mode -> PPG slots (ppg.h) and LSM6DSOX rate, or the vibration capture

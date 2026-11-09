@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Copyright (c) 2026 Het Bhavsar
+# SPDX-License-Identifier: Apache-2.0
 # Build and test the Atrium charging case firmware in Docker (CH32V003, ch32fun).
 # Usage: firmware/case/tools/case.sh image | test | build | shell
 #   image  build the toolchain image (once)

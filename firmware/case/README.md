@@ -90,3 +90,8 @@ SWD runs at the speed of the call overhead at 24 MHz [VERIFY on a scope]. ERASEA
 7. **Standby.** About 15 µA with the lid shut (MCU 8–9 µA, DS table 3-8; hall 3 µA); wake on lid, button and USB; the AWU against a stopwatch (LSI tolerance).
 8. **LED.** Blue and white brightness at a 3.4 V cell (Vf headroom); colours behind the light pipe.
 9. **Thermal.** The NTC against a thermometer; the 45 °C cut on a warm plate.
+
+## Licence
+
+Apache-2.0 (see [`firmware/LICENSE`](../LICENSE)). Copyright 2026 Het Bhavsar. ch32fun is MIT; see
+[`THIRD_PARTY_NOTICES.md`](../../THIRD_PARTY_NOTICES.md).

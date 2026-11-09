@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Local Forge
+ * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
  * ntc.c against Murata's NCP03XH103F05RL resistance-temperature table (NC-R8021, centre

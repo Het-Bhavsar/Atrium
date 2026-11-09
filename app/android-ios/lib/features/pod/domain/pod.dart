@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Het Bhavsar
+// SPDX-License-Identifier: Apache-2.0
+
 /// Pod and device entities (FEATURES.md #15-#21, #25-#27). Pure Dart.
 library;
 

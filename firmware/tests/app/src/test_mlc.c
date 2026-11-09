@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Local Forge
+ * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
  * mlc.c against app/python/atrium_ml/mlc.py on the mlc_* vectors from make_test_vectors.py:

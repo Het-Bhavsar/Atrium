@@ -54,4 +54,4 @@ The pod is 20.9 × 11 × 5.3 mm. Production intent for the shell is injection-mo
 finish (non-conductive, because the antenna sits 0.3 mm from the wall); a builder version prints in SLA resin with a
 mica silver paint. The base is PC or PA12, the gasket black LSR silicone or TPU 85A.
 
-Licensed under the CERN-OHL-S v2 with the rest of the hardware; see [`LICENSE`](../LICENSE).
+Licensed under the CERN-OHL-S v2 with the rest of the hardware; see [`LICENSE`](LICENSE).

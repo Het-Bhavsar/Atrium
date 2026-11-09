@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Local Forge
+ * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
  * Vibration bench rig (docs/ble_gatt.md 4.5): nRF52 DK, LSM6DSOX on SPIM2 at 8 MHz, printing

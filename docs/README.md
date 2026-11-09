@@ -24,3 +24,5 @@
 | [certification.md](certification.md) | OSHWA and regulatory notes |
 
 Images used across the repository are in [`images/`](images/).
+
+Documentation and images are licensed CC BY-SA 4.0 (see [`LICENSE`](LICENSE)). Copyright 2026 Het Bhavsar.

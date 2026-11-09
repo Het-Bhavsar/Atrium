@@ -93,7 +93,7 @@ folder (PDF, SVG and SchDoc).
 
 ## Licence
 
-Copyright 2026 Local Forge.
+Copyright 2026 Het Bhavsar.
 
 This source describes Open Hardware and is licensed under the CERN-OHL-S v2.
 
@@ -108,4 +108,4 @@ As per CERN-OHL-S v2 section 4, should you produce hardware based on this source
 the Source Location visible on the external case of the Atrium pod or case, or other products you make using this
 source.
 
-Full licence text: [`LICENSE`](../LICENSE).
+Full licence text: [`LICENSE`](LICENSE).

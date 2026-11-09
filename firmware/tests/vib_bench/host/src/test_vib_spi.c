@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Local Forge
+ * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
  * The bench rig's SPI drain (vib_spi.c) against a simulated LSM6DSOX: register file, FIFO of

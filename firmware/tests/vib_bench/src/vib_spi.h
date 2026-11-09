@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2026 Local Forge
+ * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
  * Vibration bench rig core: the LSM6DSOX on SPI, set up as mode 11 (vibcap.h: 6667 Hz,

@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Het Bhavsar
+// SPDX-License-Identifier: Apache-2.0
+
 import 'package:atrium/features/pod/domain/pod.dart';
 
 /// Fit guide checks (FEATURES.md #24, #26): ports of `atrium_ml/fit.press_ok` and `atrium_ml/position.side_from_tilt`.

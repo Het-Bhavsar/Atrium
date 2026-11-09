@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Het Bhavsar
+// SPDX-License-Identifier: Apache-2.0
+
 /// Pure-Dart entities for body metrics (FEATURES.md #1-#7). No Flutter imports.
 library;
 

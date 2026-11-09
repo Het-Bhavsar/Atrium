@@ -1,3 +1,6 @@
+// Copyright (c) 2026 Het Bhavsar
+// SPDX-License-Identifier: Apache-2.0
+
 /// Build switches.
 ///
 /// `flutter run --dart-define=ATRIUM_REAL_DATA=true` talks to a real pod over BLE and shows only what the
