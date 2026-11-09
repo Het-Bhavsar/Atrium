@@ -123,9 +123,9 @@ RAM use is 53.7 KB of 64 KB.
 
 ## Programming and debug
 
-From `docs/flashing-and-test.md` of the baseline.
+The full jig and bring-up procedure is in `docs/flashing-and-test.md`.
 
-**Pads.** Four ENIG pads on the base reach SWD: VIN, GND, SWDIO, SWDCLK. Field updates are BLE only (section 9 of `docs/ble_gatt.md`); the SWD pads are the recovery path.
+**Pads.** Five ENIG pads on the base: VIN, GND_A, GND_B, SWDIO and SWDCLK. Programming needs four of them (VIN, one GND, SWDIO, SWDCLK). Field updates are BLE only (section 9 of `docs/ble_gatt.md`); the SWD pads are the recovery path.
 
 **Power on the jig.** VIN = 5 V through a 100 mA limit. The BQ21061 runs the system from VIN, so SWD works with a flat or missing cell.
 
@@ -153,7 +153,8 @@ nrfutil device program --firmware build/atrium_pod_merged.hex --options chip_era
 - Upload `build/src/zephyr/zephyr.signed.bin`.
 - There is no upload below 3.60 V (VSYS) off the dock.
 - A new image confirms itself once it is healthy after 60 s. If it is still unhealthy at 300 s, it reboots, and MCUboot restores the previous image.
-- The image is signed with MCUboot's development ECDSA P-256 key. Replace the key before any release [VERIFY].
+- Signing key. `fw.sh build` signs with MCUboot's public development key unless `ATRIUM_SIGNING_KEY` names your own ECDSA P-256 key (`imgtool keygen -k atrium-ecdsa-p256.pem -t ecdsa-p256`): `ATRIUM_SIGNING_KEY=$HOME/keys/atrium-ecdsa-p256.pem firmware/tests/fw.sh build`. The key goes into MCUboot as the trusted public key and signs the app, so a pod flashed with a production build accepts only updates signed with that key. Keep the key outside the repository (`*.pem` is ignored) and in a folder Docker can share.
+- Version. `src/VERSION` sets the image version (0.1.0) that MCUboot and MCUmgr report; bump it with every release. The DIS Firmware Revision adds the commit (`0.1.0+<commit>`).
 
 ## Power and charge logic
 

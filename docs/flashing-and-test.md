@@ -4,7 +4,7 @@ How to reach the pod's SWD port, bring up a new pod and test it in production.
 
 ## Flashing pins
 
-Four pads on the base reach the nRF52832 SWD port: **VIN, GND, SWDIO and SWDCLK** (coordinates in [architecture.md](architecture.md#contacts-base-skin-side)). They are ENIG pads on the flex bottom, recessed in the base holes (base 0.35 mm plus 0.03 mm bond).
+Five ENIG pads on the flex bottom show through the base: **VIN, GND_A, GND_B, SWDIO and SWDCLK** (coordinates in [architecture.md](architecture.md#contacts-base-skin-side)). Programming uses four of them: VIN, one GND, SWDIO and SWDCLK. They are recessed in the base holes (base 0.35 mm plus 0.03 mm bond).
 
 - **Logic level is 1.8 V.** Use a probe that follows target voltage: a SEGGER J-Link (VTref), or an nRF52 / nRF53 DK through its Debug-out header (it senses VTG). Don't use a fixed 3.3 V CMSIS-DAP probe without a level shifter.
 - The pod has no VTref pad. The jig powers the pod from **VIN = 5 V** (the BQ21061 brings up VSYS and the 1.8 V rail) and feeds **1.8 V** from its own regulator into the probe's VTref.
@@ -23,10 +23,37 @@ CAD in `mechanical/programming-jig/` (STEP, STL, drawings).
 1. Before power, measure resistance from VIN, VSYS and VDD_1V8 to GND. All should read > 1 kΩ.
 2. Put the pod in the jig on a current-limited 5 V supply (50 mA limit). VIN current should settle under 20 mA with the cell disconnected.
 3. Measure VSYS (4.5 V) and VDD_1V8 (1.80 V) at their test points (listed in the PCB rules in `hardware/design-data/`).
-4. Run `nrfjprog --recover` or `west flash --runner jlink`, then flash the bring-up build of the pod firmware in `firmware/`.
+4. Run `nrfutil device recover`, then flash the bring-up build of the pod firmware (`firmware/tests/fw.sh debug`, RTT logs, no MCUboot).
 5. Watch RTT: all three I2C devices answer (the BQ21061 only while VIN is present), TH1 and TH4 read near room temperature, and VSYS is sensible.
 6. Connect the cell. Check that CHG_PG goes low on VIN, that the charge current is about 15 mA once the firmware sets ICHG, and that charging terminates.
 7. RF: a conducted test through a pigtail at the pi-match pads, then OTA RSSI with a phone (the pod advertises as "Atrium").
+
+## Programming the nRF52832
+
+Build with `firmware/tests/fw.sh build` (Docker, Zephyr v4.4.2). It writes `build/atrium_pod_merged.hex` (MCUboot and the signed app) for SWD and `build/src/zephyr/zephyr.signed.bin` for BLE updates.
+
+```bash
+nrfutil device recover
+```
+
+```bash
+nrfutil device program --firmware build/atrium_pod_merged.hex --options chip_erase_mode=ERASE_ALL
+```
+
+```bash
+nrfutil device reset
+```
+
+With nrfjprog the same steps are `nrfjprog --recover`, `nrfjprog --program build/atrium_pod_merged.hex --chiperase --verify` and `nrfjprog --reset`. `west flash` from the build directory also works. [VERIFY the option names with `nrfutil device --help` before scripting a jig.]
+
+- **Flash map** (512 KB): MCUboot 0x00000 (32 KB), slot 0 0x08000 (220 KB), slot 1 0x3F000 (220 KB), settings and bonds 0x76000 (8 KB), log 0x78000 (32 KB).
+- **Debug access.** The build uses `CONFIG_NRF_APPROTECT_USE_UICR` and the hex holds no UICR records, so a recovered chip stays open to the debugger after programming. The production lock (UICR.APPROTECT written at the end of the factory flash) is a DVT decision; `recover` always works, and wipes the chip.
+- **Signing key.** Production builds must be signed with your own ECDSA P-256 key: `ATRIUM_SIGNING_KEY=/path/to/atrium-ecdsa-p256.pem firmware/tests/fw.sh build`. Without it the build uses MCUboot's public development key, which is for bench units only. A pod accepts BLE updates signed with the key it was flashed with. Never commit a key.
+- **Version.** The image is 0.1.0 (`firmware/src/VERSION`); the DIS Firmware Revision reads `0.1.0+<commit>`.
+
+## Programming the charging case
+
+The case MCU is a CH32V003 on a single-wire debug interface (SWIO), programmed with a WCH-LinkE and `minichlink` through TP1 (SWIO, PD1), TP2 (3.3 V) and TP3 (GND) on the case board, before the case is closed, with no cell fitted when TP2 is used: `minichlink -w atrium_case.bin flash -b`, then `minichlink -D` once so PD7 is a GPIO. Build steps are in [`firmware/case/README.md`](../firmware/case/README.md). The case has no field update path.
 
 ## Field updates
 
