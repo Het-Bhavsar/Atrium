@@ -31,7 +31,7 @@ image)
 	;;
 test)
 	# host unit tests on native_sim, plus a build of the firmware for the board
-	run '$ZEPHYR_BASE/scripts/twister -T . -A /atrium/firmware/boards \
+	run 'python3 -I tests/check_version.py --self-test && $ZEPHYR_BASE/scripts/twister -T . -A /atrium/firmware/boards \
 	     -p native_sim/native/64 -p atrium_pod -O /tmp/twister --inline-logs'
 	;;
 build)
@@ -39,7 +39,8 @@ build)
 	run "west build -b atrium_pod --sysbuild -p -d build src -- -DBOARD_ROOT=/atrium/firmware $keyarg"' &&
 	     python3 $ZEPHYR_BASE/scripts/build/mergehex.py -o build/atrium_pod_merged.hex \
 	       build/mcuboot/zephyr/zephyr.hex build/src/zephyr/zephyr.signed.hex &&
-	     ls -l build/atrium_pod_merged.hex build/src/zephyr/zephyr.signed.bin'
+	     ls -l build/atrium_pod_merged.hex build/src/zephyr/zephyr.signed.bin &&
+	     python3 -I tests/check_version.py --rev "$ATRIUM_GIT_REV" build/src/zephyr/zephyr.signed.bin'
 	;;
 debug)
 	# bring-up image with RTT logs, no MCUboot (src/debug.conf, src/debug.overlay)

@@ -9,8 +9,10 @@ hold. Fill in a new table for each release; never edit an old one.
 1. **Hardware.** The board revision is the text on the bottom silkscreen (`ATRIUM EVT v0.1.0 2026-11` on the case,
    `EVT v0.1` on the flex). Record the Git commit of the released production files and the date of the DRC run.
 2. **Firmware.** The pod's version comes from `firmware/src/VERSION`, and the build stamps the commit into the DIS
-   Firmware Revision (`0.1.0+<commit>`). Record which signing key signed the image: development key or the production key
-   (never commit the key).
+   Firmware Revision (`0.1.0+<commit>`). Bump a release in `VERSION` only: it sets both the MCUboot header the app
+   checks before an update and the Firmware Revision the pod reports after it. `fw.sh build` stops if the two differ
+   (`firmware/tests/check_version.py`), because a mismatch would show a good update as failed. Record which signing key
+   signed the image: development key or the production key (never commit the key).
 3. **App.** The version is `version:` in `app/android-ios/pubspec.yaml`, and the APK names on the release carry it.
 4. **Tests.** Record each result with its date, and whether it was run on a host, in simulation or on real hardware.
    "Simulated" and "measured" are never mixed in one cell.

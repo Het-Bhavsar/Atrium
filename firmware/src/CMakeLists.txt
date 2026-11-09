@@ -6,7 +6,10 @@ list(APPEND BOARD_ROOT ${CMAKE_CURRENT_LIST_DIR}/..)
 list(APPEND DTS_ROOT ${CMAKE_CURRENT_LIST_DIR}/../drivers)
 
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
-project(atrium_pod VERSION 0.1.0)
+# One version, in VERSION: Zephyr reads it into APP_VERSION_* and signs the MCUboot header with
+# it (MCUBOOT_IMGTOOL_SIGN_VERSION defaults to APP_VERSION_TWEAK_STRING). The DIS Firmware Revision
+# below uses the same numbers, so the app's after-update check compares like with like.
+project(atrium_pod VERSION ${APP_VERSION_MAJOR}.${APP_VERSION_MINOR}.${APP_PATCHLEVEL})
 
 add_subdirectory(../drivers drivers)
 
@@ -15,7 +18,19 @@ set(ATRIUM_GIT_REV "$ENV{ATRIUM_GIT_REV}")
 if(NOT ATRIUM_GIT_REV)
   set(ATRIUM_GIT_REV "unknown")
 endif()
-target_compile_definitions(app PRIVATE ATRIUM_FW_REV="${PROJECT_VERSION}+${ATRIUM_GIT_REV}")
+target_compile_definitions(app PRIVATE ATRIUM_FW_REV="${APP_VERSION_STRING}+${ATRIUM_GIT_REV}")
+
+# A signing version set by hand (prj.conf, -D) must still match VERSION, or an update would report
+# the old number over BLE and the app would call a good update failed.
+if(CONFIG_MCUBOOT_IMGTOOL_SIGN_VERSION)
+  string(REGEX MATCH "^([0-9]+)\\.([0-9]+)\\.([0-9]+)" _ "${CONFIG_MCUBOOT_IMGTOOL_SIGN_VERSION}")
+  set(_signed "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}.${CMAKE_MATCH_3}")
+  set(_app "${APP_VERSION_MAJOR}.${APP_VERSION_MINOR}.${APP_PATCHLEVEL}")
+  if(NOT _signed STREQUAL _app)
+    message(FATAL_ERROR "MCUboot signing version ${CONFIG_MCUBOOT_IMGTOOL_SIGN_VERSION} "
+      "differs from VERSION (${_app}): bump firmware/src/VERSION instead")
+  endif()
+endif()
 
 target_include_directories(app PRIVATE . power hw ble)
 target_sources(app PRIVATE

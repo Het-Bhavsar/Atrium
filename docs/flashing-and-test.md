@@ -30,7 +30,7 @@ CAD in `mechanical/programming-jig/` (STEP, STL, drawings).
 
 ## Programming the nRF52832
 
-Build with `firmware/tests/fw.sh build` (Docker, Zephyr v4.4.2). It writes `build/atrium_pod_merged.hex` (MCUboot and the signed app) for SWD and `build/src/zephyr/zephyr.signed.bin` for BLE updates.
+Build with `firmware/tests/fw.sh build` (Docker, Zephyr v4.4.2). It writes `build/atrium_pod_merged.hex` (MCUboot and the signed app) for SWD and `build/src/zephyr/zephyr.signed.bin` for BLE updates. It then checks that the signed image's header version and the Firmware Revision string inside it both match `firmware/src/VERSION`.
 
 ```bash
 nrfutil device recover

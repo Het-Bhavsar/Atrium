@@ -409,6 +409,7 @@ MCUmgr SMP over BLE. Service `8d53dc1d-1db7-4cd3-868b-8a527460aa84`, characteris
 - MCUboot (swap using move, 32 KB) swaps between two 220 KB slots in internal flash; an image may be up to 216.9 KB.
 - A new image confirms itself only after 60 s of healthy running: BLE up, PPG and IMU ready, a VSYS reading off the Plinth (or on the Plinth). If it is still unhealthy at 300 s, it reboots and MCUboot restores the previous image. An image that was never confirmed also reverts on any reset.
 - The images are signed with ECDSA P-256. The development key is MCUboot's sample key [VERIFY: replace it before any release build].
+- Version: `firmware/src/VERSION` alone sets the MCUboot header version and the x.y.z of Firmware Revision (0x2A26). The app compares the two to confirm an update; `fw.sh build` fails if they differ.
 - Updates are refused below 3.60 V VSYS unless the pod is docked [ASSUMED].
 - This is the only field update path. The SWD pads on the base are for the programming jig and recovery.
 
