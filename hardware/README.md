@@ -1,43 +1,68 @@
 # Hardware
 
-Revision B.1, engineering validation (EVT). All dimensions are in mm.
+Every board of the Atrium EVT build: the two pod islands, the flex that joins them, a panel of both islands for
+ordering, and the charging-case board. All dimensions are in mm.
 
-| Folder | Contents |
+| Board | Build | Folder |
+|---|---|---|
+| Radio island | 6-layer HDI 1+4+1, 0.82 mm, JLC06081H-2313, ENIG. nRF52832 WLCSP, MAXM86161, chip antenna | `pod/radio-island/` |
+| Power island | Same stack. BQ21061 charger, AP6683 protection, LSM6DSOX, 1.8 V LDO | `pod/power-island/` |
+| Flex jumper | 2-layer polyimide, 0.0865 mm, ENIG both sides, SUS430 stiffener; no parts | `pod/flex-jumper/` |
+| Islands panel | Both islands, 2 × 3 sets, tabs and mouse bites, for one PCB and PCBA order | `pod/islands-panel/` |
+| Charging case | 2-layer FR-4, 0.8 mm. CH32V003, TP4054, TPS61023 boost, SY6280 limit, USB-C | `case/charging-case/` |
+
+Each board folder has the same three parts:
+
+| Folder | Files |
 |---|---|
-| `pod/schematic`, `case/schematic` | Pin-level netlists (CSV); schematic PDFs from EasyEDA Pro |
-| `pod/pcb`, `case/pcb` | Placement (`placement/*.csv`); layout files once routed |
-| `pod/bom`, `case/bom` | BOM with LCSC part numbers and JLC part type |
-| `pod/mechanical`, `case/mechanical` | Parametric build123d CAD, checks, and STEP / STL / 3MF / DXF exports |
-| `pod/production`, `case/production` | Gerbers, pick-and-place and assembly drawings, after layout |
-| `simulation` | Power, signal, thermal, RF and SPICE models behind the numbers |
+| `schematic/` | `.SchDoc` (Altium format), PDF, SVG |
+| `pcb/` | `.PcbDoc` (Altium format), a PDF with every layer, the 3D model (STEP) and top and bottom renders |
+| `production/` | Gerbers and drills (zip), BOM and pick-and-place (CSV, LCSC part numbers), IPC-D-356A netlist |
 
-## Pod board
+The `.SchDoc` and `.PcbDoc` files are exported from EasyEDA Pro. They open in Altium Designer, and KiCad imports them
+(File → Import Non-KiCad Project). The PDFs, Gerbers and CSVs need no EDA tool.
 
-| | |
+Also here:
+
+| Path | Contents |
 |---|---|
-| Outline | Stadium 28 × 14 mm, end radius 7.0; origin at the bounding-box lower-left, +x toward the antenna |
-| Stack-up | 4 layers, 0.6 mm, ENIG, laser microvias, via-in-pad under the WLCSP parts |
-| Layers | L1 parts and RF; L2 solid ground; L3 detector inputs (guarded), I²C, power; L4 skin side (optics, temperature, pogo pads) |
-| Antenna keep-out | x ≥ 24.0 mm on every layer; no metal in the shell, cell or foam |
-| Parts | ≤ 0.9 mm tall under the cell; ≤ 1.0 mm on the skin side |
+| `design-data/netlist/` | The logical netlists the schematics were captured from (YAML) |
+| `design-data/pinmap/` | nRF52832 pin map, shared with the firmware board files |
+| `design-data/constraints/` | PCB rules (stack, impedance, RF, EMC) and flex rules |
+| `design-data/outline/` | Board outlines and keep-outs (DXF, SVG) |
+| `simulation/` | Simulation reports and plots: RF chain, CPWG impedance, link budget, optics, power, charging tolerance, thermal, assembly |
+| `stencil-report.md` | Stencil area ratios for every board |
 
-## Case board
+## Ordering
 
-40 × 26 mm rounded rectangle (R3), 2-layer 1.0 mm FR-4. Charge path: USB-C, BQ24073, LP602525 300 mAh cell, TPS61099 5 V boost, SY6280 current limit, two pogo pins. A DRV5032 hall sensor and the lid magnet switch the pins off when the lid is open, and a TLV803 supervisor holds the boost off below 2.93 V.
+- **Pod:** order the islands panel (`pod/islands-panel/`, read its order notes) and the flex jumper. The flex has no
+  parts, so it needs no assembly.
+- **Case:** order `case/charging-case/production/` as a one-sided PCBA with a 0.10 mm stencil.
+- Build, flash and test steps are in [`docs/build-assembly-test.md`](../docs/build-assembly-test.md).
 
-## Open items (EVT)
+## Checks
 
-1. **USB-C vs docked pod: resolved.**
-   - The pod and the pogo pins now sit 1.8 mm further in y (pins at y 20.3), which leaves 0.50 mm to J1 (0.35 mm with the pod's float in its pocket).
-   - The hall sensor U4 moves to (36.6, 22.4) and the lid magnet to (37.55, 23.55), 1.5 mm outboard, so its pocket clears the pod pocket. |Bz| at the die is 88 mT with the lid closed.
-   - Keep-outs for the case layout: `case/mechanical/DXF/atrium_case_pcb_keepouts_revB1-1.dxf`.
-2. **Light barrier between the LED and the near detector.** Only 0.55 mm separates the two parts, so the rib above the window is 0.45 mm. That is thin for PC moulding. Fix one of two ways:
-   - a black dispensed dam or gasket;
-   - the near detector at x ≥ 6.0.
-3. **Cell envelope.** The supplier sheet allows 20.5 × 11.0 × 3.5 mm. A 10 % swell of the nominal 3.0 mm cell fits at nominal (+0.05 to +0.12 mm), but not under worst-case tolerances. Fix before freezing the height, one of two ways:
-   - get a drawing with a thickness tolerance;
-   - go to a 7.4 mm height.
-4. **Pogo pin data.** Barrel height, plunger diameter and stroke for C2826546 are [VERIFY].
-5. **Raised antenna.** The 2.5 mm interposer is modelled mechanically; its feed and ground are still to design.
+- Every board was routed by hand. EasyEDA DRC: radio and power islands 0 errors; panel 0 errors. Charging case: two
+  items inside the USB-C footprint (the maker's land pattern, accepted). Flex: two "connection" notes at the power end:
+  JP6 is joined to ground by the power island's copper when soldered (by design), and JP9's via-in-pad is counted
+  open by DRC although the Gerbers show it joined to the ground pour.
+- Paste apertures were checked per pad for area ratio and the fine-pitch ones enlarged in the released paste layers.
 
-The full check output is in `pod/mechanical/renders/stackup_report.txt` and `case/mechanical/renders/case_fit_report.txt`.
+## Licence
+
+Copyright 2026 Local Forge.
+
+This source describes Open Hardware and is licensed under the CERN-OHL-S v2.
+
+You may redistribute and modify this source and make products using it under the terms of the CERN-OHL-S v2
+(<https://ohwr.org/cern_ohl_s_v2.txt>). This source is distributed WITHOUT ANY EXPRESS OR IMPLIED WARRANTY,
+INCLUDING OF MERCHANTABILITY, SATISFACTORY QUALITY AND FITNESS FOR A PARTICULAR PURPOSE. Please see the CERN-OHL-S
+v2 for applicable conditions.
+
+Source location: <https://github.com/Het-Bhavsar/Atrium>
+
+As per CERN-OHL-S v2 section 4, should you produce hardware based on this source, you must where practicable maintain
+the Source Location visible on the external case of the Atrium pod or case, or other products you make using this
+source.
+
+Full licence text: [`LICENSE`](../LICENSE).
