@@ -141,7 +141,8 @@ light and detector are, whether it has a short channel, and what it was validate
 
 A 3 cm optical path needs a band or a longer probe and a proper study with a reference. It is on my research list, not
 in this product. Atrium is a wellness device: pulse, heart-rate variability, sleep and skin temperature, done
-honestly. The full reasoning, numbers and planned tests are in [`docs/brain-blood-flow.md`](docs/brain-blood-flow.md).
+honestly. The full reasoning is in [`docs/brain-blood-flow.md`](docs/brain-blood-flow.md), and the study itself, with its
+figures and all the data, is in [`docs/research/brain-blood-flow/`](docs/research/brain-blood-flow/README.md).
 
 If any of this is the part you want to build, start with the [roadmap](docs/roadmap.md) and open an issue.
 

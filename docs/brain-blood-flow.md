@@ -62,7 +62,7 @@ Our 30 mm result lands inside the 8–13 % that published head-model simulations
 agreement is why I trust the model at 2 mm too.
 
 <p align="center">
-  <img src="images/research/depth_share_simulated.png" alt="Simulated share of the red and infrared pulse from brain and from temporalis muscle against spacing" width="80%">
+  <img src="research/brain-blood-flow/figures/f6_depth.png" alt="Simulated share of the red and infrared pulse from brain and from temporalis muscle against spacing" width="80%">
   <br><sub>Share of the red and infrared pulse from the brain (solid) and from the temporalis muscle (dashed) as the spacing grows. Simulated.</sub>
 </p>
 
@@ -132,6 +132,18 @@ scalp, very well, in a pod small enough to forget. That is a lot, and I would ra
 something the physics can't give.
 
 — Het
+
+## The full study
+
+Everything on this page comes from a pre-registered depth study. Its report, hypotheses, protocol, seven figures and
+all result data (photon model output, 500-study power sweeps, simulated studies and the finger timing) are in
+[`research/brain-blood-flow/`](research/brain-blood-flow/README.md). Check our numbers there.
+
+<p align="center">
+  <img src="research/brain-blood-flow/figures/f7_power.png" alt="Detection power against brain share and study size" width="49%">
+  <img src="research/brain-blood-flow/figures/f3_co2_challenges.png" alt="CO2 challenge results in null, muscle-only and deep scenarios" width="49%">
+  <br><sub>Left: how large a brain share a 12- or 24-person study could detect. Right: a muscle-only response passing as "deep". Both simulated.</sub>
+</p>
 
 ## Sources and method
 

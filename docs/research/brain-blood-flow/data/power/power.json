@@ -1,0 +1,975 @@
+{
+ "rows": [
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 0.0,
+   "brain_weight_ir": 0.0,
+   "muscle_weight_ir": 0.11326786791091971,
+   "muscle_co2": 0.0,
+   "subjects": 12,
+   "detect_rate": 0.068,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 0.0,
+   "brain_weight_ir": 0.0,
+   "muscle_weight_ir": 0.11326786791091971,
+   "muscle_co2": 0.0,
+   "subjects": 24,
+   "detect_rate": 0.072,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 0.0,
+   "brain_weight_ir": 0.0,
+   "muscle_weight_ir": 0.11326786791091971,
+   "muscle_co2": 0.05,
+   "subjects": 12,
+   "detect_rate": 0.478,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 0.0,
+   "brain_weight_ir": 0.0,
+   "muscle_weight_ir": 0.11326786791091971,
+   "muscle_co2": 0.05,
+   "subjects": 24,
+   "detect_rate": 0.76,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 0.0,
+   "brain_weight_ir": 0.0,
+   "muscle_weight_ir": 0.11326786791091971,
+   "muscle_co2": 0.1,
+   "subjects": 12,
+   "detect_rate": 0.964,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 0.0,
+   "brain_weight_ir": 0.0,
+   "muscle_weight_ir": 0.11326786791091971,
+   "muscle_co2": 0.1,
+   "subjects": 24,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 1.0,
+   "brain_weight_ir": 8.253699229046484e-05,
+   "muscle_weight_ir": 0.11325851912177919,
+   "muscle_co2": 0.0,
+   "subjects": 12,
+   "detect_rate": 0.068,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 1.0,
+   "brain_weight_ir": 8.253699229046484e-05,
+   "muscle_weight_ir": 0.11325851912177919,
+   "muscle_co2": 0.0,
+   "subjects": 24,
+   "detect_rate": 0.064,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 1.0,
+   "brain_weight_ir": 8.253699229046484e-05,
+   "muscle_weight_ir": 0.11325851912177919,
+   "muscle_co2": 0.05,
+   "subjects": 12,
+   "detect_rate": 0.478,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 1.0,
+   "brain_weight_ir": 8.253699229046484e-05,
+   "muscle_weight_ir": 0.11325851912177919,
+   "muscle_co2": 0.05,
+   "subjects": 24,
+   "detect_rate": 0.764,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 1.0,
+   "brain_weight_ir": 8.253699229046484e-05,
+   "muscle_weight_ir": 0.11325851912177919,
+   "muscle_co2": 0.1,
+   "subjects": 12,
+   "detect_rate": 0.964,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 1.0,
+   "brain_weight_ir": 8.253699229046484e-05,
+   "muscle_weight_ir": 0.11325851912177919,
+   "muscle_co2": 0.1,
+   "subjects": 24,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 10.0,
+   "brain_weight_ir": 0.0008247572660476649,
+   "muscle_weight_ir": 0.11317444941385045,
+   "muscle_co2": 0.0,
+   "subjects": 12,
+   "detect_rate": 0.066,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 10.0,
+   "brain_weight_ir": 0.0008247572660476649,
+   "muscle_weight_ir": 0.11317444941385045,
+   "muscle_co2": 0.0,
+   "subjects": 24,
+   "detect_rate": 0.046,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 10.0,
+   "brain_weight_ir": 0.0008247572660476649,
+   "muscle_weight_ir": 0.11317444941385045,
+   "muscle_co2": 0.05,
+   "subjects": 12,
+   "detect_rate": 0.51,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 10.0,
+   "brain_weight_ir": 0.0008247572660476649,
+   "muscle_weight_ir": 0.11317444941385045,
+   "muscle_co2": 0.05,
+   "subjects": 24,
+   "detect_rate": 0.804,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 10.0,
+   "brain_weight_ir": 0.0008247572660476649,
+   "muscle_weight_ir": 0.11317444941385045,
+   "muscle_co2": 0.1,
+   "subjects": 12,
+   "detect_rate": 0.966,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 10.0,
+   "brain_weight_ir": 0.0008247572660476649,
+   "muscle_weight_ir": 0.11317444941385045,
+   "muscle_co2": 0.1,
+   "subjects": 24,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 30.0,
+   "brain_weight_ir": 0.0024701971720106223,
+   "muscle_weight_ir": 0.11298807394392647,
+   "muscle_co2": 0.0,
+   "subjects": 12,
+   "detect_rate": 0.054,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 30.0,
+   "brain_weight_ir": 0.0024701971720106223,
+   "muscle_weight_ir": 0.11298807394392647,
+   "muscle_co2": 0.0,
+   "subjects": 24,
+   "detect_rate": 0.04,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 30.0,
+   "brain_weight_ir": 0.0024701971720106223,
+   "muscle_weight_ir": 0.11298807394392647,
+   "muscle_co2": 0.05,
+   "subjects": 12,
+   "detect_rate": 0.588,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 30.0,
+   "brain_weight_ir": 0.0024701971720106223,
+   "muscle_weight_ir": 0.11298807394392647,
+   "muscle_co2": 0.05,
+   "subjects": 24,
+   "detect_rate": 0.884,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 30.0,
+   "brain_weight_ir": 0.0024701971720106223,
+   "muscle_weight_ir": 0.11298807394392647,
+   "muscle_co2": 0.1,
+   "subjects": 12,
+   "detect_rate": 0.984,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 30.0,
+   "brain_weight_ir": 0.0024701971720106223,
+   "muscle_weight_ir": 0.11298807394392647,
+   "muscle_co2": 0.1,
+   "subjects": 24,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 100.0,
+   "brain_weight_ir": 0.008186803529208872,
+   "muscle_weight_ir": 0.11234056613016064,
+   "muscle_co2": 0.0,
+   "subjects": 12,
+   "detect_rate": 0.098,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 100.0,
+   "brain_weight_ir": 0.008186803529208872,
+   "muscle_weight_ir": 0.11234056613016064,
+   "muscle_co2": 0.0,
+   "subjects": 24,
+   "detect_rate": 0.154,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 100.0,
+   "brain_weight_ir": 0.008186803529208872,
+   "muscle_weight_ir": 0.11234056613016064,
+   "muscle_co2": 0.05,
+   "subjects": 12,
+   "detect_rate": 0.79,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 100.0,
+   "brain_weight_ir": 0.008186803529208872,
+   "muscle_weight_ir": 0.11234056613016064,
+   "muscle_co2": 0.05,
+   "subjects": 24,
+   "detect_rate": 0.984,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 100.0,
+   "brain_weight_ir": 0.008186803529208872,
+   "muscle_weight_ir": 0.11234056613016064,
+   "muscle_co2": 0.1,
+   "subjects": 12,
+   "detect_rate": 0.994,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 100.0,
+   "brain_weight_ir": 0.008186803529208872,
+   "muscle_weight_ir": 0.11234056613016064,
+   "muscle_co2": 0.1,
+   "subjects": 24,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 300.0,
+   "brain_weight_ir": 0.024164746523386422,
+   "muscle_weight_ir": 0.11053077859360792,
+   "muscle_co2": 0.0,
+   "subjects": 12,
+   "detect_rate": 0.676,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 300.0,
+   "brain_weight_ir": 0.024164746523386422,
+   "muscle_weight_ir": 0.11053077859360792,
+   "muscle_co2": 0.0,
+   "subjects": 24,
+   "detect_rate": 0.958,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 300.0,
+   "brain_weight_ir": 0.024164746523386422,
+   "muscle_weight_ir": 0.11053077859360792,
+   "muscle_co2": 0.05,
+   "subjects": 12,
+   "detect_rate": 0.986,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 300.0,
+   "brain_weight_ir": 0.024164746523386422,
+   "muscle_weight_ir": 0.11053077859360792,
+   "muscle_co2": 0.05,
+   "subjects": 24,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 300.0,
+   "brain_weight_ir": 0.024164746523386422,
+   "muscle_weight_ir": 0.11053077859360792,
+   "muscle_co2": 0.1,
+   "subjects": 12,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 300.0,
+   "brain_weight_ir": 0.024164746523386422,
+   "muscle_weight_ir": 0.11053077859360792,
+   "muscle_co2": 0.1,
+   "subjects": 24,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 1000.0,
+   "brain_weight_ir": 0.07624985225612019,
+   "muscle_weight_ir": 0.10463120971734635,
+   "muscle_co2": 0.0,
+   "subjects": 12,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 1000.0,
+   "brain_weight_ir": 0.07624985225612019,
+   "muscle_weight_ir": 0.10463120971734635,
+   "muscle_co2": 0.0,
+   "subjects": 24,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 1000.0,
+   "brain_weight_ir": 0.07624985225612019,
+   "muscle_weight_ir": 0.10463120971734635,
+   "muscle_co2": 0.05,
+   "subjects": 12,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 1000.0,
+   "brain_weight_ir": 0.07624985225612019,
+   "muscle_weight_ir": 0.10463120971734635,
+   "muscle_co2": 0.05,
+   "subjects": 24,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 1000.0,
+   "brain_weight_ir": 0.07624985225612019,
+   "muscle_weight_ir": 0.10463120971734635,
+   "muscle_co2": 0.1,
+   "subjects": 12,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 1000.0,
+   "brain_weight_ir": 0.07624985225612019,
+   "muscle_weight_ir": 0.10463120971734635,
+   "muscle_co2": 0.1,
+   "subjects": 24,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 3000.0,
+   "brain_weight_ir": 0.19848122812766505,
+   "muscle_weight_ir": 0.09078632238055823,
+   "muscle_co2": 0.0,
+   "subjects": 12,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 3000.0,
+   "brain_weight_ir": 0.19848122812766505,
+   "muscle_weight_ir": 0.09078632238055823,
+   "muscle_co2": 0.0,
+   "subjects": 24,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 3000.0,
+   "brain_weight_ir": 0.19848122812766505,
+   "muscle_weight_ir": 0.09078632238055823,
+   "muscle_co2": 0.05,
+   "subjects": 12,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 3000.0,
+   "brain_weight_ir": 0.19848122812766505,
+   "muscle_weight_ir": 0.09078632238055823,
+   "muscle_co2": 0.05,
+   "subjects": 24,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 3000.0,
+   "brain_weight_ir": 0.19848122812766505,
+   "muscle_weight_ir": 0.09078632238055823,
+   "muscle_co2": 0.1,
+   "subjects": 12,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 2.0,
+   "deep_gain": 3000.0,
+   "brain_weight_ir": 0.19848122812766505,
+   "muscle_weight_ir": 0.09078632238055823,
+   "muscle_co2": 0.1,
+   "subjects": 24,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 0.0,
+   "brain_weight_ir": 0.0,
+   "muscle_weight_ir": 0.2085104631181246,
+   "muscle_co2": 0.0,
+   "subjects": 12,
+   "detect_rate": 0.07,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 0.0,
+   "brain_weight_ir": 0.0,
+   "muscle_weight_ir": 0.2085104631181246,
+   "muscle_co2": 0.0,
+   "subjects": 24,
+   "detect_rate": 0.082,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 0.0,
+   "brain_weight_ir": 0.0,
+   "muscle_weight_ir": 0.2085104631181246,
+   "muscle_co2": 0.05,
+   "subjects": 12,
+   "detect_rate": 0.528,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 0.0,
+   "brain_weight_ir": 0.0,
+   "muscle_weight_ir": 0.2085104631181246,
+   "muscle_co2": 0.05,
+   "subjects": 24,
+   "detect_rate": 0.848,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 0.0,
+   "brain_weight_ir": 0.0,
+   "muscle_weight_ir": 0.2085104631181246,
+   "muscle_co2": 0.1,
+   "subjects": 12,
+   "detect_rate": 0.984,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 0.0,
+   "brain_weight_ir": 0.0,
+   "muscle_weight_ir": 0.2085104631181246,
+   "muscle_co2": 0.1,
+   "subjects": 24,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 1.0,
+   "brain_weight_ir": 0.0001637072150353114,
+   "muscle_weight_ir": 0.20847632845090178,
+   "muscle_co2": 0.0,
+   "subjects": 12,
+   "detect_rate": 0.07,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 1.0,
+   "brain_weight_ir": 0.0001637072150353114,
+   "muscle_weight_ir": 0.20847632845090178,
+   "muscle_co2": 0.0,
+   "subjects": 24,
+   "detect_rate": 0.082,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 1.0,
+   "brain_weight_ir": 0.0001637072150353114,
+   "muscle_weight_ir": 0.20847632845090178,
+   "muscle_co2": 0.05,
+   "subjects": 12,
+   "detect_rate": 0.53,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 1.0,
+   "brain_weight_ir": 0.0001637072150353114,
+   "muscle_weight_ir": 0.20847632845090178,
+   "muscle_co2": 0.05,
+   "subjects": 24,
+   "detect_rate": 0.85,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 1.0,
+   "brain_weight_ir": 0.0001637072150353114,
+   "muscle_weight_ir": 0.20847632845090178,
+   "muscle_co2": 0.1,
+   "subjects": 12,
+   "detect_rate": 0.984,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 1.0,
+   "brain_weight_ir": 0.0001637072150353114,
+   "muscle_weight_ir": 0.20847632845090178,
+   "muscle_co2": 0.1,
+   "subjects": 24,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 10.0,
+   "brain_weight_ir": 0.0016346636941850649,
+   "muscle_weight_ir": 0.20816961863420766,
+   "muscle_co2": 0.0,
+   "subjects": 12,
+   "detect_rate": 0.062,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 10.0,
+   "brain_weight_ir": 0.0016346636941850649,
+   "muscle_weight_ir": 0.20816961863420766,
+   "muscle_co2": 0.0,
+   "subjects": 24,
+   "detect_rate": 0.054,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 10.0,
+   "brain_weight_ir": 0.0016346636941850649,
+   "muscle_weight_ir": 0.20816961863420766,
+   "muscle_co2": 0.05,
+   "subjects": 12,
+   "detect_rate": 0.576,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 10.0,
+   "brain_weight_ir": 0.0016346636941850649,
+   "muscle_weight_ir": 0.20816961863420766,
+   "muscle_co2": 0.05,
+   "subjects": 24,
+   "detect_rate": 0.88,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 10.0,
+   "brain_weight_ir": 0.0016346636941850649,
+   "muscle_weight_ir": 0.20816961863420766,
+   "muscle_co2": 0.1,
+   "subjects": 12,
+   "detect_rate": 0.99,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 10.0,
+   "brain_weight_ir": 0.0016346636941850649,
+   "muscle_weight_ir": 0.20816961863420766,
+   "muscle_co2": 0.1,
+   "subjects": 24,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 30.0,
+   "brain_weight_ir": 0.004888010575705398,
+   "muscle_weight_ir": 0.20749126176925795,
+   "muscle_co2": 0.0,
+   "subjects": 12,
+   "detect_rate": 0.056,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 30.0,
+   "brain_weight_ir": 0.004888010575705398,
+   "muscle_weight_ir": 0.20749126176925795,
+   "muscle_co2": 0.0,
+   "subjects": 24,
+   "detect_rate": 0.038,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 30.0,
+   "brain_weight_ir": 0.004888010575705398,
+   "muscle_weight_ir": 0.20749126176925795,
+   "muscle_co2": 0.05,
+   "subjects": 12,
+   "detect_rate": 0.666,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 30.0,
+   "brain_weight_ir": 0.004888010575705398,
+   "muscle_weight_ir": 0.20749126176925795,
+   "muscle_co2": 0.05,
+   "subjects": 24,
+   "detect_rate": 0.932,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 30.0,
+   "brain_weight_ir": 0.004888010575705398,
+   "muscle_weight_ir": 0.20749126176925795,
+   "muscle_co2": 0.1,
+   "subjects": 12,
+   "detect_rate": 0.992,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 30.0,
+   "brain_weight_ir": 0.004888010575705398,
+   "muscle_weight_ir": 0.20749126176925795,
+   "muscle_co2": 0.1,
+   "subjects": 24,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 100.0,
+   "brain_weight_ir": 0.016109632460068395,
+   "muscle_weight_ir": 0.20515143619321294,
+   "muscle_co2": 0.0,
+   "subjects": 12,
+   "detect_rate": 0.144,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 100.0,
+   "brain_weight_ir": 0.016109632460068395,
+   "muscle_weight_ir": 0.20515143619321294,
+   "muscle_co2": 0.0,
+   "subjects": 24,
+   "detect_rate": 0.202,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 100.0,
+   "brain_weight_ir": 0.016109632460068395,
+   "muscle_weight_ir": 0.20515143619321294,
+   "muscle_co2": 0.05,
+   "subjects": 12,
+   "detect_rate": 0.874,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 100.0,
+   "brain_weight_ir": 0.016109632460068395,
+   "muscle_weight_ir": 0.20515143619321294,
+   "muscle_co2": 0.05,
+   "subjects": 24,
+   "detect_rate": 0.996,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 100.0,
+   "brain_weight_ir": 0.016109632460068395,
+   "muscle_weight_ir": 0.20515143619321294,
+   "muscle_co2": 0.1,
+   "subjects": 12,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 100.0,
+   "brain_weight_ir": 0.016109632460068395,
+   "muscle_weight_ir": 0.20515143619321294,
+   "muscle_co2": 0.1,
+   "subjects": 24,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 300.0,
+   "brain_weight_ir": 0.046820379179751515,
+   "muscle_weight_ir": 0.19874792417198842,
+   "muscle_co2": 0.0,
+   "subjects": 12,
+   "detect_rate": 0.808,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 300.0,
+   "brain_weight_ir": 0.046820379179751515,
+   "muscle_weight_ir": 0.19874792417198842,
+   "muscle_co2": 0.0,
+   "subjects": 24,
+   "detect_rate": 0.986,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 300.0,
+   "brain_weight_ir": 0.046820379179751515,
+   "muscle_weight_ir": 0.19874792417198842,
+   "muscle_co2": 0.05,
+   "subjects": 12,
+   "detect_rate": 0.996,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 300.0,
+   "brain_weight_ir": 0.046820379179751515,
+   "muscle_weight_ir": 0.19874792417198842,
+   "muscle_co2": 0.05,
+   "subjects": 24,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 300.0,
+   "brain_weight_ir": 0.046820379179751515,
+   "muscle_weight_ir": 0.19874792417198842,
+   "muscle_co2": 0.1,
+   "subjects": 12,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 300.0,
+   "brain_weight_ir": 0.046820379179751515,
+   "muscle_weight_ir": 0.19874792417198842,
+   "muscle_co2": 0.1,
+   "subjects": 24,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 1000.0,
+   "brain_weight_ir": 0.14069711526472464,
+   "muscle_weight_ir": 0.1791736424548927,
+   "muscle_co2": 0.0,
+   "subjects": 12,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 1000.0,
+   "brain_weight_ir": 0.14069711526472464,
+   "muscle_weight_ir": 0.1791736424548927,
+   "muscle_co2": 0.0,
+   "subjects": 24,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 1000.0,
+   "brain_weight_ir": 0.14069711526472464,
+   "muscle_weight_ir": 0.1791736424548927,
+   "muscle_co2": 0.05,
+   "subjects": 12,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 1000.0,
+   "brain_weight_ir": 0.14069711526472464,
+   "muscle_weight_ir": 0.1791736424548927,
+   "muscle_co2": 0.05,
+   "subjects": 24,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 1000.0,
+   "brain_weight_ir": 0.14069711526472464,
+   "muscle_weight_ir": 0.1791736424548927,
+   "muscle_co2": 0.1,
+   "subjects": 12,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 1000.0,
+   "brain_weight_ir": 0.14069711526472464,
+   "muscle_weight_ir": 0.1791736424548927,
+   "muscle_co2": 0.1,
+   "subjects": 24,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 3000.0,
+   "brain_weight_ir": 0.32940006731556243,
+   "muscle_weight_ir": 0.13982710253101527,
+   "muscle_co2": 0.0,
+   "subjects": 12,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 3000.0,
+   "brain_weight_ir": 0.32940006731556243,
+   "muscle_weight_ir": 0.13982710253101527,
+   "muscle_co2": 0.0,
+   "subjects": 24,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 3000.0,
+   "brain_weight_ir": 0.32940006731556243,
+   "muscle_weight_ir": 0.13982710253101527,
+   "muscle_co2": 0.05,
+   "subjects": 12,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 3000.0,
+   "brain_weight_ir": 0.32940006731556243,
+   "muscle_weight_ir": 0.13982710253101527,
+   "muscle_co2": 0.05,
+   "subjects": 24,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 3000.0,
+   "brain_weight_ir": 0.32940006731556243,
+   "muscle_weight_ir": 0.13982710253101527,
+   "muscle_co2": 0.1,
+   "subjects": 12,
+   "detect_rate": 1.0,
+   "sims": 500
+  },
+  {
+   "spacing_mm": 3.0,
+   "deep_gain": 3000.0,
+   "brain_weight_ir": 0.32940006731556243,
+   "muscle_weight_ir": 0.13982710253101527,
+   "muscle_co2": 0.1,
+   "subjects": 24,
+   "detect_rate": 1.0,
+   "sims": 500
+  }
+ ],
+ "detectable_brain_weight_80pct": {
+  "2.0mm_n12": 0.03751278228640539,
+  "2.0mm_n24": 0.019534653898171297,
+  "3.0mm_n12": 0.046222390781714105,
+  "3.0mm_n24": 0.03635027246512811
+ },
+ "physics_brain_weight_ir": {
+  "2.0mm": 8.253699229046484e-05,
+  "3.0mm": 0.0001637072150353114
+ },
+ "simulated": true
+}
