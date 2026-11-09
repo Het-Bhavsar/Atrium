@@ -1,0 +1,52 @@
+{
+ "inputs": {
+  "side": "left",
+  "utc_offset_h": 5.5,
+  "night_date_s": 1793514600,
+  "upright": [
+   0.9999998644625254,
+   -0.00017017195900886304,
+   0.0004920532851144729
+  ],
+  "config": {
+   "window_start_h": 18.0,
+   "window_end_h": 14.0,
+   "rest_mg": 15.0,
+   "rest_join_min": 20.0,
+   "rest_min_h": 2.0,
+   "pad_min": 30.0,
+   "onset_min": 10.0,
+   "wake_up_min": 5.0,
+   "rhr_win_min": 10.0,
+   "rhr_min_conf": 0.5,
+   "hrv_min_diffs": 300,
+   "skin_settle_min": 30.0,
+   "upright_min_walk_epochs": 10,
+   "min_nights": 5
+  },
+  "model": "sleep_v1.json/wake_sleep"
+ },
+ "night": {
+  "start_s": 1793556180.0,
+  "end_s": 1793584590.0,
+  "in_bed_min": 561.5,
+  "asleep_min": 441.5,
+  "period_min": 473.5,
+  "efficiency": 0.9324181626187962,
+  "wake_ups": 2,
+  "resting_hr_bpm": 49.4,
+  "rmssd_ms": 48.219087940352786,
+  "hrv_diffs": 19828,
+  "skin_c": 34.6,
+  "oxygen_ratio": 0.52,
+  "oxygen_bursts": 86,
+  "position_min": {
+   "upright": 0.0,
+   "back": 223.0,
+   "left": 144.0,
+   "right": 74.5,
+   "front": 0.0
+  },
+  "on_pod_min": 144.0
+ }
+}
