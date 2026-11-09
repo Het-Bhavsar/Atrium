@@ -10,7 +10,7 @@ Atrium will apply for OSHWA certification (country code IN) at its first public 
 | Software licence | Apache-2.0 |
 | Docs licence | CC BY-SA 4.0 |
 | Source design files | KiCad / EasyEDA sources, CAD scripts and STEP |
-| Bill of materials | `hardware/*/bom` |
+| Bill of materials | the `production/` BOMs under `hardware/` |
 | Build and assembly instructions | after EVT |
 | Public repository | at release |
 
@@ -20,10 +20,10 @@ Atrium will apply for OSHWA certification (country code IN) at its first public 
 |---|---|---|---|
 | Radio, India | WPC ETA (2.4 GHz, licence-exempt) | pod | plan |
 | Radio, EU / US | RED (EN 300 328, EN 301 489), FCC Part 15C | pod | plan |
-| Electrical safety | IEC 62368-1 | pod, case | plan |
-| Lithium cells | IEC 62133-2; BIS IS 16046 (India) | both cells | supplier reports |
+| Electrical safety | IEC 62368-1 | pod, Plinth | plan |
+| Lithium cells | IEC 62133-2; BIS IS 16046 (India) | pod cell | supplier reports |
 | Transport | UN 38.3 | cells | supplier reports |
-| Skin contact | ISO 10993-5 / -10 on the adhesive and the window materials | pod | supplier reports, then a 7-day patch test |
+| Skin contact | ISO 10993-5 / -10 on the base, gasket, Skin and adhesive materials | pod | supplier reports, then a 7-day patch test |
 | RF exposure | SAR or MPE exemption for low-power BLE | pod | plan |
 | Materials | RoHS, REACH | all | BOM check |
 
