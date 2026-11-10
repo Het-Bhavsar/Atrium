@@ -86,9 +86,9 @@ folder (PDF, SVG and SchDoc).
 ## Checks
 
 - Every board was routed by hand. EasyEDA DRC: radio and power islands 0 errors; panel 0 errors. Charging case: two
-  items inside the USB-C footprint (the maker's land pattern, accepted). Flex: two "connection" notes at the power end:
-  JP6 is joined to ground by the power island's copper when soldered (by design), and JP9's via-in-pad is counted
-  open by DRC although the Gerbers show it joined to the ground pour.
+  items inside the USB-C footprint (the maker's land pattern, accepted). Flex: 0 errors. JP6 was joined to ground only
+  through the power island; since 2026-11-10 a bottom-layer track ties it to the flex ground pour, so the bare flex
+  passes a continuity test against its own netlist and the power island has two ground pads.
 - Paste apertures were checked per pad for area ratio and the fine-pitch ones enlarged in the released paste layers.
 
 ## Licence

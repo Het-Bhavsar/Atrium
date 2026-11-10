@@ -1,8 +1,8 @@
 C  Project Name:Atrium
 C  Board Name:
 C  PCB Name:Flex_PCB
-C  Date:2026/11/09
-C  Time:19:09:22
+C  Date:2026/11/10
+C  Time:19:43:27
 C  --------------- Layer Stackup --------------------
 C  Top Layer
 C  Bottom Layer
@@ -87,6 +87,7 @@ P  VER   IPC-D-356A
 378GND            L01 X118 X5825Y2165 X4626
 378GND            L02 X118 X4980Y2165 X4626
 378GND            L02 X118 X3248Y1752 Y2165  Y2579
+378GND            L02 X55 X1045Y1504 X1154Y1669  X2047
 389BOARD_EDGE         X40Y40 X878Y1319 X1870  Y1024  X5236  Y1181  X6228  
 089 Y3150  X5236  Y3307  X1870  Y3012  X878  Y1319
 999

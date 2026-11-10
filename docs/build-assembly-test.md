@@ -4,7 +4,7 @@ How the first pods and charging cases are fabricated, assembled, flashed and deb
 
 ## Inputs
 
-- **Routed boards:** radio and power islands, flex jumper, charging case. DRC: radio 0, power 0, flex only the known JP6–JP9 link that crosses boards, case only two items inside the USB-C footprint (accepted).
+- **Routed boards:** radio and power islands, flex jumper, charging case. DRC: radio 0, power 0, flex 0 (JP6 tied to the flex ground pour on 2026-11-10), case only two items inside the USB-C footprint (accepted).
 - **Mechanical design**, fit-checked against the real board STEPs ([mechanical.md](mechanical.md)).
 - **Process checks behind this plan** (reports in `hardware/simulation/`):
   - stencil area ratio per pad, computed from the paste Gerbers per IPC-7525;
