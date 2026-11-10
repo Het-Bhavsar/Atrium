@@ -34,9 +34,11 @@ Atrium is a 20.9 × 11 × 5.3 mm pod worn on the temporal region, the flat of th
 with light and motion: pulse, heart-rate variability, skin-temperature trend, sleep and activity. It keeps a log and
 syncs it to your phone over Bluetooth LE. A small Plinth charges it, and a pocket case charges it on the go.
 
+https://github.com/user-attachments/assets/29e595bc-7b6f-4664-8e52-f603c6576f4c
+
 <p align="center">
-  <a href="docs/images/video/atrium_assembly_film_1080p.mp4"><img src="docs/images/video/atrium_film_poster.jpg" alt="Play the Atrium film: the pod on skin with green light at its base" width="100%"></a>
-  <br><sub>The film, 57 s: the radio island, the power island, the flex, the cell, the pod, then green and red light on skin.</sub>
+  <sub>The film, 57 s: the radio island, the power island, the flex, the cell, the pod, then green and red light on skin.
+  <a href="docs/images/video/atrium_assembly_film_1080p.mp4">Download the MP4</a>.</sub>
 </p>
 
 <p align="center">
