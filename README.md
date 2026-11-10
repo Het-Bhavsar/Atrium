@@ -239,7 +239,7 @@ Engineering validation (EVT).
 | Production files | Gerbers, BOM, CPL and a 4 × 5 islands panel ready to order |
 | Enclosure | Pod, skin pad, Plinth, case, jig and packaging CAD with fit checks and drawings |
 | Firmware | Pod and case firmware build; unit tests pass |
-| App | Android and iOS app with demo and real-pod modes; v0.1.1 APKs |
+| App | Android and iOS app with demo and real-pod modes; v0.1.2 APKs |
 | First units | Not built yet |
 
 Open engineering items are tracked in [`docs/open-items.md`](docs/open-items.md).

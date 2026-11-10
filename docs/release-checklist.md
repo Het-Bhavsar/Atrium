@@ -18,6 +18,30 @@ hold. Fill in a new table for each release; never edit an old one.
    "Simulated" and "measured" are never mixed in one cell.
 5. **Open items.** Every open item in [open-items.md](open-items.md) that affects the release is listed by number.
 
+## v0.1.2-evt (EVT, 10 November 2026)
+
+| | |
+|---|---|
+| Hardware | The same boards as v0.1.1-evt (silkscreen unchanged), with the 2026-11-10 blind-via change on both islands and the panel: 12 of the 14 blind vias closer than JLC's 0.35 mm to the routed edge were moved (O-47), and the panel BOM now lists the released nRF52832-CIAA-G-R7, MAXM86161AEFD+T and LQM18DN100M70L. Flex and case unchanged. Production files and the EasyEDA project at the commit tagged v0.1.2-evt |
+| Firmware | Unchanged from v0.1.1-evt: pod 0.1.1 (MCUboot **development** key, bench units only) and case firmware 0.1.1. The same image files are attached to the v0.1.2-evt release, byte for byte (pod SHA-256 `864a3418…f7dd`), so the app's update check finds the pod image on the latest release |
+| App | 0.1.2 (version codes 2003 arm64 and 1003 armeabi-v7a; APKs on the v0.1.2-evt release, signed with the same key as 0.1.1, so they install over it). Raw signal recording (Settings, Research; off by default), raw light and motion export, and the real size under "On this phone" |
+| Built units | None yet |
+
+| Check | Where it ran | Result |
+|---|---|---|
+| Board DRC | EasyEDA, 2026-11-10, after the via change | Radio and power islands, panel: 0 errors. Flex and case: not re-run (unchanged) |
+| Gerber check | Host, on the released Gerbers, 2026-11-10 | No shorts or opens against the IPC-D-356A netlists; copper and hole spacing at or above JLC's minimums; JLC HDI rules met except two radio vias at 0.289 and 0.291 mm from the edge (O-47); the 20 panel copies match the islands |
+| Mechanical fit | Not re-run | Vias and tracks only; no outline or part moved |
+| Pod and case firmware unit tests | Not re-run | Firmware unchanged: 177 of 177 and 48 of 48 at v0.1.1-evt |
+| App unit tests and analysis | Host (`flutter test`, `flutter analyze`) | 179 of 179 pass, no analyzer issues |
+| App on a device | iOS Simulator, demo build | Raw recording, the session list, export (light CSV, motion CSV, raw file) and delete work. Not run on an Android device or with a real pod |
+| Raw stream from a real pod | Not run | Check on the bench, including the sleep window, where the 4 s connection interval may drop notifications (the session's missed count shows it) |
+| Firmware update end to end | Not run | Needs a built pod (O-44) |
+| Battery life, radio range, sensor accuracy | Simulation only / not run | As for v0.1.0-evt. The raw stream's battery cost (about 8 % by day, 14 % at night) is an estimate |
+
+Open items that affect this release: O-36 to O-47 in [open-items.md](open-items.md), and the build items in
+[build-assembly-test.md](build-assembly-test.md#12-open-items).
+
 ## v0.1.1-evt (EVT, 10 November 2026)
 
 | | |
