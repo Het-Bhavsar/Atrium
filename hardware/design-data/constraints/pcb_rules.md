@@ -13,7 +13,7 @@ features drawn as seen from the top, as in KiCad/EasyEDA).
 | Min trace/space | Design at 0.10/0.10 mm; 0.09 only in the WLCSP fan-out |
 | Vias | **HDI 1-step 1+4+1**: laser microvias L1–L2 and L5–L6 0.10 hole / 0.25 pad (aspect 0.96 on 0.0964 prepreg, JLC max 1:1), copper filled, in the ball pads of the 0.4 mm WLCSP-50 and DSBGA-20; buried L2–L5 0.15 / 0.30; stacked skip L1–L5 / L2–L6 0.10 / 0.25 (laser on buried); through 0.15 / 0.25 where both sides are clear. EasyEDA blind-via rules `1-2`, `5-6`, `2-5`, `1-5`, `2-6`. Quote 2026-11-08 (5 pcs, 7 × 10 mm, ENIG, filled & capped): about $222 + buried-via and lamination fees (manual quote), 12–13 days |
 | Finish | ENIG |
-| Copper to edge | >= 0.20 mm |
+| Copper to edge | >= 0.20 mm; blind and skip vias: hole edge >= 0.35 mm from the routed edge (JLC HDI rules) |
 | Why HDI | The radio bottom carries the MAXM86161 pad columns and the flex tongue directly under U1: 13 of U1's 15 inner-ball through vias would land on other-net bottom pads (DRC 2026-11-07; a placement scan found one legal through-via spot for U1 exists, but it leaves no room for the RF match before the antenna zone). Microvias stop at L2, so nothing under U1 reaches the bottom. The same holds for U10 (bottom) under U11 (top) on the power island. |
 | Assembly | JLC **Standard** PCBA, both sides, X-ray for U1/U10. Panelised with rails and fiducials; mouse-bites, never V-score (curved outlines, 0201 parts near the edge). |
 
