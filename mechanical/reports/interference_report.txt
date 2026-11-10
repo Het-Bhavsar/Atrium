@@ -25,9 +25,9 @@ atrium_pod.py check(), 20.9 x 11.0 x 5.3 mm
   -- routed boards: EasyEDA exports in mechanical/boards/ --
   [PASS] routed boards: no part body clashes with the shell, base, gasket, cell, stiffener, flex or the other board: none
   [OPEN] routed boards: rib tips land on the board (crush <= 0.03, O-38): stack 0.844 (PCB_T 0.82 + mask) over the rib tips at 6 ribs, 0.024 crush
-  [OPEN] routed boards: every part >= 0.1 from the housing and the flex outline (courtyard): C53 (power, bottom) 0.023 to the flex; C30 (radio, top) 0.023 to the shell; C55 (power, bottom) 0.043 to the flex; R51 (power, bottom) 0.062 to the flex; D10 (power, bottom) 0.067 to the flex; U2 (radio, bottom) 0.068 to the flex; C21 (radio, bottom) 0.093 to the flex
+  [OPEN] routed boards: every part >= 0.1 from the housing and the flex outline (courtyard): C53 (power, bottom) 0.023 to the flex; C30 (radio, top) 0.023 to the shell; C55 (power, bottom) 0.043 to the flex; R51 (power, bottom) 0.062 to the flex; D10 (power, bottom) 0.067 to the flex; U2 (radio, bottom) 0.068 to the flex; C21 (radio, bottom) 0.088 to the flex
   [PASS] MAXM86161 0.10 proud of the base (board bottom on the posts): U3 face at z -0.100, 0.100 proud
-  [OPEN] U3 3D model is the MAXM86161 body, centred on its pad field: model 3.114 x 4.534 x 1.40 centred (17.191, 5.591); datasheet body 2.9 x 4.3 x 1.4; 6 pads centred (17.110, 5.500), geometry (17.110, 5.500). The assemblies and the clash checks use the datasheet body in its place
+  [OPEN] U3 3D model is the MAXM86161 body, centred on its pad field: model 3.114 x 4.534 x 1.40 centred (17.191, 5.591); datasheet body 2.9 x 4.3 x 1.4; 9 pads centred (17.110, 5.500), geometry (17.110, 5.500). The assemblies and the clash checks use the datasheet body in its place
   [PASS] bottom-side parts <= 0.80 tall (U3 excepted): tallest U10 (power) 0.610, U12 (power) 0.511, C51 (power) 0.500; top side U11 (power) 0.921, ANT1 (radio) 0.750, L2 (radio) 0.520
   [PASS] ANT1 body in its zone, >= 0.25 from the shell wall and >= 0.5 from the ribs: body x 18.935..19.866 (zone from 18.76), 0.455 to the wall, 2.97 to the nearest rib
   [PASS] contact pads P1-P5 centred in the base holes (<= 0.02): d1.0 pads in d1.2 holes; offsets VIN 0.000, GND_A 0.000, GND_B 0.000, SWDIO 0.000, SWDCLK 0.000

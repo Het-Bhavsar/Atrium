@@ -6,12 +6,16 @@
 /// idle -> checking -> available | upToDate
 /// available -> downloading -> handingOver -> uploading -> restarting -> confirming -> verifying -> done
 /// handingOver -> verifying when the pod already runs this image, confirmed
+/// verifying -> pending when the pod reports the new version but its slot list never said "confirmed"
+/// pending -> done (slot list confirmed) | failed (reverted) | unconfirmed (no answer past the 300 s revert)
+/// unconfirmed -> pending (check the pod again) | checking
 /// any working step -> failed; downloading or uploading -> cancelled; done/failed/cancelled/upToDate -> checking
 ///
 /// The firmware contract (docs/ble_gatt.md section 9): the image goes up in MCUmgr "test" mode, so it boots once on
 /// trial; the pod confirms it itself after 60 s of healthy running (`firmware/src/dfu_health.c`) and reverts if it is
-/// still unhealthy at 300 s or resets first. The app never confirms an image. Success is only claimed once the pod's
-/// slot list shows the new image active and confirmed, and the reconnected pod reports the new version.
+/// still unhealthy at 300 s or resets first. The app never confirms an image. Done needs positive evidence: the pod's
+/// slot list shows the new image active and confirmed, and the reconnected pod reports the new version. A matching
+/// version alone is not enough, since a trial image reports its version too.
 library;
 
 import 'dart:async';
@@ -19,7 +23,28 @@ import 'dart:async';
 import 'package:atrium/features/device/domain/firmware_image.dart';
 import 'package:flutter/foundation.dart';
 
-enum OtaPhase { idle, checking, available, upToDate, downloading, handingOver, uploading, restarting, confirming, verifying, done, failed, cancelled }
+enum OtaPhase {
+  idle,
+  checking,
+  available,
+  upToDate,
+  downloading,
+  handingOver,
+  uploading,
+  restarting,
+  confirming,
+  verifying,
+
+  /// Installed, confirmation pending: the pod runs the new version, but its slot list hasn't said it kept it. Not done
+  /// and not failed; the flow keeps reading the slot list until past the pod's 300 s revert.
+  pending,
+
+  /// The pod runs the new version, but never said whether it kept it, even past its 300 s revert. Not done.
+  unconfirmed,
+  done,
+  failed,
+  cancelled,
+}
 
 /// Allowed moves; [FirmwareUpdateFlow] asserts every step against it.
 const Map<OtaPhase, Set<OtaPhase>> otaTransitions = {
@@ -32,7 +57,9 @@ const Map<OtaPhase, Set<OtaPhase>> otaTransitions = {
   OtaPhase.uploading: {OtaPhase.restarting, OtaPhase.failed, OtaPhase.cancelled},
   OtaPhase.restarting: {OtaPhase.confirming, OtaPhase.failed},
   OtaPhase.confirming: {OtaPhase.verifying, OtaPhase.failed},
-  OtaPhase.verifying: {OtaPhase.done, OtaPhase.failed},
+  OtaPhase.verifying: {OtaPhase.done, OtaPhase.pending, OtaPhase.failed},
+  OtaPhase.pending: {OtaPhase.done, OtaPhase.failed, OtaPhase.unconfirmed},
+  OtaPhase.unconfirmed: {OtaPhase.pending, OtaPhase.checking},
   OtaPhase.done: {OtaPhase.checking},
   OtaPhase.failed: {OtaPhase.checking},
   OtaPhase.cancelled: {OtaPhase.checking},
@@ -61,6 +88,7 @@ class OtaState {
     OtaPhase.restarting,
     OtaPhase.confirming,
     OtaPhase.verifying,
+    OtaPhase.pending,
   };
 
   /// True from the download to the check after the restart: the pod link belongs to the update.
@@ -178,6 +206,7 @@ class FirmwareUpdateFlow {
     this.confirmPoll = const Duration(seconds: 10),
     this.confirmTimeout = const Duration(minutes: 6),
     this.uploadRetries = 2,
+    this.pendingPoll = const Duration(seconds: 60),
     Future<void> Function(Duration)? wait,
   }) : _wait = wait ?? Future<void>.delayed;
 
@@ -198,7 +227,18 @@ class FirmwareUpdateFlow {
 
   /// Upload attempts after a dropped link, before giving up.
   final int uploadRetries;
+
+  /// While confirmation is pending: how often the app lends the link back to MCUmgr to read the slot list again.
+  final Duration pendingPoll;
   final Future<void> Function(Duration) _wait;
+
+  /// Time waited since the pod was told to reset: the sum of the flow's own waits, so a lower bound on the real time
+  /// (reads and reconnects add to it). The pending check runs until this passes [confirmTimeout].
+  Duration _sinceReset = Duration.zero;
+
+  /// The image being confirmed, and the version the pod ran before (for [recheck]).
+  Uint8List? _hash;
+  PodVersion? _from;
 
   OtaState _s = const OtaState();
   OtaState get state => _s;
@@ -222,6 +262,7 @@ class FirmwareUpdateFlow {
   /// Reads the pod's version and the latest release.
   Future<void> check() async {
     if (_s.working) return;
+    _hash = null;
     _go(OtaPhase.checking);
     PodVersion? current;
     try {
@@ -288,6 +329,10 @@ class FirmwareUpdateFlow {
       // What the pod holds now: already this image (an update that finished earlier), or a trial still running.
       final before = await _slotsOrNull(id);
       final installed = before?.where((s) => s.active && s.confirmed && s.holds(img.sha256)).isNotEmpty ?? false;
+      // Positive evidence that the pod kept the image: only the slot list gives it.
+      var kept = installed;
+      _hash = img.sha256;
+      _from = from;
       if (!installed) {
         if (before?.any((s) => s.active && !s.confirmed) ?? false) {
           throw const OtaFailure('The pod is still trying out its last update. Leave it for five minutes, then try again.');
@@ -296,12 +341,12 @@ class FirmwareUpdateFlow {
         await _uploadWithRetry(id, bytes, img.sha256);
         if (_s.phase == OtaPhase.uploading) _go(OtaPhase.restarting, progress: 1);
 
-        await _wait(swapWait);
+        _sinceReset = Duration.zero;
+        await _pause(swapWait);
         _go(OtaPhase.confirming, progress: 1);
         final verdict = await _watchConfirm(id, img.sha256);
-        if (verdict == SlotVerdict.reverted) {
-          throw OtaFailure("The new software didn't pass the pod's own check, so the pod went back to ${from ?? 'its previous software'}.");
-        }
+        if (verdict == SlotVerdict.reverted) throw OtaFailure(_revertedText(from));
+        kept = verdict == SlotVerdict.confirmed;
       }
 
       _go(OtaPhase.verifying, progress: 1);
@@ -313,8 +358,12 @@ class FirmwareUpdateFlow {
           message:
               "Couldn't reach the pod after it restarted, so the update isn't confirmed. Keep it close and open Device. If the new software doesn't start properly, the pod goes back to ${from ?? 'its previous software'} by itself.",
         );
-      } else if (now == r.version) {
+      } else if (now == r.version && kept) {
         _go(OtaPhase.done, progress: 1, current: now);
+      } else if (now == r.version) {
+        // The version matches, but a trial image reports its version too: keep checking the slot list.
+        _go(OtaPhase.pending, progress: 1, current: now);
+        await _confirmPending(r.version, img.sha256, from, deadline: confirmTimeout);
       } else {
         _go(OtaPhase.failed, current: now, message: "The pod restarted on $now, not ${r.version}, so the update didn't take. Nothing else changed.");
       }
@@ -327,6 +376,63 @@ class FirmwareUpdateFlow {
       final still = now == null ? '' : ' The pod is on $now.';
       _go(OtaPhase.failed, current: now, message: '$why$still');
     }
+  }
+
+  /// After [unconfirmed]: reads the pod's slot list once more.
+  Future<void> recheck() async {
+    final hash = _hash;
+    final r = _s.release;
+    if (_s.phase != OtaPhase.unconfirmed || hash == null || r == null) return;
+    _go(OtaPhase.pending, progress: 1, current: _s.current);
+    try {
+      await _confirmPending(r.version, hash, _from, deadline: _sinceReset, immediate: true);
+    } on Object catch (e) {
+      _go(OtaPhase.failed, message: e is OtaFailure ? e.message : "The pod couldn't be checked.");
+    }
+  }
+
+  /// Pending: lends the link to MCUmgr every [pendingPoll] to read the slot list, then takes it back and reads the
+  /// version, until the slot list says confirmed (done) or reverted, the pod comes back on another version (reverted),
+  /// or [deadline] passes since the reset with neither (unconfirmed). Always leaves the app holding the link.
+  Future<void> _confirmPending(PodVersion want, Uint8List hash, PodVersion? from, {required Duration deadline, bool immediate = false}) async {
+    var first = immediate;
+    while (true) {
+      if (!first) await _pause(pendingPoll);
+      first = false;
+      List<PodSlot>? slots;
+      try {
+        slots = await _slotsOrNull(await pod.release());
+      } on Object {
+        slots = null;
+      }
+      // Taken back every time, even after a hand-over that failed half-way.
+      final now = await _reclaimQuietly();
+      final verdict = slots == null ? null : slotVerdict(slots, hash);
+      if (verdict == SlotVerdict.reverted || (now != null && now != want)) {
+        _go(OtaPhase.failed, current: now, message: _revertedText(now ?? from));
+        return;
+      }
+      if (verdict == SlotVerdict.confirmed && now == want) {
+        _go(OtaPhase.done, progress: 1, current: now);
+        return;
+      }
+      if (_sinceReset >= deadline) {
+        _go(
+          OtaPhase.unconfirmed,
+          current: now ?? _s.current,
+          message:
+              "The pod runs $want, but it hasn't said whether it keeps it, so the update isn't confirmed. If the new software isn't healthy the pod goes back to ${from ?? 'its previous software'} by itself. Keep it close and check again in a few minutes.",
+        );
+        return;
+      }
+    }
+  }
+
+  String _revertedText(PodVersion? back) => "The new software didn't pass the pod's own check, so the pod went back to ${back ?? 'its previous software'}.";
+
+  Future<void> _pause(Duration d) async {
+    _sinceReset += d;
+    await _wait(d);
   }
 
   /// Uploads, and after a dropped link waits and tries again up to [uploadRetries] times.
@@ -362,7 +468,8 @@ class FirmwareUpdateFlow {
   }
 
   /// Reads the slot list until the pod has confirmed or reverted the image, or [confirmTimeout] passes. A pod whose
-  /// slots can't be read at all is left, after about 90 s from the reset (past its 60 s check), to the version check.
+  /// slots can't be read at all is left, after about 90 s from the reset (past its 60 s check), to the version check,
+  /// which can only lead to pending, never to done.
   Future<SlotVerdict?> _watchConfirm(String id, Uint8List hash) async {
     final polls = (confirmTimeout.inMilliseconds / confirmPoll.inMilliseconds).ceil();
     // Slots never readable: give the pod its 60 s health check plus margin, then leave it to the version check.
@@ -377,7 +484,7 @@ class FirmwareUpdateFlow {
       } else if (!read && i >= blindPolls) {
         return null;
       }
-      await _wait(confirmPoll);
+      await _pause(confirmPoll);
     }
     if (read) throw const OtaFailure("The pod didn't confirm the new software in time. Keep it on the Plinth; if the new software isn't healthy it goes back by itself.");
     return null;

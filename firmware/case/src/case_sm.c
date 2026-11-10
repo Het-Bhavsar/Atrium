@@ -259,7 +259,8 @@ void case_sm_step(struct case_sm *sm, const struct case_in *in, struct case_out 
 		oc_fault(sm, now);
 	}
 
-	/* readings while VIN has been on past the blanking, outside the soft-reset pattern */
+	/* the slow path: tick readings count from the second tick after VIN on (now - feed_t0
+	 * > blank_ms), outside the pulse patterns; the fast path is main.c's (oc_fast.h) */
 	if (sm->feed && !sm->pulse && now - sm->feed_t0 > c->blank_ms && in->i_valid) {
 		measure(sm, in, ldo_seen);
 	}
@@ -360,7 +361,6 @@ void case_sm_step(struct case_sm *sm, const struct case_in *in, struct case_out 
 	out->boost_en = vin && !in->usb;
 	out->ldo_pwr = ldo;
 	out->opa_on = sm->feed;
-	out->oc_armed = vin && sm->feed && !sm->pulse && now - sm->feed_t0 > c->blank_ms;
 	out->awake = sm->feed || in->btn || sm->show || sm->led != LED_OFF || in->usb ||
 		     sm->pulse_want || sm->swd_want || sm->swd_busy;
 

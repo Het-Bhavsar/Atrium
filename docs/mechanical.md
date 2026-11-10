@@ -19,7 +19,7 @@ The pod housing, battery bay, board clamp, skin pad, Plinth, charging case enclo
 | Programming jig | `mechanical/programming-jig/` |
 | Retail packaging | `mechanical/packaging/` |
 | Renders | `mechanical/renders/` |
-| Interference and fit reports | `mechanical/reports/interference_report.txt`, `mechanical/reports/case_check_report.txt` |
+| Interference and fit reports | `mechanical/reports/interference_report.txt`, `mechanical/reports/case_check_report.txt` (re-run 2026-11-10 on the released boards: the islands after the spacing change, O-45, and the case board with the BQ24040 and TH2) |
 | Pod board outlines (DXF) | `hardware/design-data/` |
 | Case PCB outline | `mechanical/case/DXF/case_pcb_outline.dxf` |
 

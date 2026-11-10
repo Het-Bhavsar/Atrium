@@ -18,6 +18,31 @@ hold. Fill in a new table for each release; never edit an old one.
    "Simulated" and "measured" are never mixed in one cell.
 5. **Open items.** Every open item in [open-items.md](open-items.md) that affects the release is listed by number.
 
+## v0.1.1-evt (EVT, 10 November 2026)
+
+| | |
+|---|---|
+| Hardware | The same boards as v0.1.0-evt (silkscreen unchanged), with the 2026-11-10 part-spacing change on both islands (O-45) and the islands panel at 4 × 5, 83 × 71 mm. Production files and the EasyEDA project at the commit tagged v0.1.1-evt |
+| Firmware | Pod 0.1.1 (`atrium-pod-0.1.1.bin`, SHA-256 `864a3418…f7dd`), signed with MCUboot's **development** key (bench units only). Case firmware at the tag: the fast over-current check now arms 10 ms after every VIN switch-on, the feed start and the signature and soft-reset pulses included |
+| App | 0.1.1 (version codes 2002 arm64 and 1002 armeabi-v7a; APKs on the v0.1.1-evt release, same signing key as 0.1.0, so they install over it). OTA reports done only once the pod confirms the image; heart-rate gaps stay gaps; walks split on gaps over 2 min; Export data writes real CSVs |
+| Built units | None yet |
+
+| Check | Where it ran | Result |
+|---|---|---|
+| Board DRC | EasyEDA, 2026-11-10 | Radio and power islands, panel: 0 errors. Flex and case: known, accepted items only |
+| Mechanical fit | CAD, 2026-11-10, on the released boards | No failures. Open items as in `mechanical/reports/`; new: TH2 courtyard at the 0.100 mm minimum to the deck (O-46) |
+| Pod firmware unit tests | Host (`native_sim`, Twister) | 177 of 177 pass; `check_version.py` self-test 7 of 7 |
+| Case firmware unit tests | Host (`make -C firmware/case test`) | 48 of 48 pass. In the host timing model a short is cut 30–50 ms after VIN comes on (it was 210–720 ms) |
+| App unit tests and analysis | Host (`flutter test`, `flutter analyze`) | 163 of 163 pass, no analyzer issues |
+| App on a device | iOS Simulator | Demo export shares a 183-line daily CSV; an empty store disables Export. Not run on an Android device or with real pod records |
+| Firmware update end to end | Not run | Needs a built pod (O-44) |
+| Short-circuit cut-off on a real dock | Not run | Oscilloscope on the first case; check the SY6280 turn-on against the 10 ms blanking (build item B-8) |
+| Case charger temperature cut-off | Not run | TH2 against a thermocouple on the cell (O-46, B-10) |
+| Battery life, radio range, sensor accuracy | Simulation only / not run | As for v0.1.0-evt |
+
+Open items that affect this release: O-36 to O-46 in [open-items.md](open-items.md), and the build items in
+[build-assembly-test.md](build-assembly-test.md#12-open-items).
+
 ## v0.1.0-evt (EVT, November 2026)
 
 | | |

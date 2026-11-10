@@ -34,6 +34,7 @@ class FirmwareUpdateNotifier extends Notifier<OtaState> {
 
   Future<void> check() => _flow.check();
   Future<void> start() => _flow.start();
+  Future<void> recheck() => _flow.recheck();
   Future<void> cancel() => _flow.cancel();
 
   /// Why [start] would refuse now, for the button (battery and connection).

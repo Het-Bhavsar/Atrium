@@ -153,11 +153,14 @@ class FakeDfu implements DfuTransport {
 }
 
 class FakePod implements PodHandover {
-  FakePod({this.version = v010, this.after, this.block});
+  FakePod({this.version = v010, this.after, this.block, this.afters});
   PodVersion? version;
 
   /// What the pod reports after the restart (null: not reached).
   PodVersion? after;
+
+  /// What each reconnect reports in turn (the last repeats); overrides [after].
+  final List<PodVersion?>? afters;
   String? block;
   int releases = 0;
   int reclaims = 0;
@@ -176,9 +179,11 @@ class FakePod implements PodHandover {
 
   @override
   Future<PodVersion?> reclaim(Duration timeout) async {
-    reclaims++;
-    if (after != null) version = after;
-    return after;
+    final i = reclaims++;
+    final a = afters;
+    final v = a == null ? after : a[i < a.length ? i : a.length - 1];
+    if (v != null) version = v;
+    return v;
   }
 }
 
@@ -285,7 +290,7 @@ void main() {
   });
 
   group('state machine', () {
-    test('every phase has its moves, and only verifying leads to done', () {
+    test('every phase has its moves; only verifying and pending lead to done, and unconfirmed never does', () {
       for (final p in OtaPhase.values) {
         expect(otaTransitions.containsKey(p), isTrue, reason: '$p');
       }
@@ -293,7 +298,8 @@ void main() {
         for (final e in otaTransitions.entries)
           if (e.value.contains(OtaPhase.done)) e.key,
       ];
-      expect(intoDone, [OtaPhase.verifying]);
+      expect(intoDone, [OtaPhase.verifying, OtaPhase.pending]);
+      expect(otaTransitions[OtaPhase.unconfirmed], isNot(contains(OtaPhase.done)));
     });
 
     test('check: newer release is available, same or older is up to date', () async {
@@ -393,21 +399,83 @@ void main() {
       expect(pod.reclaims, 1, reason: 'the app link comes back after a revert');
     });
 
-    test('slots never readable: the version check waits past the 60 s health check', () async {
+    test('slots never readable plus the new version: pending, then unconfirmed past the 300 s revert, never done', () async {
       final waits = <Duration>[];
+      final seen = <OtaState>[];
       final dfu = FakeDfu(slotScript: [null]);
+      final pod = FakePod(after: v020);
       final f = FirmwareUpdateFlow(
         source: FakeSource(rel: release(v020), bytes: image(v020)),
         dfu: dfu,
-        pod: FakePod(after: v020),
+        pod: pod,
+        onChange: seen.add,
         wait: (d) async => waits.add(d),
       );
       await f.check();
       await f.start();
-      expect(f.state.phase, OtaPhase.done);
+      expect(f.history, containsAllInOrder([OtaPhase.confirming, OtaPhase.verifying, OtaPhase.pending, OtaPhase.unconfirmed]));
+      expect(f.history, isNot(contains(OtaPhase.done)));
+      expect(f.history, isNot(contains(OtaPhase.failed)));
+      expect(f.state.phase, OtaPhase.unconfirmed);
+      expect(f.state.message, allOf(contains("isn't confirmed"), contains('0.1.0')));
+      // The first pending state is shown about 90 s after the reset (past the 60 s health check).
+      final pendingAt = seen.indexWhere((s) => s.phase == OtaPhase.pending);
+      expect(pendingAt, greaterThan(0));
       final waited = waits.fold(Duration.zero, (a, b) => a + b);
-      expect(waited >= const Duration(seconds: 90), isTrue, reason: 'swap wait plus polls: $waited');
-      expect(waited < const Duration(minutes: 3), isTrue, reason: 'not the whole 6 min window');
+      expect(waited > const Duration(seconds: 300), isTrue, reason: 'checked past the pod revert: $waited');
+      expect(pod.reclaims, greaterThan(2), reason: 'the slot list is read again on each reconnect');
+      expect(f.state.busy, isFalse, reason: 'the app has the link back');
+    });
+
+    test('pending then the slot list says confirmed: done', () async {
+      final h = hashOf(image(v020));
+      final confirmed = [PodSlot(slot: 0, hash: h, active: true, confirmed: true), PodSlot(slot: 1, hash: Uint8List(32))];
+      // Before the upload, then the nine blind confirm polls: unreadable. The first pending read answers.
+      final dfu = FakeDfu(slotScript: [...List<List<PodSlot>?>.filled(10, null), confirmed]);
+      final f = flow(FakeSource(rel: release(v020), bytes: image(v020)), dfu, FakePod(after: v020));
+      await f.check();
+      await f.start();
+      expect(f.history, containsAllInOrder([OtaPhase.verifying, OtaPhase.pending, OtaPhase.done]));
+      expect(f.state.phase, OtaPhase.done);
+      expect(f.state.current, v020);
+    });
+
+    test('pending then the pod comes back on the old version: reverted, a failure', () async {
+      final dfu = FakeDfu(slotScript: [null]);
+      final pod = FakePod(afters: [v020, v020, v010]);
+      final f = flow(FakeSource(rel: release(v020), bytes: image(v020)), dfu, pod);
+      await f.check();
+      await f.start();
+      expect(f.history, containsAllInOrder([OtaPhase.pending, OtaPhase.failed]));
+      expect(f.history, isNot(contains(OtaPhase.done)));
+      expect(f.state.current, v010);
+      expect(f.state.message, allOf(contains("pod's own check"), contains('0.1.0')));
+    });
+
+    test('pending then the slot list says reverted: a failure', () async {
+      final h = hashOf(image(v020));
+      final old = Uint8List(32);
+      final reverted = [PodSlot(slot: 0, hash: old, active: true, confirmed: true), PodSlot(slot: 1, hash: h)];
+      final dfu = FakeDfu(slotScript: [...List<List<PodSlot>?>.filled(10, null), reverted]);
+      final f = flow(FakeSource(rel: release(v020), bytes: image(v020)), dfu, FakePod(after: v020));
+      await f.check();
+      await f.start();
+      expect(f.history, containsAllInOrder([OtaPhase.pending, OtaPhase.failed]));
+      expect(f.state.message, contains("pod's own check"));
+    });
+
+    test('unconfirmed, then checking the pod again finds it confirmed: done', () async {
+      final h = hashOf(image(v020));
+      final confirmed = [PodSlot(slot: 0, hash: h, active: true, confirmed: true)];
+      final script = <List<PodSlot>?>[null];
+      final dfu = FakeDfu(slotScript: script);
+      final f = flow(FakeSource(rel: release(v020), bytes: image(v020)), dfu, FakePod(after: v020));
+      await f.check();
+      await f.start();
+      expect(f.state.phase, OtaPhase.unconfirmed);
+      script.add(confirmed);
+      await f.recheck();
+      expect(f.state.phase, OtaPhase.done);
     });
 
     test('a trial that outlives the confirm window is not called done', () async {

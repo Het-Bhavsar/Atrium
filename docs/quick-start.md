@@ -13,7 +13,7 @@ Five ways into Atrium, from "look at it on my phone" to "build a pod". Pick the 
 ## 1. Try the app (no hardware)
 
 1. On an Android phone, open the [latest release](https://github.com/Het-Bhavsar/Atrium/releases/latest).
-2. Download `atrium-0.1.0-demo-arm64-v8a.apk` (use `armeabi-v7a` on an older 32-bit phone).
+2. Download `atrium-0.1.1-demo-arm64-v8a.apk` (use `armeabi-v7a` on an older 32-bit phone).
 3. Open it and allow the install from your browser when Android asks.
 4. Start the app. The demo build runs on sample data, so every screen works without a pod.
 

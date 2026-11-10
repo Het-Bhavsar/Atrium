@@ -304,6 +304,8 @@ class _DeviceViewState extends ConsumerState<DeviceView> {
                 subtitle: switch (ota!.phase) {
                   OtaPhase.available => '${ota.release!.version} is available',
                   OtaPhase.upToDate || OtaPhase.done => 'Up to date',
+                  OtaPhase.pending => 'Waiting for the pod to confirm',
+                  OtaPhase.unconfirmed => 'Update not confirmed yet',
                   _ when ota.busy => 'Updating…',
                   _ => 'Check for updates',
                 },

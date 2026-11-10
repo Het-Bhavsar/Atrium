@@ -1,6 +1,10 @@
 // Copyright (c) 2026 Het Bhavsar
 // SPDX-License-Identifier: Apache-2.0
 
+import 'dart:async';
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:atrium/core/app_state.dart';
 import 'package:atrium/core/config.dart';
 import 'package:atrium/core/routes/app_router.dart';
@@ -10,14 +14,19 @@ import 'package:atrium/core/widgets/graphics.dart';
 import 'package:atrium/core/widgets/scaffolds.dart';
 import 'package:atrium/features/device/presentation/device_sheets.dart';
 import 'package:atrium/features/device/presentation/device_widgets.dart';
+import 'package:atrium/features/insights/data/metrics_provider.dart';
 import 'package:atrium/features/onboarding/presentation/onboarding_widgets.dart';
+import 'package:atrium/features/pod/data/epoch_store.dart';
 import 'package:atrium/features/pod/domain/pod.dart';
 import 'package:atrium/features/profile/data/profile_store.dart';
+import 'package:atrium/features/settings/data/data_export.dart';
 import 'package:atrium/features/settings/data/log_out.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show showLicensePage;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 /// Labs features still in research (name, one line).
@@ -118,7 +127,8 @@ class SettingsView extends ConsumerWidget {
         ListGroup(
           children: [
             ListRow(icon: 'health', title: 'Health', subtitle: 'Write heart rate, HRV and sleep', trailing: sw('health')),
-            if (!s.isEvt) ListRow(icon: 'export', title: 'Export data', subtitle: 'Your readings as CSV', chevron: true, onTap: () => _showExport(context)),
+            if (!s.isEvt)
+              ListRow(icon: 'export', title: 'Export data', subtitle: 'Your readings as CSV', chevron: true, onTap: () => _showExport(context, ref)),
             const ListRow(icon: 'db', title: 'On this phone', value: '182 MB'),
             const ListRow(icon: 'globe', title: 'Units', value: '°C · metric', chevron: true),
             ListRow(title: 'Delete all data', danger: true, onTap: () => _showDelete(context, ref)),
@@ -167,7 +177,7 @@ class SettingsView extends ConsumerWidget {
               title: 'Open source',
               subtitle: 'App and firmware Apache-2.0, hardware CERN-OHL-S',
               trailing: chev,
-              onTap: () => showLicensePage(context: context, applicationName: 'Atrium', applicationVersion: '0.1.0 (1) · by $kMaker'),
+              onTap: () => showLicensePage(context: context, applicationName: 'Atrium', applicationVersion: '$kAppVersion ($kAppBuild) · by $kMaker'),
             ),
             ListRow(
               leading: const LocalForgeLogo(),
@@ -176,7 +186,7 @@ class SettingsView extends ConsumerWidget {
               trailing: chev,
               onTap: () => launchUrl(Uri.https(kMakerSite), mode: LaunchMode.externalApplication),
             ),
-            const ListRow(icon: 'info', title: 'App version', value: '0.1.0 (1)'),
+            const ListRow(icon: 'info', title: 'App version', value: '$kAppVersion ($kAppBuild)'),
           ],
         ),
         const ListFoot(
@@ -216,26 +226,78 @@ class SettingsView extends ConsumerWidget {
     ],
   );
 
-  static Future<void> _showExport(BuildContext context) => showAtriumSheet<void>(
-    context,
-    title: 'Export your data',
-    paragraphs: const ["Your daily summaries and the pod's 30-second records as CSV. The columns are documented in the repository."],
-    content: const ListGroup(
-      children: [
-        ListRow(title: 'Range', value: 'All time · 182 days'),
-        ListRow(title: '30-second records', value: 'Include'),
+  /// Export (#22): the stored data as CSV, handed to the share sheet. The range is the real span of what is stored;
+  /// the demo exports its demo days (it has no 30-second records).
+  static Future<void> _showExport(BuildContext context, WidgetRef ref) async {
+    final days = [...ref.read(metricsProvider).days];
+    Uint8List? rows;
+    if (kRealData) {
+      try {
+        rows = (await ref.read(epochStoreProvider.future)).rowBytes();
+      } on Object {
+        rows = null;
+      }
+    }
+    final plan = ExportPlan(days: days, records: rows == null ? 0 : rows.length ~/ EpochStore.rowSize, recordRows: rows);
+    final include = ValueNotifier<bool>(plan.hasRecords);
+    if (!context.mounted) return;
+    await showAtriumSheet<void>(
+      context,
+      title: 'Export your data',
+      paragraphs: [
+        if (plan.isEmpty) const NothingToExport().toString() else "Your daily summaries and the pod's 30-second records as CSV, from what is stored on this phone. You choose where they go; the columns are listed in the app's README.",
       ],
-    ),
-    actions: (sheet) => [
-      PrimaryButton(
-        'Export',
-        onPressed: () {
-          Navigator.pop(sheet);
-          if (context.mounted) showAtriumToast(context, 'Export ready to share');
-        },
+      content: ListGroup(
+        children: [
+          ListRow(title: 'Range', value: plan.rangeLabel),
+          ListRow(
+            title: '30-second records',
+            subtitle: plan.hasRecords ? '${plan.records} records' : null,
+            value: plan.hasRecords ? null : (kRealData ? 'None stored' : 'Not in the demo'),
+            trailing: plan.hasRecords
+                ? ValueListenableBuilder<bool>(
+                    valueListenable: include,
+                    builder: (_, on, _) => AtriumSwitch(value: on, onChanged: (v) => include.value = v, label: 'Include 30-second records'),
+                  )
+                : null,
+          ),
+        ],
       ),
-    ],
-  );
+      actions: (sheet) => [
+        PrimaryButton(
+          'Export',
+          onPressed: plan.isEmpty
+              ? null
+              : () {
+                  Navigator.pop(sheet);
+                  unawaited(_export(context, plan, records: include.value));
+                },
+        ),
+      ],
+    );
+  }
+
+  static Future<void> _export(BuildContext context, ExportPlan plan, {required bool records}) async {
+    final box = context.findRenderObject() as RenderBox?;
+    final origin = box != null && box.hasSize ? box.localToGlobal(Offset.zero) & box.size : null;
+    try {
+      final tmp = await getTemporaryDirectory();
+      final dir = Directory('${tmp.path}/atrium-export');
+      if (await dir.exists()) await dir.delete(recursive: true);
+      final files = await writeExport(plan, dir, withRecords: records);
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [for (final f in files) XFile(f.path, mimeType: 'text/csv')],
+          subject: 'Atrium data export',
+          sharePositionOrigin: origin,
+        ),
+      );
+    } on NothingToExport catch (e) {
+      if (context.mounted) showAtriumToast(context, '$e');
+    } on Object {
+      if (context.mounted) showAtriumToast(context, "Couldn't prepare the export. Try again.");
+    }
+  }
 
   static Future<void> _showDelete(BuildContext context, WidgetRef ref) => showAtriumSheet<void>(
     context,

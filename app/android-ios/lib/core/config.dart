@@ -13,5 +13,9 @@ const String kMakerSite = 'localforge.in';
 
 const bool kRealData = bool.fromEnvironment('ATRIUM_REAL_DATA');
 
+/// The app's version as Settings shows it; must equal `version:` in pubspec.yaml (`test/app_version_test.dart`).
+const String kAppVersion = '0.1.1';
+const int kAppBuild = 2;
+
 /// First screen, e.g. `--dart-define=ATRIUM_START=/today` (debugging and screen capture).
 const String kStartRoute = String.fromEnvironment('ATRIUM_START', defaultValue: '/welcome');

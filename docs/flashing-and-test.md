@@ -49,7 +49,7 @@ With nrfjprog the same steps are `nrfjprog --recover`, `nrfjprog --program firmw
 - **Flash map** (512 KB): MCUboot 0x00000 (32 KB), slot 0 0x08000 (220 KB), slot 1 0x3F000 (220 KB), settings and bonds 0x76000 (8 KB), log 0x78000 (32 KB).
 - **Debug access.** The build uses `CONFIG_NRF_APPROTECT_USE_UICR` and the hex holds no UICR records, so a recovered chip stays open to the debugger after programming. The production lock (UICR.APPROTECT written at the end of the factory flash) is a DVT decision; `recover` always works, and wipes the chip.
 - **Signing key.** Production builds must be signed with your own ECDSA P-256 key: `ATRIUM_SIGNING_KEY=/path/to/atrium-ecdsa-p256.pem firmware/tests/fw.sh build`. Without it the build uses MCUboot's public development key, which is for bench units only. A pod accepts BLE updates signed with the key it was flashed with. Never commit a key.
-- **Version.** The image is 0.1.0 (`firmware/src/VERSION`); the DIS Firmware Revision reads `0.1.0+<commit>`.
+- **Version.** The image is 0.1.1 (`firmware/src/VERSION`); the DIS Firmware Revision reads `0.1.1+<commit>`.
 
 ## Programming the charging case
 

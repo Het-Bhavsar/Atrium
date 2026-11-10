@@ -97,6 +97,18 @@ class EpochStore {
 
   int get count => _rows.length;
 
+  /// Every row in the file format (u32 Unix time, then the 12 record bytes), oldest first: for the data export.
+  Uint8List rowBytes() {
+    final keys = _rows.keys.toList()..sort();
+    final out = Uint8List(keys.length * rowSize);
+    final bd = ByteData.sublistView(out);
+    for (var i = 0; i < keys.length; i++) {
+      bd.setUint32(i * rowSize, keys[i], Endian.little);
+      out.setRange(i * rowSize + 4, (i + 1) * rowSize, _rows[keys[i]]!);
+    }
+    return out;
+  }
+
   Future<void> clear() async {
     _rows.clear();
     syncedToPage = 0;

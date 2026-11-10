@@ -218,9 +218,13 @@ class PodMetrics extends MetricsSource {
     return out;
   }
 
-  /// Walks and runs of at least 10 min (gaps up to 2 min joined), from the pod's activity class.
+  /// Walks and runs of at least 10 min, from the pod's activity class. Moving epochs are joined while the time between
+  /// one moving epoch's end and the next one's start is 2 min or less, by the epoch times: a gap in the log (pod off,
+  /// out of the log) splits a walk like time spent still does.
   List<Workout> _workouts(List<int> t, List<Epoch> day, int midnight) {
     bool moving(Epoch e) => e.activityClass == ActivityClass.walk || e.activityClass == ActivityClass.run;
+    const maxGapS = 120;
+    final epochS = (epochMin * 60).round();
     final out = <Workout>[];
     var i = 0;
     while (i < day.length) {
@@ -228,9 +232,9 @@ class PodMetrics extends MetricsSource {
         i++;
         continue;
       }
-      var j = i;
+      var j = i + 1;
       var last = i;
-      while (j < day.length && (moving(day[j]) || t[j] - t[last] <= 120)) {
+      while (j < day.length && t[j] - (t[last] + epochS) <= maxGapS) {
         if (moving(day[j])) last = j;
         j++;
       }
@@ -346,7 +350,6 @@ class PodMetrics extends MetricsSource {
     final end = _now.millisecondsSinceEpoch ~/ 1000;
     final start = end - 24 * 3600;
     final midnight = _midnight(today);
-    var last = 0;
     hr24 = [];
     var i = _lowerBound([for (final e in all) e.time], start);
     for (var t = start; t < end; t += 300) {
@@ -359,8 +362,8 @@ class PodMetrics extends MetricsSource {
         }
         i++;
       }
-      if (k > 0) last = (sum / k).round();
-      if (last > 0) hr24.add(HrSample((t - midnight) ~/ 60, last));
+      // A bin with no pulse gets no sample: the chart shows a gap, not the last pulse carried on.
+      if (k > 0) hr24.add(HrSample((t - midnight) ~/ 60, (sum / k).round()));
     }
   }
 }

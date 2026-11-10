@@ -486,6 +486,14 @@ class _EmptyBody extends StatelessWidget {
   );
 }
 
+/// [hr] on its 5-minute grid, from the first sample to the last: a slot with no sample (no pulse in that bin) is NaN,
+/// which the line chart draws as a gap.
+List<(int, double)> hr24Grid(List<HrSample> hr) {
+  if (hr.isEmpty) return const [];
+  final by = {for (final p in hr) p.minute: p.bpm.toDouble()};
+  return [for (var m = hr.first.minute; m <= hr.last.minute; m += 5) (m, by[m] ?? double.nan)];
+}
+
 /// Last 24 hours of heart rate, with last night shaded.
 class Hr24Chart extends StatelessWidget {
   const Hr24Chart({required this.data, this.height = 170, super.key});
@@ -494,21 +502,22 @@ class Hr24Chart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hr = data.hr24;
-    final sStart = hr.indexWhere((p) => p.minute >= data.bedMinute - 1440);
-    final sEnd = hr.indexWhere((p) => p.minute >= data.wakeMinute);
+    final grid = hr24Grid(data.hr24);
+    final minutes = [for (final (m, _) in grid) m];
+    final sStart = minutes.indexWhere((m) => m >= data.bedMinute - 1440);
+    final sEnd = minutes.indexWhere((m) => m >= data.wakeMinute);
     final xl = <(int, String)>[
-      for (var i = 5; i < hr.length - 4; i++)
-        if ((((hr[i].minute % 1440) + 1440) % 1440) % 360 == 0) (i, '${((((hr[i].minute % 1440) + 1440) % 1440) ~/ 60).toString().padLeft(2, '0')}:00'),
+      for (var i = 5; i < minutes.length - 4; i++)
+        if ((((minutes[i] % 1440) + 1440) % 1440) % 360 == 0) (i, '${((((minutes[i] % 1440) + 1440) % 1440) ~/ 60).toString().padLeft(2, '0')}:00'),
     ];
     return AtriumChart(
-      points: [for (final p in hr) p.bpm.toDouble()],
+      points: [for (final (_, v) in grid) v],
       color: AtriumColors.of(context).heart,
       kind: ChartKind.line,
       height: height,
       xLabels: xl,
       shade: [if (sStart >= 0 && sEnd > sStart) (sStart, sEnd)],
-      labels: [for (final p in hr) clockLabel(p.minute)],
+      labels: [for (final m in minutes) clockLabel(m)],
       unit: 'bpm',
       semantics: 'Heart rate over the last 24 hours',
     );

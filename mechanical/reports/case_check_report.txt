@@ -18,7 +18,7 @@ atrium_case.py check_case(), 36.0 x 25.0 x 16.75 mm
   -- routed case PCB: mechanical/boards/atrium_case_evt.step --
   [PASS] case board in the case frame, bottom on the ledges: 32.975 x 21.975 x 0.800 at z 6.70..7.50; outline edge 0.013 inside the DXF
   [PASS] routed case PCB: no part body clashes with the case, the cell, the cap, the light pipe or the pogos: none
-  [PASS] routed case PCB: parts >= 0.1 from the case (courtyard): none
+  [OPEN] routed case PCB: parts >= 0.1 from the case (courtyard): TH2 0.100 to the deck
   [info] tallest top parts: J1 3.26, U5 1.65, U6 1.65, C4 1.30, SW1 1.27, U4 1.25
   [PASS] nest zone: parts under the nest floor <= 1.0: all <= 1.0 (floor underside 0.2 above)
   [PASS] cell clear under the 0.8 board: board bottom 6.70 over the cell top 6.50 (0.20); lowest part point z 6.60 (J1's legs) 0.10 over the cell
@@ -27,5 +27,5 @@ atrium_case.py check_case(), 36.0 x 25.0 x 16.75 mm
   [PASS] J1 (USB-C) clear in its opening, mouth at the wall face: 0.219 to the tub, mouth x 17.990 (outer face 18.0), top z 10.76 under the hump 11.00
   [PASS] cell leads reach their plated holes beside the cell (pad edge >= 0.3 outboard): (-15.50, 2.00) pad edge +0.35 from the cell end, wire rises 1.00 from the tub wall; (-15.50, -2.00) pad edge +0.35 from the cell end, wire rises 1.00 from the tub wall. Top fillet to z 8.00, 2.50 under the deck. Move them to ((-15.5, 2.0), (-15.5, -2.0)) with d1.3 pads (0.35 from the cell end, 0.34 from the edge) and drop the slot [VERIFY lead exit on the cell]
   [info] U8 (HAL248) at (-12.00, -7.00) under the lid magnet at (-12.0, -7.0)
-  [OPEN] pogo landing pads under the pogos (d1.4): the STEP carries no copper (empty copper layers), so the pads can't be checked here; positions as stated: VIN (0.00, 0.05), GND (0.00, 2.25), SWDIO (2.20, -3.70), SWDCLK (-2.20, -3.70)
-FAILED: none | OPEN: ['pogo landing pads under the pogos (d1.4)']
+  [PASS] pogo landing pads under the pogos (d1.4): VIN 0.000, GND 0.000, SWDIO 0.000, SWDCLK 0.000
+FAILED: none | OPEN: ['routed case PCB: parts >= 0.1 from the case (courtyard)']

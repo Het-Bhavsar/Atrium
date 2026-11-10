@@ -9,16 +9,22 @@
  * Feeding the pod (VIN on)
  *  - VIN goes on when the lid opens, when a pod is charging, on USB, and for a top-up of a
  *    full pod every 4 h [ASSUMED]. Before VIN goes on, main zeroes the current reading
- *    (zero_req). Readings until 100 ms after VIN goes on are ignored (pod input capacitors).
+ *    (zero_req). The state machine reads the current at each tick and ignores the readings
+ *    at the feed-start tick and the next one (now - feed start must exceed blank_ms, 100 ms):
+ *    the first that counts is the second tick after VIN on, 200 ms. A soft-reset or
+ *    signature pattern restarts that count, and no tick reading counts during the pattern.
  *  - The translators' 1.8 V side (LDO_PWR) goes on 100 ms after VIN, and off with VIN, so
  *    an unpowered nRF52832 is never driven through its pins.
  *  - Pod present: SWDIO reads high (the nRF's pull-up against a 1M pull-down on the case
  *    side [VERIFY]) or the current is above 0.4 mA. Absent for 2 s: no pod.
  *  - Charging above 5 mA; full below 2.5 mA for 30 s with the pod present. Between the two
  *    the state holds. Once full without USB and with the lid shut, VIN goes off.
- *  - Over 80 mA for 3 readings (or the reading clips): contact fault, VIN off, retry 30 s.
- *    main.c also checks every 20 ms frame and cuts VIN within about 40 ms (oc_fast.h); it
- *    reports that as fast_trip, handled the same way.
+ *  - Over 80 mA for 3 counted tick readings (or the reading clips): contact fault, VIN off,
+ *    retry 30 s; at the earliest the 400 ms tick. That is the slow backstop. The fast path
+ *    is main.c's (oc_fast.h): every 20 ms frame, from 10 ms after each VIN-on edge
+ *    including the energised parts of the pulse patterns, two readings over cut VIN, within
+ *    50 ms of the edge for a short there from the start. main reports it as fast_trip,
+ *    handled the same way. The SY6280 limit (0.34-0.57 A) is the hardware backstop.
  *  - Case cell below 3.4 V without USB (3 readings): no feeding until 3.6 V or USB.
  *  - Case cell above 45 C (NTC, read only while feeding): VIN off, retry in 10 min; it
  *    stays off until a reading below 42 C.
@@ -42,7 +48,8 @@
 #define CASE_TEMP_NONE INT16_MIN
 
 struct case_cfg {
-	uint16_t blank_ms;      /* after VIN on, before readings count */
+	uint16_t blank_ms;      /* tick readings count once now - feed start > this (2nd tick) */
+	uint16_t oc_blank_ms;   /* main's fast check: each VIN-on edge to the first armed frame */
 	uint16_t ldo_delay_ms;  /* VIN on to the 1.8 V side on */
 	int32_t chg_ua;         /* above: charging */
 	int32_t full_ua;        /* below, for full_ms: full */
@@ -74,7 +81,7 @@ struct case_cfg {
 
 #define CASE_CFG_DEFAULT                                                                       \
 	{                                                                                      \
-		.blank_ms = 100, .ldo_delay_ms = 100, .chg_ua = 5000, .full_ua = 2500,         \
+		.blank_ms = 100, .oc_blank_ms = 10, .ldo_delay_ms = 100, .chg_ua = 5000, .full_ua = 2500,         \
 		.full_ms = 30000, .present_ua = 400, .absent_ms = 2000, .oc_ua = 80000,        \
 		.oc_count = 3, .retry_ms = 30000, .vbat_cut_mv = 3400, .vbat_resume_mv = 3600, \
 		.vbat_count = 3, .hot_c10 = 450, .hot_resume_c10 = 420,                        \
@@ -101,7 +108,7 @@ struct case_in {
 	bool pod_pullup;   /* SWDIO read high (valid while ldo_pwr) */
 	bool swd_done;     /* the hard reset asked for last time has run */
 	bool swd_ok;
-	bool fast_trip;     /* main cut VIN for an over-current between ticks (oc_fast.h) */
+	bool fast_trip;    /* main cut VIN for an over-current between ticks (oc_fast.h) */
 };
 
 struct case_out {
@@ -109,7 +116,6 @@ struct case_out {
 	bool boost_en;
 	bool ldo_pwr;
 	bool opa_on;      /* OPA and shunt readings wanted */
-	bool oc_armed;    /* feed on, past the blanking, no pulse: main's fast check may run */
 	bool zero_req;    /* take the zero reading now, VIN still off, then set vin_en */
 	bool swd_reset;   /* run the hard reset now (once) */
 	enum led_pat led;

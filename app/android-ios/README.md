@@ -70,6 +70,7 @@ Atrium has no accounts and no server: the phone talks to the pod directly over B
 - Onboarding asks for a name, age, height and weight. They're saved in `profile.json` in the app's private folder, and Settings edits them.
 - Readings live in `epochs.bin` beside it.
 - Both are encrypted at rest by the OS (iOS Data Protection, Android file-based encryption).
+- **Export data** (Settings) writes CSVs from what is stored on the phone and opens the system share sheet; the app sends nothing itself. Columns below, under "Data export".
 - **Log out** (Settings, at the bottom) clears this phone: it forgets the pod (`forgetPod`), deletes the readings and the profile, resets settings except the theme, and returns to Welcome. **Delete all data** removes only the readings; **Forget this pod** (Device) only unpairs.
 - The only network request is the pod software check: opening Device > Pod software fetches the latest release of `Het-Bhavsar/Atrium` from the GitHub API and, if you update, its `atrium-pod-<version>.bin` asset. Nothing about you or the pod is sent. Android's release manifest declares `INTERNET` for it.
 - Both are kept out of backups: iOS marks the folder excluded from iCloud and computer backup (`FilesHostApi.keepOnDevice`); Android turns backup and device transfer off in the manifest.
@@ -146,6 +147,49 @@ The pod keeps about 20 h. While the app is closed:
 
 Hive (`hive_ce`, `core/storage/local_store.dart`) holds the settings (kept across launches; someone who finished onboarding opens on Today), the profile (moved over from the old `profile.json`) and the last computed metrics (so a launch opens with numbers while the log is read). The raw readings stay in `epochs.bin`: 16-byte rows in the exact log codec, read in one pass, with the cursor beside it that native background sync reads and moves. Everything is in the app's data folder, kept out of backups; log out and "Delete all data" empty it.
 
+## Data export (#22)
+
+Settings > Export data writes CSV files from this phone's store and hands them to the system share sheet (`share_plus`); where they go is the user's choice. The sheet shows the real span of stored data, first to last day. "30-second records" is a switch, on by default when there are records. The demo build exports its demo days and has no 30-second records. With nothing stored, the sheet says so and writes no file. Code: `features/settings/data/data_export.dart`.
+
+Files are comma-separated, UTF-8, with one header row; an empty cell means the value isn't known.
+
+**`atrium-daily-YYYYMMDD.csv`**: one row per local day, oldest first, the values the screens show.
+
+| Column | Unit | Meaning |
+|---|---|---|
+| `date` | YYYY-MM-DD, phone's time zone | The day |
+| `recovery_score` | 0–100 | Recovery; empty before there is a baseline |
+| `sleep_score` | 0–100 | Sleep score; empty with no night |
+| `effort_score` | 0–100 | Effort, from heart-rate zones |
+| `resting_hr_bpm` | beats per minute | Resting heart rate of the night |
+| `hrv_rmssd_ms` | ms | Night HRV (RMSSD) |
+| `asleep_min` | minutes | Time asleep |
+| `skin_temp_deviation_c` | °C | Night skin temperature against your usual; empty with no night |
+| `steps` | count | Steps from the pod |
+| `active_min` | minutes | Minutes walking or running |
+
+**`atrium-records-YYYYMMDD.csv`**: the pod's 30-second records as stored in `epochs.bin`, oldest first. Every field of the log record (`pod/data/log_record.dart`, the firmware's compact log).
+
+| Column | Unit | Meaning |
+|---|---|---|
+| `time_unix_s` | s | Start of the 30 s epoch, Unix time (UTC) |
+| `time_utc` | ISO 8601, UTC | The same time, readable |
+| `pulse_bpm` | beats per minute | Pulse; 0 = none |
+| `pulse_confidence` | 0–1 | Pulse quality (4-bit, in steps of 1/15) |
+| `on_skin`, `pulse_from_ir`, `docked`, `charging` | 0 or 1 | Flags: on skin, pulse from the IR channel, on the Plinth, charging |
+| `rmssd_ms` | ms | HRV (RMSSD) over the epoch; 0 = fewer than 5 clean beat differences |
+| `clean_diffs` | count | Clean beat-to-beat differences behind it |
+| `activity` | still, walk, run, other | Activity class |
+| `activity_mg` | milli-g | Motion intensity |
+| `mlc_level_max` | 0–7 | Highest motion level from the motion sensor's own classifier |
+| `pulse_present_s` | s | Seconds of the epoch with a pulse |
+| `skin_temp_c` | °C | Skin temperature; empty = not valid |
+| `steps` | count | Steps in the epoch |
+| `pitch_deg`, `roll_deg` | degrees | Pod orientation; empty = unknown |
+| `burst_ratio_r` | ratio | Red/IR ratio of an oxygen burst ending in this epoch; 0.00 = none. A research value, not a blood-oxygen percentage |
+| `burst_confidence` | 0–1 | Quality of that burst |
+| `record_hex` | hex | The 12 record bytes as logged, to decode again |
+
 ## Sync status (#20)
 
 The pod's log is 8 pages of 4 KB, about 20 h, and the oldest page is erased when it is full; the battery lasts days longer. So real builds show "Last synced …" on Today (under the story, and in the empty state) and on Device (caption, Last sync row, and in the not-nearby card), and a "Sync soon" notice once the last sync is more than 16 h old: "sync soon or older readings will be overwritten" (`pod/domain/sync_age.dart`, `pod/presentation/sync_status.dart`). A full sync and live records (Live Epoch 0x0504, saved at most every 5 min) both count as synced. `docs/FEATURES.md` #20 still says the app warns after 12 h; the app uses 16 h, 4 h before the log starts overwriting.
@@ -161,6 +205,7 @@ Real builds (`device/domain/firmware_update.dart`, `device/data/`, `device/prese
 5. **Slots, then upload.** The slot list is read first: an image already running and confirmed is not sent again, and a trial still running from an earlier update blocks a new one. `McumgrTransport` uploads with the verified hash, mode `testOnly`, `eraseAppSettings` off (the settings partition holds the bonds), a 60 s stall timeout; a dropped link is retried twice after 5 s (the pod resumes a matching image [VERIFY]). The pod's refusal below 3.60 V (MGMT_ERR_EBUSY) and pairing errors become plain words.
 6. **Confirm.** The app never confirms an image. After a 10 s swap wait [ASSUMED] it reads the slot list every 10 s (6 min at most) until the pod's own health check has confirmed the new image (`firmware/src/dfu_health.c`, 60 s) or reverted it (300 s or a reset): a revert is shown as such. If the slot list can't be read at all, the app waits about 90 s from the reset (past the 60 s check) before the version check.
 7. **Verify.** `PodSession.takeBack` reconnects, reads 0x2A26 again and resumes syncing. Only a confirmed image on a pod that reports the release's version shows "Updated".
+8. **Pending.** A pod that reports the new version while its slot list never said "confirmed" is "Installed, confirmation pending", which is neither done nor failed: a trial image reports its version too. Every 60 s the app lends the link to MCUmgr again, reads the slot list, then reconnects and reads the version. It ends "Updated" (confirmed), as a revert (slot list reverted, or the pod back on another version), or, past 6 min from the reset (beyond the pod's 300 s revert), "Installed, not confirmed yet" with a button to check the pod again.
 
 Native changes for this (small, both platforms): `disconnect()` now also cancels a connect that is still pending and fails its waiter, and a dropped link fails the read, write and connect calls still waiting, so the retry loop and the hand-over never hang (`ios/Runner/PodHost.swift`, `android/.../PodHost.kt`).
 

@@ -311,6 +311,7 @@ class AtriumChart extends StatefulWidget {
   /// Value text in the readout; integers by default.
   final String Function(double)? format;
 
+  /// The values, one per slot. A line chart breaks at a NaN (no reading there) instead of joining across it.
   final List<double> points;
   final Color color;
   final ChartKind kind;
@@ -421,10 +422,10 @@ class _AtriumChartState extends State<AtriumChart> with SingleTickerProviderStat
                           TextSpan(
                             children: [
                               TextSpan(
-                                text: (o.format ?? _plain)(o.points[i]),
+                                text: o.points[i].isFinite ? (o.format ?? _plain)(o.points[i]) : 'No reading',
                                 style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: t.ink),
                               ),
-                              if (o.unit.isNotEmpty)
+                              if (o.unit.isNotEmpty && o.points[i].isFinite)
                                 TextSpan(
                                   text: ' ${o.unit}',
                                   style: TextStyle(fontSize: 12, color: t.ink),
@@ -449,6 +450,23 @@ class _AtriumChartState extends State<AtriumChart> with SingleTickerProviderStat
   }
 }
 
+/// The stretches of [points] a line chart draws, as inclusive index ranges: a NaN (no reading) ends one.
+List<(int, int)> lineRuns(List<double> points) {
+  final out = <(int, int)>[];
+  for (var i = 0; i < points.length;) {
+    if (!points[i].isFinite) {
+      i++;
+      continue;
+    }
+    final a = i;
+    while (i < points.length && points[i].isFinite) {
+      i++;
+    }
+    out.add((a, i - 1));
+  }
+  return out;
+}
+
 String _plain(double v) => v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(1);
 
 /// Chart geometry shared by the painter and the touch readout.
@@ -459,8 +477,9 @@ class _ChartGeom {
     const bot = 22.0;
     final pw = s.width - pr;
     final ph = s.height - top - bot;
-    var lo = o.points.isEmpty ? 0.0 : o.points.reduce(math.min);
-    var hi = o.points.isEmpty ? 1.0 : o.points.reduce(math.max);
+    final finite = o.points.where((v) => v.isFinite);
+    var lo = finite.isEmpty ? 0.0 : finite.reduce(math.min);
+    var hi = finite.isEmpty ? 1.0 : finite.reduce(math.max);
     if (o.band != null) {
       lo = math.min(lo, o.band!.$1);
       hi = math.max(hi, o.band!.$2);
@@ -585,14 +604,30 @@ class _ChartPainter extends CustomPainter {
           );
         }
       case ChartKind.line:
-        final path = Path()..moveTo(x(0), y(o.points[0]));
-        for (var i = 1; i < n; i++) {
-          path.lineTo(x(i), y(o.points[i]));
+        // One stretch per run of readings: a gap (NaN) ends the line and its fill, so nothing is drawn where there was
+        // no reading. A single reading between gaps is a short tick.
+        final path = Path();
+        final area = Path();
+        final runs = lineRuns(o.points);
+        if (runs.isEmpty) break;
+        final lastFinite = runs.last.$2;
+        for (final (a, b) in runs) {
+          final run = Path()..moveTo(a == b ? x(a) - step * 0.4 : x(a), y(o.points[a]));
+          if (a == b) run.lineTo(x(a) + step * 0.4, y(o.points[a]));
+          for (var k = a + 1; k <= b; k++) {
+            run.lineTo(x(k), y(o.points[k]));
+          }
+          path.addPath(run, Offset.zero);
+          if (b > a) {
+            area.addPath(
+              Path.from(run)
+                ..lineTo(x(b), top + ph)
+                ..lineTo(x(a), top + ph)
+                ..close(),
+              Offset.zero,
+            );
+          }
         }
-        final area = Path.from(path)
-          ..lineTo(x(n - 1), top + ph)
-          ..lineTo(x(0), top + ph)
-          ..close();
         // Draw-in: reveal the line left to right; the end dot lands when it is complete.
         canvas
           ..save()
@@ -612,9 +647,9 @@ class _ChartPainter extends CustomPainter {
           ..restore();
         if (progress < 0.98) break;
         canvas
-          ..drawCircle(Offset(x(n - 1), y(o.points.last)), 4, Paint()..color = o.color)
+          ..drawCircle(Offset(x(lastFinite), y(o.points[lastFinite])), 4, Paint()..color = o.color)
           ..drawCircle(
-            Offset(x(n - 1), y(o.points.last)),
+            Offset(x(lastFinite), y(o.points[lastFinite])),
             4,
             Paint()
               ..style = PaintingStyle.stroke
@@ -638,7 +673,7 @@ class _ChartPainter extends CustomPainter {
       text(str, Offset(x(i).clamp(8, pw - 8), s.height - 8), TextAlign.center);
     }
     final k = scrub;
-    if (k != null && k < n) {
+    if (k != null && k < n && o.points[k].isFinite) {
       canvas
         ..drawLine(
           Offset(x(k), top - 4),

@@ -4,8 +4,10 @@
  *
  * Atrium charging case: the hardware around case_sm.c. No RTOS: a 100 ms loop while
  * anything needs the MCU (LED frames every 20 ms), standby otherwise.
- *  - Each 20 ms LED frame while the feed is armed: one pod-current reading for the fast
- *    over-current cut-off (oc_fast.h), which turns VIN off itself.
+ *  - Each 20 ms LED frame: the fast over-current cut-off (oc_fast.h). main records every
+ *    VIN_EN write, so it knows the last VIN-on edge (feed start or a pulse); from 10 ms
+ *    after it, each frame reads the pod current once, and two readings over 80 mA turn VIN
+ *    off here: within 50 ms of the edge, or 40 ms of a later short, on any tick.
  *  - Each tick: read the lid, button, USB and charger CHG pins, VDD from VREFINT, and,
  *    with the outputs of the last tick, the pod current (OPA, 16 samples), the NTC (VIN on)
  *    and the SWDIO pull-up (1.8 V side on). Step the state machine, then set the outputs.
@@ -310,6 +312,7 @@ int main(void)
 	struct oc_fast fast = {0};
 	bool fast_trip = false;
 	uint16_t vdd_last = 0;
+	/* tests/test_oc_fast.c (sim_tick, sim_frame) replays this loop's VIN writes and frames */
 
 	SystemInit();
 	board_init();
@@ -361,6 +364,7 @@ int main(void)
 		}
 		opa(out.opa_on);
 		funDigitalWrite(PIN_VIN_EN, out.vin_en);
+		oc_fast_vin(&fast, out.vin_en, now_ms()); /* after the zero reading's 10 ms */
 		funDigitalWrite(PIN_BOOST, out.boost_en);
 		funDigitalWrite(PIN_LDO, out.ldo_pwr);
 		if (out.swd_reset) {
@@ -378,8 +382,8 @@ int main(void)
 
 				led_render(out.led, now_ms() - out.led_t0, &c);
 				led_set(c);
-				/* fast over-current cut-off (oc_fast.h): VIN off within about 40 ms */
-				if (out.oc_armed && !fast_trip) {
+				/* fast over-current cut-off (oc_fast.h): armed from 10 ms after each VIN-on edge */
+				if (oc_fast_armed(&fast, now_ms(), cfg.oc_blank_ms)) {
 					uint32_t s = adc_sum(ADC_CH_OPA); /* 16 conversions, about 0.4 ms */
 					int32_t ua = sense_pod_ua(s, zero, OVS, vdd_last);
 
@@ -387,10 +391,9 @@ int main(void)
 						funDigitalWrite(PIN_VIN_EN, 0);
 						funDigitalWrite(PIN_LDO, 0);
 						funDigitalWrite(PIN_BOOST, 0);
+						oc_fast_vin(&fast, false, now_ms());
 						fast_trip = true;
 					}
-				} else if (!out.oc_armed) {
-					oc_fast_sample(&fast, false, 0, false, cfg.oc_ua);
 				}
 				next += FRAME_MS * TICKS_PER_MS;
 				nap_until(next);

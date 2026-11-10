@@ -39,6 +39,8 @@ String otaTitle(OtaState s, {bool blocked = false}) => switch (s.phase) {
   OtaPhase.restarting => 'Restarting the pod',
   OtaPhase.confirming => 'Trying out the new software',
   OtaPhase.verifying => 'Checking the new version',
+  OtaPhase.pending => 'Installed, confirmation pending',
+  OtaPhase.unconfirmed => 'Installed, not confirmed yet',
   OtaPhase.done => 'Updated',
   OtaPhase.failed => s.release == null ? "Couldn't check" : "Update didn't finish",
   OtaPhase.cancelled => 'Update stopped',
@@ -72,7 +74,13 @@ class _RealFirmwareViewState extends ConsumerState<RealFirmwareView> {
     final onPod = s.current ?? PodVersion.tryParse(ref.watch(podSessionProvider.select((p) => p.firmware)));
     final r = s.release;
     final blocker = s.phase == OtaPhase.available ? n.blocker : null;
-    final showMeter = s.phase == OtaPhase.downloading || s.phase == OtaPhase.uploading || s.phase == OtaPhase.restarting || s.phase == OtaPhase.confirming || s.phase == OtaPhase.verifying;
+    final showMeter =
+        s.phase == OtaPhase.downloading ||
+        s.phase == OtaPhase.uploading ||
+        s.phase == OtaPhase.restarting ||
+        s.phase == OtaPhase.confirming ||
+        s.phase == OtaPhase.verifying ||
+        s.phase == OtaPhase.pending;
     final pct = (s.progress * 100).clamp(0, 100).round();
 
     final detail = switch (s.phase) {
@@ -85,6 +93,8 @@ class _RealFirmwareViewState extends ConsumerState<RealFirmwareView> {
       OtaPhase.restarting => 'The pod restarts and moves the new software into place. This takes a few seconds.',
       OtaPhase.confirming => 'The pod keeps new software only after it has run well for a minute. Keep it close.',
       OtaPhase.verifying => 'Reconnecting to read the version the pod now runs.',
+      OtaPhase.pending =>
+        'The pod runs ${s.current ?? r?.version} and is still deciding whether to keep it. Atrium keeps asking it for about five minutes. Keep it close.',
       OtaPhase.done => 'Pod software ${s.current} passed the pod\'s own check and is now kept.',
       _ => s.message ?? '',
     };
@@ -104,6 +114,12 @@ class _RealFirmwareViewState extends ConsumerState<RealFirmwareView> {
       case OtaPhase.handingOver || OtaPhase.restarting || OtaPhase.confirming || OtaPhase.verifying:
         label = 'Updating…';
         action = null;
+      case OtaPhase.pending:
+        label = 'Waiting for the pod…';
+        action = null;
+      case OtaPhase.unconfirmed:
+        label = 'Check the pod again';
+        action = n.recheck;
       case OtaPhase.done || OtaPhase.upToDate || OtaPhase.failed || OtaPhase.cancelled:
         label = 'Check again';
         action = n.check;
@@ -139,10 +155,13 @@ class _RealFirmwareViewState extends ConsumerState<RealFirmwareView> {
                   Expanded(
                     child: Text(otaTitle(s, blocked: blocker != null), style: AtriumType.bodyStrong(t.ink)),
                   ),
-                  if (showMeter && s.phase != OtaPhase.verifying) Text('$pct%', style: AtriumType.body(t.ink2)),
+                  if (showMeter && s.phase != OtaPhase.verifying && s.phase != OtaPhase.pending) Text('$pct%', style: AtriumType.body(t.ink2)),
                 ],
               ),
-              if (showMeter) ...[const SizedBox(height: 10), Meter(s.phase == OtaPhase.restarting || s.phase == OtaPhase.verifying ? 1 : s.progress)],
+              if (showMeter) ...[
+                const SizedBox(height: 10),
+                Meter(s.phase == OtaPhase.restarting || s.phase == OtaPhase.verifying || s.phase == OtaPhase.pending ? 1 : s.progress),
+              ],
               if (detail.isNotEmpty) ...[const SizedBox(height: 10), Text(detail, style: AtriumType.secondary(s.phase == OtaPhase.failed ? t.red : t.ink2))],
             ],
           ),
