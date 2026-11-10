@@ -35,6 +35,11 @@ with light and motion: pulse, heart-rate variability, skin-temperature trend, sl
 syncs it to your phone over Bluetooth LE. A small Plinth charges it, and a pocket case charges it on the go.
 
 <p align="center">
+  <a href="docs/images/video/atrium_assembly_film_1080p.mp4"><img src="docs/images/video/atrium_film_poster.jpg" alt="Play the Atrium film: the pod on skin with green light at its base" width="100%"></a>
+  <br><sub>The film, 57 s: the radio island, the power island, the flex, the cell, the pod, then green and red light on skin.</sub>
+</p>
+
+<p align="center">
   <img src="docs/images/renders/pod_studio_dimensions.png" alt="Studio render of the pod with its dimensions: 20.9 by 11.0 by 5.3 mm" width="100%">
 </p>
 
