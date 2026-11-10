@@ -42,13 +42,13 @@ Board values the firmware depends on, from that netlist: BQ24040 ISET 2.7k (abou
 | 3 | PA2 | OPA_P | OPP0: 10k from the shunt, 1.5M from VDD (pedestal) |
 | 5 | PD0 | VIN_EN | SY6280 EN, and the top of the NTC divider; 1M to GND |
 | 7 | PC0 | LED_G | TIM2_CH3, cathode |
-| 8 | PC1 | VBUS_DET | 5 V tolerant; 10k from VBUS, 100k to GND; EXTI1 |
+| 8 | PC1 | VBUS_DET | 5 V tolerant; 2.2k from VBUS, 2.2k to GND; EXTI1 |
 | 9 | PC2 | LID | HAL248 output, 5 V tolerant; EXTI2 |
 | 10 | PC3 | BTN | to GND, internal pull-up; EXTI3 |
 | 11 | PC4 | NTC | ADC A2: TH1 NCU15WF104F6SRC (100k, B 4250 K class [VERIFY B against the firmware table]) to GND, R20 100k to VIN_EN |
 | 12 | PC5 | SWDCLK | U5 A; U5 DIR tied to VCCA |
 | 13 | PC6 | SWDIO | U6 A |
-| 14 | PC7 | SWDIO_DIR | U6 DIR: high when the case drives |
+| 14 | PC7 | SWDIO_DIR | U6 DIR: high when the case drives; 100k pull-down (R25) until set |
 | 15 | PD1 | SWIO | the case's own programming pad |
 | 16 | PD2 | BOOST_EN | TPS61023 EN; 1M to GND |
 | 17 | PD3 | LED_R | TIM2_CH2, cathode |

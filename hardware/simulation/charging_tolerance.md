@@ -32,7 +32,7 @@ the data sheet (SLUS941H), not re-run through the Monte Carlo:
 
 - **Diode in a pogo short (until firmware trips).** Worked for the B5819WS; Rev B fits the 1N5819WS (Hottech, C191023) with the same 0.60 V at 1 A, but its power rating is not in the LCSC listing [VERIFY Hottech data sheet]. The firmware trip (within 50 ms of a VIN-on edge into a short, 40 ms for a later short; host-tested) is what keeps either part safe. B5819WS figures: 236 mW (329 mW worst) against its 200-250 mW rating, steady-state Tj 131 C (181 C worst; Tj max 125 C). Safe only because firmware cuts VIN_EN within its 80 mA check; keep that check fast (<= 50 ms) [measure]. In normal charging (<= 25 mA) it dissipates < 10 mW.
 
-- **VBUS_DET at PC1:** 4.24-5.09 V; PC1 is 5 V tolerant (CH32V003 Table 2-1, FT max 5.5 V) and reads high above about 2.0 V at VDD 4.2 V.
+- **VBUS_DET at PC1:** 2.31-2.83 V (2.2k / 2.2k, 1 %, VBUS 4.66-5.60 V); PC1 reads high above 1.88 V at VDD 4.2 V. With USB out, up to about 60 uA of D1 reverse leakage (70 C) into the 4.4k divider gives 0.13 V, under VIL 0.71 V.
 - **Cell voltage via VREFINT:** VREFINT is 1.17-1.23 V (+-2.5 %), so an uncalibrated reading of a 3.80 V cell spans 3.71-3.90 V: about +-8 % of state of charge in the LED bands. Store a one-point calibration at end-of-line test.
 
 - **Case cell NTC at 45 C:** firmware reads 44.3-45.6 C (1 % parts, 10-bit ADC, ratiometric from PD0); the 45 C charge stop has +-1 C of error [VERIFY B25/85 against Murata's R-T table].

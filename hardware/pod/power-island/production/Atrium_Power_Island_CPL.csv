@@ -1,7 +1,5 @@
 Designator,Device,Footprint,Mid X,Mid Y,Ref X,Ref Y,Pad X,Pad Y,Pins,Layer,Rotation,SMD,Comment,Value,Type,Supplier,Datasheet
-C50,GRM033R60J105KEA2D,C0201,2.45mm,7.65mm,2.45mm,7.65mm,2.45mm,7.376mm,2,T,90,Yes,1uF,1uF,,LCSC,https://item.szlcsc.com/datasheet/GRM033R60J105KEA2D/78056.html
 C51,GRM155R60J226ME11D,C0402,1.93mm,7.45mm,1.93mm,7.45mm,1.93mm,7.03mm,2,B,90,Yes,22uF,22uF,,LCSC,https://item.szlcsc.com/datasheet/GRM155R60J226ME11D/408393.html
-C52,GRM033R60J105KEA2D,C0201,3.2mm,2.04mm,3.2mm,2.04mm,3.474mm,2.04mm,2,B,180,Yes,1uF,1uF,,LCSC,https://item.szlcsc.com/datasheet/GRM033R60J105KEA2D/78056.html
 C53,CL05A475MP5NRNC,C0402,2.44mm,3.02mm,2.44mm,3.02mm,2.44mm,3.44mm,2,B,270,Yes,4.7uF,4.7uF,,LCSC,https://item.szlcsc.com/datasheet/CL05A475MP5NRNC/24469.html
 C55,GRM033R60J104KE19D,C0201,2.52mm,7.165mm,2.52mm,7.165mm,2.52mm,7.439mm,2,B,270,Yes,100nF,100nF,,LCSC,https://item.szlcsc.com/datasheet/GRM033R60J104KE19D/78055.html
 C56,GRM033R60J105KEA2D,C0201,1.85mm,3.21mm,1.85mm,3.21mm,1.85mm,3.484mm,2,B,270,Yes,1uF,1uF,,LCSC,https://item.szlcsc.com/datasheet/GRM033R60J105KEA2D/78056.html
@@ -17,3 +15,5 @@ U12,AP6683,DFN-4_L1.0-W1.0-P0.65-BL-EP,3.1mm,8.32mm,3.1mm,8.32mm,2.625mm,7.995mm
 U13,TPS7A0218PYCHR,WLCSP-4_L0.6-W0.6-P0.35-R2-C2-TL,1.75mm,6.25mm,1.75mm,6.25mm,1.925mm,6.425mm,4,B,180,Yes,TPS7A0218PYCHR,,,LCSC,https://www.ti.com/cn/lit/ds/symlink/tps7a02.pdf
 D12,ESD5V3U04-0201,X3-DFN0603-2_L0.6-W0.3-RD,3.7mm,2.17mm,3.7mm,2.17mm,3.7mm,1.97mm,2,T,90,Yes,ESD5V3U04-0201,,ESD,LCSC,https://item.szlcsc.com/datasheet/ESD5V3U04-0201/539383.html
 D13,ESD5V3U04-0201,X3-DFN0603-2_L0.6-W0.3-RD,3.5mm,8.9mm,3.5mm,8.9mm,3.5mm,8.7mm,2,T,90,Yes,ESD5V3U04-0201,,ESD,LCSC,https://item.szlcsc.com/datasheet/ESD5V3U04-0201/539383.html
+C50,CL05A106MP5NUNC_C315248,C0402,2.451mm,7.856mm,2.451mm,7.856mm,2.451mm,7.436mm,2,T,90,Yes,10uF,10uF,,LCSC,https://item.szlcsc.com/datasheet/CL05A106MP5NUNC/297154.html
+C52,CL05A106MP5NUNC_C315248,C0402,3.685mm,2.18mm,3.685mm,2.18mm,3.685mm,2.6mm,2,B,270,Yes,10uF,10uF,,LCSC,https://item.szlcsc.com/datasheet/CL05A106MP5NUNC/297154.html

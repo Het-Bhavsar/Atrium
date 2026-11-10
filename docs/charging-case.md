@@ -53,7 +53,7 @@ pogo GND ─ 1 Ω shunt (low side) ─ GND     OPA (CH32V003 plain op-amp, exter
 SWD: CH32V003 GPIO ─ 2 × 74LVC1T45 (VCCA = VDD, VCCB = 1.8 V from XC6206P182MR fed by GPIO PD5, Ioff keeps the pod side
      unpowered when the LDO is off) ─ 100 Ω ─ pogo SWDIO / SWDCLK; 1 M pull-down on SWDIO B side (presence)
 HAL248 (lid) ─ PC2 wake;  button ─ PC3 wake;  RGB LED (cathodes on TIM2 PWM, anodes to VDD, ~2 mA);  BQ24040 CHG ─ PD6
-VBUS_DET ─ PC1 (10 k / 100 k);  cell NTC 100 k B3950 / 100 k from PD0 ─ PC4 (A2);  TH2 10 k NTC (board, above the cell) ─ BQ24040 TS;  SWIO pad (PD1) + VDD + GND for flashing
+VBUS_DET ─ PC1 (2.2 k / 2.2 k);  cell NTC 100 k B3950 / 100 k from PD0 ─ PC4 (A2);  TH2 10 k NTC (board, above the cell) ─ BQ24040 TS;  SWIO pad (PD1) + VDD + GND for flashing
 ```
 
 Key parts (LCSC numbers checked 2026-11-08; re-check stock before ordering):
@@ -67,7 +67,7 @@ Key parts (LCSC numbers checked 2026-11-08; re-check stock before ordering):
 | U5, U6 | 74LVC1T45 level translator | [VERIFY LCSC] | SWDCLK fixed direction, SWDIO with DIR from the MCU |
 | U7 | XC6206P182MR 1.8 V LDO, SOT-23 | C21659 | VCCB of the translators, enabled only while the pod is powered |
 | U8 | HAL248 SW omnipolar hall, 1.8–5.5 V, 3 µA | C6320892 | Lid sensor |
-| J1 | USB-C 16-pin receptacle | C2765186 | 5.1 k CC pull-downs, VBUS TVS |
+| J1 | USB-C 16-pin receptacle | C2765186 | 5.1 k CC pull-downs, VBUS TVS (D4 TSD05DYFR, C22396185) |
 | D1, D2 | 1N5819WS Schottky, SOD-323 | C191023 | Diode-OR of VBUS and boost (SOD-323 because two SOD-123 bodies did not fit between SW1 and J1) |
 | BT1 | Sharvi KP-502030 500 mAh | Sharvi | KP-502030 packs usually ship with a PCM and red / black bare wire leads [VERIFY on the delivered cell]. Each lead goes up through a plated 0.8 mm hole (BT1 + at (−15.5, +2.0), BT2 − at (−15.5, −2.0), past the cell end, 1.3 mm pads both sides) and is soldered on top; trim with a small loop, add a dab of glue under the board for strain relief; foam pad under the cell |
 | P1–P4 | SMD pogo pins, 1.0–1.5 mm stroke, ≤ 0.3 N | [VERIFY] | Through the nest floor to the pod pads |
@@ -103,13 +103,13 @@ CH32V003F4U6, QFN-20, ch32fun toolchain.
 | 5 | PD0 | VIN_EN | SY6280 EN, top of the NTC divider; 1 M to GND |
 | 6 | VDD | VDD (cell) | 100 n + 1 µ |
 | 7 | PC0 | LED_G | TIM2_CH3, sinks |
-| 8 | PC1 | VBUS_DET | 10 k from VBUS, 100 k to GND, EXTI wake |
+| 8 | PC1 | VBUS_DET | 2.2 k from VBUS, 2.2 k to GND (low enough that D1 leakage cannot fake a plug-in), EXTI wake |
 | 9 | PC2 | LID | HAL248 output, EXTI wake |
 | 10 | PC3 | BTN | To GND, internal pull-up, EXTI wake |
 | 11 | PC4 | NTC_ADC | A2 |
 | 12 | PC5 | SWDCLK_A | U5 A (DIR tied to VCCA) |
 | 13 | PC6 | SWDIO_A | U6 A |
-| 14 | PC7 | SWDIO_DIR | U6 DIR (high = MCU drives) |
+| 14 | PC7 | SWDIO_DIR | U6 DIR (high = MCU drives); R25 100 k holds it low until firmware sets it |
 | 15 | PD1 | SWIO | Case programming pad |
 | 16 | PD2 | BOOST_EN | TPS61023 EN, 1 M to GND |
 | 17 | PD3 | LED_R | TIM2_CH2, sinks |

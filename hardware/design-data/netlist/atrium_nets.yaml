@@ -22,7 +22,7 @@ components:
   # ------------------------------------------------------------- RADIO island
   U1: {board: RADIO, side: top, part: NRF52832-CIAA-G-R7 (CIAA in the 7k-reel code JLC stocks; CIAA-R C509405 had none), pkg: WLCSP-50 3.0x3.2 0.4p, lcsc: C3606951,
        note: "Copy Nordic's 'CIAA WLCSP with DC/DC regulator setup' reference circuit and layout exactly (nRF52832 PS, Reference circuitry, Fig 5 / Table 5)."}
-  Y1: {board: RADIO, side: top, part: NX1612SA-32MHZ-STD-CIS-3 32 MHz 8 pF 1612, lcsc: C910049, note: "NDK NX1612SA (1.6 x 1.2 x 0.3): 8 pF, +/-10 ppm, +/-15 ppm -30..85 C, drive 10 (max 100) uW. Replaces the 2016 part so the Nordic decoupling fits next to U1 (review 2026-11-07).", verify: "ESR max 100 ohm at 32 MHz: Nordic allows 100 ohm only with C0 <= 3 pF (PS CLOCK, RS_HFXO_3PF); get C0 from NDK and check HFXO start-up at EVT bring-up"}
+  Y1: {board: RADIO, side: top, part: NX1612SA-32MHZ-STD-CIS-3 32 MHz 8 pF 1612, lcsc: C910049, note: "NDK NX1612SA (1.6 x 1.2 x 0.3): 8 pF, +/-10 ppm, +/-15 ppm -30..85 C, drive 10 (max 100) uW. Replaces the 2016 part so the Nordic decoupling fits next to U1 (review 2026-11-07).", note2: "NDK specification EXS00A-CS14160 (NX1612SA 32 MHz 8 pF): C0 0.54 pF +/-30 %, ESR 60 ohm max. Nordic allows 100 ohm when C0 <= 3 pF (PS CLOCK, RS_HFXO_3PF), so the crystal stays (2026-11-10)", verify: "confirm with NDK that the STD-CIS-3 suffix follows EXS00A-CS14160; check HFXO start-up at EVT bring-up"}
   C1: {board: RADIO, side: top, part: 12 pF C0G 0201, lcsc: C161404, note: "XC1 load (Nordic ref: 12 pF NP0 +/-2 %)"}
   C2: {board: RADIO, side: top, part: 12 pF C0G 0201, lcsc: C161404, note: "XC2 load"}
   L3: {board: RADIO, side: top, part: 3.3 nH 0201, lcsc: C98045, note: "Nordic RF match series L1 in ref BOM, after the C3 shunt (2026-11-10: on the land C42 had)"}
@@ -65,9 +65,9 @@ components:
   # ------------------------------------------------------------- POWER island
   U10: {board: POWER, side: bot, part: BQ21061YFPR I2C linear charger, pkg: DSBGA-20 2.0x1.6 0.4p, lcsc: C2869893,
         note: "ICHG 1.25-500 mA in 1.25 mA steps; firmware sets 15 mA. PMID = VSYS. VDD (1.8 V, always on except ship mode) powers the IMU."}
-  C50: {board: POWER, side: top, part: 1 uF X5R 0201, lcsc: C76929, note: "IN (>= 1 uF)"}
+  C50: {board: POWER, side: top, part: 10 uF X5R 10 V 0402 (CL05A106MP5NUNC), lcsc: C315248, note: "IN (>= 1 uF effective). About 2.0 uF left at 5.3 V DC bias (Samsung curve); no 0201 keeps 1 uF at 4.35-5.3 V, so the 1 uF 0201 was replaced (2026-11-10)"}
   C51: {board: POWER, side: bot, part: 22 uF X5R 0402 6.3 V, lcsc: C415703, note: "PMID (TI: 22 uF close to pins). 0402 height <= 0.65 mm fits under the island."}
-  C52: {board: POWER, side: bot, part: 1 uF X5R 0201, lcsc: C76929, note: "BAT (>= 1 uF)"}
+  C52: {board: POWER, side: bot, part: 10 uF X5R 10 V 0402 (CL05A106MP5NUNC), lcsc: C315248, note: "BAT (>= 1 uF effective). About 2.5 uF left at 4.35 V. Vertical between the clamp band and R51, pad 1 on the CELL_P track to BT1 (2026-11-10)"}
   C53: {board: POWER, side: bot, part: 4.7 uF X5R 0402 6.3 V, lcsc: C23733, note: "BQ21061 VDD. TI SLUSDU0A 8.2.2.2 recommends 4.7 uF, > 1 uF after derating", verify: "LCSC number (CL05A475MQ5NRNC) not yet checked on LCSC"}
   C56: {board: POWER, side: bot, part: 1 uF X5R 0201, lcsc: C76929, note: "VINLS (>= 1 uF)", verify: "VINLS/LSLDO termination when LDO unused: copy TI BQ21061 EVM"}
   R50: {board: POWER, side: top, part: 10 kohm 0201 1 %, lcsc: C473048, note: "TS: in parallel with TH5"}

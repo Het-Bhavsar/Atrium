@@ -11,7 +11,7 @@ One 6-layer panel carries both pod islands, so a build needs one PCB order, one 
 | Break-off | Mouse bites: two 0.50 mm NPTH holes per tab end at 0.65 mm pitch, centres 0.30 mm outside the board edge (280 per panel) |
 | Copper at the tabs | Pour kept off every tab body and 0.2 mm back from each joint, the same pull-back as every board edge |
 | Fiducials and tooling | 3 fiducials per side (1.0 mm copper, 2.0 mm mask opening), 4 × 1.152 mm NPTH tooling holes |
-| Placements | 1,040 per panel (580 top, 460 bottom), 30 BOM lines |
+| Placements | 1,040 per panel (580 top, 460 bottom), 31 BOM lines |
 | Nets | Each island has its own net names (`GND_R11`, `VSYS_P32`, …), so the flying-probe netlist keeps the islands apart |
 
 ## Files
@@ -24,7 +24,7 @@ One 6-layer panel carries both pod islands, so a build needs one PCB order, one 
 | `Pod_Islands_Panel_render.png` | Top and bottom with every placement marked |
 
 The panel was checked against both source boards part by part (all 40 islands: parts, pad nets, tracks, vias) and, as
-Gerbers, layer by layer: all six copper layers, both masks and both paste layers match an independent merged-Gerber build, and the 4,504 drill hits match (3,964 holes: EasyEDA writes each of the 540 through vias into both the `Through` and the `Through_Via` drill file). EasyEDA DRC on the panel: 0 errors. The panel PCB carries four panel-only rules:
+Gerbers, layer by layer: all six copper layers, both masks and both paste layers match an independent merged-Gerber build, and the 4,484 drill hits match (3,944 holes: EasyEDA writes each of the 540 through vias into both the `Through` and the `Through_Via` drill file). EasyEDA DRC on the panel: 0 errors. The panel PCB carries four panel-only rules:
 board outline to hole and to TH pad 0 (the mouse bites sit on the edge by design), hole to hole 0.10 mm (bite pairs),
 and board outline to SMD pad 0.195 mm, which absorbs a 1 µm rounding of the column-2 offset at the radio flex pads
 (0.200 mm on the island itself, where the 0.20 mm rule passes).

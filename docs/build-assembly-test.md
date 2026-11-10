@@ -67,7 +67,7 @@ Area ratio = aperture area / (perimeter × foil thickness). It needs to be ≥ 0
 | Power | Top | 28 | 0201 diode 0.30 × 0.20 | 0.78 | 0.62 | 0.52 |
 | Power | Bottom | 55 | U13 DSBGA ball 0.157 (U12's exposed pad prints: see below) | 0.57 | 0.46 | 0.38 |
 | Flex | – | – | No parts: **no stencil** | – | – | – |
-| Case | Top | 174 | U1 QFN lead 0.60 × 0.20 | 0.96 | 0.77 | 0.64 |
+| Case | Top | 178 | U1 QFN lead 0.60 × 0.20 | 0.96 | 0.77 | 0.64 |
 
 The table gives the apertures as designed, before the changes below.
 

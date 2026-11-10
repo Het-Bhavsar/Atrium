@@ -19,7 +19,7 @@
 #define PIN_VIN_EN PD0
 /* [7] TIM2_CH3, LED green cathode */
 #define PIN_LED_G  PC0
-/* [8] 5 V tolerant: VBUS through 10k, 100k to GND. EXTI1. */
+/* [8] 5 V tolerant: VBUS through 2.2k, 2.2k to GND. EXTI1. */
 #define PIN_VBUS   PC1
 /* [9] 5 V tolerant: HAL248 output. EXTI2. */
 #define PIN_LID    PC2
@@ -32,7 +32,7 @@
 #define PIN_SWCLK  PC5
 /* [13] U6 A */
 #define PIN_SWDIO  PC6
-/* [14] U6 DIR: high = A to B (the case drives SWDIO) */
+/* [14] U6 DIR: high = A to B (the case drives SWDIO); R25 100k pulls it low at reset */
 #define PIN_SWDIR  PC7
 /* [15] PD1 SWIO: the case's own programming pad */
 /* [16] TPS61023 EN, 1M to GND */

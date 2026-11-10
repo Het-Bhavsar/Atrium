@@ -23,6 +23,8 @@ components:
         note: "SOD-323, not SOD-123: two stacked SOD-123 bodies (1.6 mm) did not fit between SW1 and J1 (mech fit 2026-11-08) [VERIFY Pd at the 0.45 A ISET limit]"}
   D2:  {board: CASE, side: top, part: 1N5819WS SOD-323 Schottky (boost -> 5V_POD; replaces B5819WS C179554, out of stock), lcsc: C191023,
         note: "SOD-323, not SOD-123: two stacked SOD-123 bodies (1.6 mm) did not fit between SW1 and J1 (mech fit 2026-11-08) [VERIFY Pd at the 0.45 A ISET limit]"}
+  D4:  {board: CASE, side: top, part: TSD05DYFR 5 V unidirectional TVS (VRWM 5.5 V, VBR >= 6 V, clamp 11.5 V max at 24 A, leakage 50 nA max), pkg: SOD-323, lcsc: C22396185,
+        note: "VBUS to GND beside C1, about 3 mm of track from J1 VBUS (2026-11-10). No 5 V TVS clamps under 6 V, so C1 (10 uF) still takes the ESD charge; D4 takes the surge energy"}
   D3:  {board: CASE, side: top, part: XL-1615RGBC-RF RGB LED, lcsc: C965840, note: "common anode to VDD [VERIFY pinout]"}
   SW1: {board: CASE, side: top, part: Alps SKSCLAE010 side-push tactile 3.5 x 2.9 x 1.25 (stem to the -Y wall), lcsc: C130445}
   TH1: {board: CASE, side: top, part: "NCU15WF104F6SRC 100k NTC, B 4250 K class (case cell, read by the MCU while feeding the pod; replaces the end-of-life NCP15WF104F03RC C77130) [VERIFY B against the firmware table]", lcsc: C458473}
@@ -30,8 +32,9 @@ components:
   RS1: {board: CASE, side: top, part: 1 ohm 1 % 0603 shunt (low side, pod GND return), lcsc: C22936}
   R1:  {board: CASE, side: top, part: 5.1k CC1, lcsc: C25905}
   R2:  {board: CASE, side: top, part: 5.1k CC2, lcsc: C25905}
-  R3:  {board: CASE, side: top, part: 10k VBUS_DET series, lcsc: C25744}
-  R4:  {board: CASE, side: top, part: 100k VBUS_DET to GND, lcsc: C25741}
+  R3:  {board: CASE, side: top, part: 2.2k VBUS_DET series, lcsc: C25879,
+        note: "2.2k / 2.2k since 2026-11-10 (was 10k / 100k). With USB out and the boost on, D1 leaks up to about 60 uA at 70 C back into VBUS; into 4.4k that is 0.13 V at PC1, under VIL 0.71 V (100k gave a false USB detect). USB in: 0.5 x VBUS = 2.3-2.8 V, over VIH 1.88 V at VDD 4.2 V. 1.1 mA from VBUS while plugged in"}
+  R4:  {board: CASE, side: top, part: 2.2k VBUS_DET to GND, lcsc: C25879}
   R5:  {board: CASE, side: top, part: 2.7k BQ24040 ISET (200 mA), lcsc: C25885}
   R6:  {board: CASE, side: top, part: 768k boost FB top, lcsc: C27017}
   R7:  {board: CASE, side: top, part: 100k boost FB bottom, lcsc: C25741}
@@ -52,6 +55,8 @@ components:
   R22: {board: CASE, side: top, part: 330 ohm LED green, lcsc: C25104}
   R23: {board: CASE, side: top, part: 330 ohm LED blue, lcsc: C25104}
   R24: {board: CASE, side: top, part: 2k BQ24040 PRE-TERM (10 % termination, 20 % pre-charge), lcsc: C4109}
+  R25: {board: CASE, side: top, part: 100k SWDIO_DIR pull-down, lcsc: C25741,
+        note: "Holds U6 DIR low (B to A: the pod drives, the MCU pin listens) from power-up until firmware sets PC7. DIR leakage 2 uA max gives 0.2 V at most (2026-11-10)"}
   C1:  {board: CASE, side: top, part: 10 uF 0603 VBUS, lcsc: C19702}
   C2:  {board: CASE, side: top, part: 4.7 uF 0603 charger OUT (BAT), lcsc: C19666}
   C3:  {board: CASE, side: top, part: 10 uF 0603 boost in, lcsc: C19702}
@@ -82,8 +87,8 @@ nets:
   GND:        [U1.VSS, U1.EP, U2.GND, U3.GND, U4.GND, U5.GND, U6.GND, U7.GND, U8.GND, J1.GND, J1.SHELL, BT2, RS1.2, R1.2, R2.2,
                R4.2, R7.2, R8.2, R10.2, R13.2, R17.2, R18.2, TH1.2, SW1.3, SW1.4, C1.2, C2.2, C3.2, C4.2, C5.2, C6.2, C7.2, C8.2,
                C9.2, C10.2, C11.2, C12.2, C13.2, C14.2, C15.2, C16.2, R9.2, R5.2, TP3,
-               U2.VSS, U2.EP, U2.ISET2, R24.2, TH2.2]
-  VBUS:       [J1.VBUS, U2.IN, D1.A, R3.1, C1.1]
+               U2.VSS, U2.EP, U2.ISET2, R24.2, TH2.2, D4.2, R25.2]
+  VBUS:       [J1.VBUS, U2.IN, D1.A, R3.1, C1.1, D4.1]
   CC1:        [J1.CC1, R1.1]
   CC2:        [J1.CC2, R2.1]
   VDD:        [BT1, U2.OUT, C2.1, U1.VDD, C7.1, C8.1, U3.VIN, L1.1, C3.1, U5.VCCA, U5.DIR, U6.VCCA, C9.1, C11.1, U8.VDD, C15.1,
@@ -118,7 +123,7 @@ nets:
   SWDCLK_B:   [U5.B, R15.1]
   POGO_SWDCLK: [R15.2, P4]
   SWDIO_A:    [U1.PC6, U6.A]
-  SWDIO_DIR:  [U1.PC7, U6.DIR]
+  SWDIO_DIR:  [U1.PC7, U6.DIR, R25.1]
   SWDIO_B:    [U6.B, R16.1, R17.1]
   POGO_SWDIO: [R16.2, P3]
   LDO_PWR:    [U1.PD5, U7.VIN, C13.1, R18.1]
