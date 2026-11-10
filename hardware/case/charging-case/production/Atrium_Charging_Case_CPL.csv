@@ -35,7 +35,6 @@ R15,0402WGF1000TCE,R0402,-4.6mm,-3.7mm,-4.6mm,-3.7mm,-5.033mm,-3.7mm,2,T,0,Yes,1
 R16,0402WGF1000TCE,R0402,4.6mm,-3.7mm,4.6mm,-3.7mm,5.033mm,-3.7mm,2,T,180,Yes,100Ω,100Ω,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/0402WGF1000TCE/25819.html
 R17,0402WGF1004TCE,R0402,-4.6mm,-5.18mm,-4.6mm,-5.18mm,-4.6mm,-4.747mm,2,T,270,Yes,1MΩ,1MΩ,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/0402WGF1004TCE/26826.html
 R18,0402WGF1004TCE,R0402,-12mm,2.4mm,-12mm,2.4mm,-12mm,2.833mm,2,T,270,Yes,1MΩ,1MΩ,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/0402WGF1004TCE/26826.html
-R19,0402WGF4704TCE,R0402,-13.8mm,-7mm,-13.8mm,-7mm,-13.8mm,-6.567mm,2,T,270,Yes,4.7MΩ,4.7MΩ,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/0402WGF4704TCE/480665.html
 R20,0402WGF1003TCE,R0402,-7.7mm,7.7mm,-7.7mm,7.7mm,-8.133mm,7.7mm,2,T,0,Yes,100kΩ,100kΩ,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/0402WGF1003TCE/26484.html
 R21,0402WGF1001TCE,R0402,-9.4mm,-8.3mm,-9.4mm,-8.3mm,-9.4mm,-7.867mm,2,T,270,Yes,1kΩ,1kΩ,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/0402WGF1001TCE/12256.html
 R22,0402WGF3300TCE,R0402,-6.8mm,-9.4mm,-6.8mm,-9.4mm,-6.367mm,-9.4mm,2,T,180,Yes,330Ω,330Ω,Thick Film Resistors,LCSC,https://item.szlcsc.com/datasheet/0402WGF3300TCE/25847.html
@@ -56,3 +55,4 @@ R5,0402WGF2701TCE,R0402,12.9mm,5.45mm,12.9mm,5.45mm,13.333mm,5.45mm,2,T,180,Yes,
 R24,0402WGF2001TCE,R0402,14.98mm,5.45mm,14.98mm,5.45mm,14.547mm,5.45mm,2,T,0,Yes,2kΩ,2kΩ,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/0402WGF2001TCE/4516.html
 TH2,NCP15XH103F03RC,R0402,12.3mm,9.85mm,12.3mm,9.85mm,12.733mm,9.85mm,2,T,180,Yes,NCP15XH103F03RC,,,LCSC,https://item.szlcsc.com/datasheet/NCP15XH103F03RC/78258.html
 U2,BQ24040DSQR,WSON-10_L2.0-W2.0-P0.40-BL-EP,13.95mm,7.3mm,13.95mm,7.3mm,13.15mm,6.372mm,11,T,0,Yes,BQ24040DSQR,,,LCSC,https://www.ti.com/cn/lit/ds/symlink/bq24040.pdf
+R19,0402WGF3303TCE,R0402,-13.8mm,-7mm,-13.8mm,-7mm,-13.8mm,-6.567mm,2,T,270,Yes,330kΩ,330kΩ,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/0402WGF3303TCE/26521.html

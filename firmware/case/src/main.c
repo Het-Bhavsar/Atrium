@@ -227,7 +227,7 @@ static void board_init(void)
 	funPinMode(PIN_OPA_O, GPIO_CFGLR_IN_ANALOG);
 	funPinMode(PIN_NTC, GPIO_CFGLR_IN_ANALOG);
 	funPinMode(PIN_VBUS, GPIO_CFGLR_IN_FLOAT); /* 100k to GND on the board */
-	funPinMode(PIN_LID, GPIO_CFGLR_IN_FLOAT);  /* push-pull hall output [VERIFY] */
+	funPinMode(PIN_LID, GPIO_CFGLR_IN_FLOAT);  /* open-drain hall output, R19 330k pull-up */
 	in_pullup(PIN_BTN);
 	in_pullup(PIN_CHRG);
 	led_pins(false);

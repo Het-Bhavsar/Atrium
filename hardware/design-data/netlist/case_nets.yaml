@@ -46,7 +46,7 @@ components:
   R16: {board: CASE, side: top, part: 100 ohm SWDIO series, lcsc: C25076}
   R17: {board: CASE, side: top, part: 1M SWDIO_B pull-down (pod presence), lcsc: C26083}
   R18: {board: CASE, side: top, part: 1M LDO_PWR pull-down, lcsc: C26083}
-  R19: {board: CASE, side: top, part: 4.7M LID pull-up (fit only if the HAL248 is open drain), lcsc: C474132, dnp: true}
+  R19: {board: CASE, side: top, part: 330k LID pull-up (the HAL248 output is open drain, Hallwee data sheet V3.3 p4), lcsc: C25778}
   R20: {board: CASE, side: top, part: 100k NTC divider top (from PD0), lcsc: C25741}
   R21: {board: CASE, side: top, part: 1k LED red, lcsc: C11702}
   R22: {board: CASE, side: top, part: 330 ohm LED green, lcsc: C25104}

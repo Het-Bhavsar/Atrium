@@ -49,7 +49,8 @@
 
 #define ADC_CH_VREFINT 8
 
-/* HAL248 output level with the lid open (no magnet) [VERIFY output type and polarity] */
+/* HAL248 output level with the lid open (no magnet): open drain, off without a magnet, so R19 pulls it high
+ * (Hallwee HAL248 data sheet V3.3, p4) */
 #define LID_OPEN_LEVEL 1
 
 #endif /* CASE_BOARD_H_ */

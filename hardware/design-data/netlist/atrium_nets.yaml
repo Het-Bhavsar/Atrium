@@ -25,8 +25,8 @@ components:
   Y1: {board: RADIO, side: top, part: NX1612SA-32MHZ-STD-CIS-3 32 MHz 8 pF 1612, lcsc: C910049, note: "NDK NX1612SA (1.6 x 1.2 x 0.3): 8 pF, +/-10 ppm, +/-15 ppm -30..85 C, drive 10 (max 100) uW. Replaces the 2016 part so the Nordic decoupling fits next to U1 (review 2026-11-07).", verify: "ESR max 100 ohm at 32 MHz: Nordic allows 100 ohm only with C0 <= 3 pF (PS CLOCK, RS_HFXO_3PF); get C0 from NDK and check HFXO start-up at EVT bring-up"}
   C1: {board: RADIO, side: top, part: 12 pF C0G 0201, lcsc: C161404, note: "XC1 load (Nordic ref: 12 pF NP0 +/-2 %)"}
   C2: {board: RADIO, side: top, part: 12 pF C0G 0201, lcsc: C161404, note: "XC2 load"}
-  L3: {board: RADIO, side: top, part: 3.3 nH 0201, lcsc: C98045, note: "Nordic RF match series L1 in ref BOM"}
-  C3: {board: RADIO, side: top, part: 1.0 pF C0G 0201, lcsc: C237514, note: "Nordic RF match C3 in ref BOM", verify: "position (shunt) per Fig 5"}
+  L3: {board: RADIO, side: top, part: 3.3 nH 0201, lcsc: C98045, note: "Nordic RF match series L1 in ref BOM, after the C3 shunt (2026-11-10: on the land C42 had)"}
+  C3: {board: RADIO, side: top, part: 1.0 pF C0G 0201, lcsc: C237514, note: "Nordic RF match C3: 1.0 pF shunt on the ANT ball node, ground via beside it, then L3 (PS v1.8 section 53.5, Figure 175; 2026-11-10: on the land L3 had)"}
   C4: {board: RADIO, side: top, part: 100 nF X5R 0201, lcsc: C76928, note: DEC1}
   C5: {board: RADIO, side: top, part: 100 nF X5R 0201, lcsc: C76928, note: "VDD (H7) decoupling"}
   C6: {board: RADIO, side: top, part: 100 pF C0G 0201, lcsc: C62550, note: DEC3, verify: "Nordic ref C6 placement"}
@@ -56,9 +56,9 @@ components:
   C12: {board: RADIO, side: top, part: 100 nF X5R 0201, lcsc: C76928, note: "VSYS sense hold cap (SAADC charge reservoir)"}
   C40: {board: RADIO, side: top, part: 0201 C0G, lcsc: TBD, dnp: true, note: "Pi-match shunt 1 (antenna side). Tune on VNA; Smith-chart match on the VNA"}
   Z41: {board: RADIO, side: top, part: 0 ohm 0201 (series pi element), lcsc: C473473, note: "Pi-match series: 0 ohm until tuned"}
-  C42: {board: RADIO, side: top, part: 0201 C0G, lcsc: TBD, dnp: true, note: "Pi-match shunt 2 (nRF side)"}
+  C42: {board: RADIO, side: top, part: 0201 C0G, lcsc: TBD, dnp: true, note: "Pi-match shunt 2 (nRF side; 2026-11-10: on the land C3 had)"}
   ANT1: {board: RADIO, side: top, part: KH-1608-H08 2.45 GHz chip antenna 0603, lcsc: C2925416,
-         note: "At the radio-island tip. Copper-free zone through ALL layers from x = 17.26 mm. Kinghelm asks for 5 x 3 mm minimum; we have ~7.6 mm2 (~50 %). Known, accepted, tune on VNA."}
+         note: "At the radio-island tip. Copper-free zone through ALL layers from x = 17.26 mm. Kinghelm asks for 5 x 3 mm minimum; we have ~7.6 mm2 (~50 %). Known, accepted, tune on VNA. Pin 1 (far end) is not connected: none of Kinghelm's layouts grounds it (2026-11-10: GND tie removed)."}
   TP1: {board: RADIO, side: top, part: test pad 0.6 mm, note: "P0.21/nRESET, bench use only"}
   TP2: {board: RADIO, side: bot, part: test pad 0.5 mm, note: "MAXM GPIO (pin 13), unused"}
 
@@ -100,7 +100,7 @@ nets:
   GND:        [P2, P5, U10.A4, D10.2, D12.2, D13.2, C50.2, C51.2, C52.2, C53.2, C56.2, C60.2, R50.2, TH5.2, TH4.2,
                U11.GND, U11.SA0, U11.SDx, U11.SCx, U10.LP, U12.VM, FPC1.GND_P,
                FPC1.GND_R, U1.VSS, U1.VSS_PA, C1.2, C2.2, C3.2, C4.2, C5.2, C6.2, C7.2, C8.2, C9.2, U2.GND, C20.2, C21.2, U13.GND, C63.2,
-               U3.PGND, U3.GND_DIG, U3.GND_ANA, C30.2, C31.2, C32.2, R5.2, TH1.2, C10.2, R41.2, C12.2, C40.2, C42.2, ANT1.GND]
+               U3.PGND, U3.GND_DIG, U3.GND_ANA, C30.2, C31.2, C32.2, R5.2, TH1.2, C10.2, R41.2, C12.2, C40.2, C42.2]
   CELL_P:     [BT1.+, U10.A3, U10.B3, C52.1, R51.1]
   CELL_N:     [BT1.-, U12.GND, C55.2]
   U12_VDD:    [U12.VDD, R51.2, C55.1]
@@ -118,8 +118,8 @@ nets:
   DCC:        [U1.DCC, L1.1]
   XC1:        [U1.XC1, Y1.1, C1.1]
   XC2:        [U1.XC2, Y1.3, C2.1]
-  ANT_NRF:    [U1.ANT, L3.1]
-  RF_50R:     [L3.2, C3.1, C42.1, Z41.1]
+  ANT_NRF:    [U1.ANT, C3.1, L3.1]
+  RF_50R:     [L3.2, C42.1, Z41.1]
   ANT_FEED:   [Z41.2, C40.1, ANT1.FEED]
   # Sensors and buses
   I2C_SDA:    [U1.P0.15, R1.2, U3.SDA, FPC1.SDA_R, FPC1.SDA_P, U11.SDA, U10.E2]
@@ -143,7 +143,7 @@ nets:
 no_connect: [U1.P0.00, U1.P0.01, U1.P0.04, U1.P0.05, U1.P0.06, U1.P0.07, U1.P0.08, U1.P0.09,
              U1.P0.10, U1.P0.11, U1.P0.13, U1.P0.19, U1.P0.22, U1.P0.23, U1.P0.24, U1.P0.25, U1.P0.26, U1.P0.27,
              U1.P0.29, U1.P0.30, U1.P0.31, U1.NC, U10.C1_MR, U10.C2_CE, U10.D2_INT, U10.C3, U10.C4, U11.INT2, U11.OCS_Aux, U11.SDO_Aux,
-             U3.NC6, U3.NC7, U3.NC8]
+             U3.NC6, U3.NC7, U3.NC8, ANT1.NC]
 
 jumper:   # FPC1 pads per end, 10 each. Net names; FPC1.<NET>_R / _P in the nets above.
   radio: [GND, GND, GND, VSYS, I2C_SDA, I2C_SCL, IMU_INT1, CHG_PG, SWDIO, SWDCLK]

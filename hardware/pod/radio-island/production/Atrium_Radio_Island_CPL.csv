@@ -2,7 +2,7 @@ Designator,Device,Footprint,Mid X,Mid Y,Ref X,Ref Y,Pad X,Pad Y,Pins,Layer,Rotat
 ANT1,KH-1608-H08,ANT-SMD_L1.7-W0.9,19.4mm,5.5mm,19.4mm,5.5mm,19.4mm,4.744mm,2,T,90,Yes,KH-1608-H08,,,LCSC,https://item.szlcsc.com/datasheet/KH-1608-H08/3244678.html
 C1,GRM0335C1H120GA01D,C0201,17.63mm,2.4mm,17.63mm,2.4mm,17.904mm,2.4mm,2,T,180,Yes,12pF,12pF,,LCSC,https://item.szlcsc.com/datasheet/GRM0335C1H120GA01D/172785.html
 C2,GRM0335C1H120GA01D,C0201,16.46mm,3.75mm,16.46mm,3.75mm,16.46mm,4.024mm,2,T,270,Yes,12pF,12pF,,LCSC,https://item.szlcsc.com/datasheet/GRM0335C1H120GA01D/172785.html
-C3,GJM0335C1H1R0BB01D,C0201,17.63mm,6.912mm,17.63mm,6.912mm,17.63mm,6.638mm,2,T,90,Yes,1pF,1pF,,LCSC,https://atta.szlcsc.com/upload/public/pdf/source/20181211/C237514_B3409DDFEFAC0419E560973322D8BE24.pdf
+C3,GJM0335C1H1R0BB01D,C0201,17.15mm,6.127mm,17.15mm,6.127mm,17.15mm,5.852mm,2,T,90,Yes,1pF,1pF,,LCSC,https://atta.szlcsc.com/upload/public/pdf/source/20181211/C237514_B3409DDFEFAC0419E560973322D8BE24.pdf
 C4,GRM033R60J104KE19D,C0201,14.544mm,3.62mm,14.544mm,3.62mm,14.27mm,3.62mm,2,T,0,Yes,100nF,100nF,,LCSC,https://item.szlcsc.com/datasheet/GRM033R60J104KE19D/78055.html
 C5,GRM033R60J104KE19D,C0201,14.223mm,8.42mm,14.223mm,8.42mm,14.223mm,8.146mm,2,T,90,Yes,100nF,100nF,,LCSC,https://item.szlcsc.com/datasheet/GRM033R60J104KE19D/78055.html
 C6,0201CG101J500NT,C0201,17.45mm,5.11mm,17.45mm,5.11mm,17.176mm,5.11mm,2,T,0,Yes,100pF,100pF,,LCSC,https://item.szlcsc.com/datasheet/0201CG101J500NT/63610.html
@@ -17,10 +17,10 @@ C30,CL05A106MQ5NUNC,C0402,16.15mm,1.29mm,16.15mm,1.29mm,16.57mm,1.29mm,2,T,180,Y
 C31,GRM033R60J105KEA2D,C0201,18.4mm,7.8mm,18.4mm,7.8mm,18.4mm,7.526mm,2,T,90,Yes,1uF,1uF,,LCSC,https://item.szlcsc.com/datasheet/GRM033R60J105KEA2D/78056.html
 C32,GRM033R60J105KEA2D,C0201,15.67mm,2.25mm,15.67mm,2.25mm,15.944mm,2.25mm,2,B,180,Yes,1uF,1uF,,LCSC,https://item.szlcsc.com/datasheet/GRM033R60J105KEA2D/78056.html
 C40,0201CG101J500NT,C0201,18.511mm,5.629mm,18.511mm,5.629mm,18.511mm,5.903mm,2,T,270,Yes,100pF,100pF,,LCSC,https://item.szlcsc.com/datasheet/0201CG101J500NT/63610.html
-C42,0201CG101J500NT,C0201,17.63mm,5.888mm,17.63mm,5.888mm,17.63mm,6.162mm,2,T,270,Yes,100pF,100pF,,LCSC,https://item.szlcsc.com/datasheet/0201CG101J500NT/63610.html
+C42,0201CG101J500NT,C0201,17.63mm,6.911mm,17.63mm,6.911mm,17.63mm,6.637mm,2,T,90,Yes,100pF,100pF,,LCSC,https://item.szlcsc.com/datasheet/0201CG101J500NT/63610.html
 L1,LQM18FN100M00D,L0603,15.2mm,2.1mm,15.2mm,2.1mm,15.9mm,2.1mm,2,T,180,Yes,10uH,10uH,,LCSC,https://item.szlcsc.com/datasheet/LQM18FN100M00D/87259.html
 L2,VHF100505HQ15NJT,L0402-R-RD,15mm,3mm,15mm,3mm,14.455mm,3mm,2,T,0,Yes,15nH,15nH,-,LCSC,https://item.szlcsc.com/datasheet/VHF100505HQ15NJT/375465.html
-L3,LQP03TN3N3B02D,L0201-RD,17.15mm,6.126mm,17.15mm,6.126mm,17.15mm,5.852mm,2,T,90,Yes,3.3nH,3.3nH,,LCSC,https://atta.szlcsc.com/upload/public/pdf/source/20200107/C157592_7FF58F85BAEF0D918ADFA12AEC0AEBA8.pdf
+L3,LQP03TN3N3B02D,L0201-RD,17.63mm,5.888mm,17.63mm,5.888mm,17.63mm,5.613mm,2,T,90,Yes,3.3nH,3.3nH,,LCSC,https://atta.szlcsc.com/upload/public/pdf/source/20200107/C157592_7FF58F85BAEF0D918ADFA12AEC0AEBA8.pdf
 R1,RC0201FR-074K7L,R0201,14.3mm,8.65mm,14.3mm,8.65mm,14.3mm,8.408mm,2,B,90,Yes,4.7kΩ,4.7kΩ,Thick Film Resistors,LCSC,https://atta.szlcsc.com/upload/public/pdf/source/20181009/C309620_DA5935B6E1D48212CB7A533FE518B3C2.pdf
 R2,RC0201FR-074K7L,R0201,16.25mm,9.45mm,16.25mm,9.45mm,16.492mm,9.45mm,2,B,180,Yes,4.7kΩ,4.7kΩ,Thick Film Resistors,LCSC,https://atta.szlcsc.com/upload/public/pdf/source/20181009/C309620_DA5935B6E1D48212CB7A533FE518B3C2.pdf
 R3,0201WMF1003TEE,R0201,14.699mm,8.64mm,14.699mm,8.64mm,14.699mm,8.881mm,2,T,270,Yes,100kΩ,100kΩ,Thick Film Resistors,LCSC,https://atta.szlcsc.com/upload/public/pdf/source/20200306/C422600_1E6D84923E4A46A82E41ADD87F860B5C.pdf
