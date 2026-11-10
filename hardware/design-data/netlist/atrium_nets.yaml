@@ -4,8 +4,8 @@
 # islands, and the pin map matches firmware/boards/atrium/atrium_pod/atrium_pod-pinctrl.dtsi.
 # The EasyEDA schematics in hardware/pod/*/schematic/ are captured from it.
 #
-# Boards:  RADIO  = radio + sensor island (rigid 4-layer, 0.6 mm, JLC)
-#          POWER  = power island (rigid 4-layer, 0.6 mm, JLC)
+# Boards:  RADIO  = radio + sensor island (rigid 6-layer HDI 1+4+1, 0.82 mm, JLC06081H-2313)
+#          POWER  = power island (rigid 6-layer HDI 1+4+1, 0.82 mm, JLC06081H-2313)
 #          FPC1   = jumper (JLC 2-layer flex, no impedance control, no RF)
 #          MECH   = parts that live in the shell (cell, contacts)
 # side:    top = faces the zirconia top shell; bot = faces the skin/base

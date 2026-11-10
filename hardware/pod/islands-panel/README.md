@@ -24,7 +24,7 @@ One 6-layer panel carries both pod islands, so a build needs one PCB order, one 
 | `Pod_Islands_Panel_render.png` | Top and bottom with every placement marked |
 
 The panel was checked against both source boards part by part (all 40 islands: parts, pad nets, tracks, vias) and, as
-Gerbers, layer by layer: all six copper layers, both masks and both paste layers match an independent merged-Gerber build, and the 4,544 drill hits match. EasyEDA DRC on the panel: 0 errors. The panel PCB carries four panel-only rules:
+Gerbers, layer by layer: all six copper layers, both masks and both paste layers match an independent merged-Gerber build, and the 4,544 drill hits match (4,004 holes: EasyEDA writes each of the 540 through vias into both the `Through` and the `Through_Via` drill file). EasyEDA DRC on the panel: 0 errors. The panel PCB carries four panel-only rules:
 board outline to hole and to TH pad 0 (the mouse bites sit on the edge by design), hole to hole 0.10 mm (bite pairs),
 and board outline to SMD pad 0.195 mm, which absorbs a 1 µm rounding of the column-2 offset at the radio flex pads
 (0.200 mm on the island itself, where the 0.20 mm rule passes).
