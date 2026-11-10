@@ -6,16 +6,25 @@ import 'package:atrium/features/insights/data/metrics_provider.dart';
 import 'package:atrium/features/pod/data/pod_session.dart';
 import 'package:atrium/features/pod/data/spool.dart';
 import 'package:atrium/features/profile/data/profile_store.dart';
+import 'package:atrium/features/research/data/raw_recorder.dart';
+import 'package:atrium/features/research/data/raw_store.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Atrium has no account and no cloud, so these act on this phone only.
 abstract final class PhoneData {
-  /// Deletes the readings synced to this phone. The pod keeps its own log (about a day) until it rolls over.
+  /// Deletes the readings synced to this phone and every raw recording. The pod keeps its own log (about a day) until
+  /// it rolls over.
   static Future<void> deleteReadings(WidgetRef ref) async {
     final store = await ref.read(epochStoreProvider.future);
     await store.clear();
     // The saved screen numbers and any pages background sync left hold the same readings.
     await MetricsCache.clear();
+    // Raw signal recordings are readings too; their folder sits beside the readings.
+    try {
+      await ref.read(rawRecorderProvider.notifier).deleteAll(includeCurrent: true, store: RawStore(RawStore.dirIn(store.file.parent.path)));
+    } on Object {
+      // No recordings folder yet.
+    }
     try {
       final spool = Spool.dirIn(store.file.parent.path);
       if (spool.existsSync()) spool.deleteSync(recursive: true);

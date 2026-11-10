@@ -8,6 +8,7 @@ import 'dart:typed_data';
 import 'package:atrium/core/app_state.dart';
 import 'package:atrium/core/config.dart';
 import 'package:atrium/core/routes/app_router.dart';
+import 'package:atrium/core/storage/storage_usage.dart';
 import 'package:atrium/core/theme/tokens.dart';
 import 'package:atrium/core/widgets/components.dart';
 import 'package:atrium/core/widgets/graphics.dart';
@@ -19,8 +20,11 @@ import 'package:atrium/features/onboarding/presentation/onboarding_widgets.dart'
 import 'package:atrium/features/pod/data/epoch_store.dart';
 import 'package:atrium/features/pod/domain/pod.dart';
 import 'package:atrium/features/profile/data/profile_store.dart';
+import 'package:atrium/features/research/data/raw_recorder.dart';
+import 'package:atrium/features/research/presentation/recordings_view.dart';
 import 'package:atrium/features/settings/data/data_export.dart';
 import 'package:atrium/features/settings/data/log_out.dart';
+import 'package:atrium/features/settings/data/storage_provider.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show showLicensePage;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -49,6 +53,8 @@ class SettingsView extends ConsumerWidget {
     final s = ref.watch(appStateProvider);
     final t = AtriumColors.of(context);
     final n = ref.read(appStateProvider.notifier);
+    final raw = ref.watch(rawRecorderProvider);
+    final usage = ref.watch(storageUsageProvider);
 
     Widget sw(String key) => AtriumSwitch(value: s.toggles[key] ?? false, onChanged: (_) => n.toggle(key), label: key);
     final chev = Padding(
@@ -129,11 +135,40 @@ class SettingsView extends ConsumerWidget {
             ListRow(icon: 'health', title: 'Health', subtitle: 'Write heart rate, HRV and sleep', trailing: sw('health')),
             if (!s.isEvt)
               ListRow(icon: 'export', title: 'Export data', subtitle: 'Your readings as CSV', chevron: true, onTap: () => _showExport(context, ref)),
-            const ListRow(icon: 'db', title: 'On this phone', value: '182 MB'),
+            ListRow(
+              icon: 'db',
+              title: 'On this phone',
+              value: switch (usage) {
+                AsyncData(:final value) => formatBytes(value.total),
+                AsyncError() => 'Unknown',
+                _ => '…',
+              },
+              chevron: true,
+              onTap: () => _showStorage(context, ref),
+            ),
             const ListRow(icon: 'globe', title: 'Units', value: '°C · metric', chevron: true),
             ListRow(title: 'Delete all data', danger: true, onTap: () => _showDelete(context, ref)),
           ],
         ),
+        const SectionHeader('Research'),
+        ListGroup(
+          children: [
+            ListRow(
+              icon: 'wave',
+              title: 'Raw signal recording',
+              subtitle: _rawLine(raw),
+              trailing: AtriumSwitch(value: raw.enabled, label: 'Raw signal recording', onChanged: (_) => n.toggle(rawRecordingKey)),
+            ),
+            ListRow(
+              icon: 'storage',
+              title: 'Raw recordings',
+              subtitle: 'Sessions, export and delete',
+              chevron: true,
+              onTap: () => context.pushDetail('/recordings'),
+            ),
+          ],
+        ),
+        const ListFoot(kRealData ? rawRecordingNote : '$rawRecordingNote The demo has no pod, so here it records a synthetic signal in the same format.'),
         const SectionHeader('Labs'),
         ListGroup(
           children: [
@@ -219,6 +254,7 @@ class SettingsView extends ConsumerWidget {
         onPressed: () async {
           Navigator.pop(sheet);
           await PhoneData.logOut(ref);
+          await clearShareCopies();
           if (context.mounted) context.go('/welcome');
         },
       ),
@@ -292,6 +328,7 @@ class SettingsView extends ConsumerWidget {
           sharePositionOrigin: origin,
         ),
       );
+      if (context.mounted) ProviderScope.containerOf(context, listen: false).invalidate(storageUsageProvider);
     } on NothingToExport catch (e) {
       if (context.mounted) showAtriumToast(context, '$e');
     } on Object {
@@ -302,14 +339,89 @@ class SettingsView extends ConsumerWidget {
   static Future<void> _showDelete(BuildContext context, WidgetRef ref) => showAtriumSheet<void>(
     context,
     title: 'Delete all data?',
-    paragraphs: const ["This removes every reading from this phone. It can't be undone. Export first if you want a copy."],
+    paragraphs: const ["This removes every reading and every raw recording from this phone. It can't be undone. Export first if you want a copy."],
     actions: (sheet) => [
       DangerButton(
         'Delete',
         onPressed: () async {
           Navigator.pop(sheet);
           await PhoneData.deleteReadings(ref);
-          if (context.mounted) showAtriumToast(context, 'Readings deleted from this phone');
+          await clearShareCopies();
+          refreshStorage(ref);
+          if (context.mounted) showAtriumToast(context, 'Readings and recordings deleted from this phone');
+        },
+      ),
+      GreyButton('Cancel', onPressed: () => Navigator.pop(sheet)),
+    ],
+  );
+
+  static String _rawLine(RawRecorderState r) {
+    if (r.capReached) return 'Stopped: recordings reached the 500 MB limit';
+    if (!r.enabled) return "The pod's raw light and motion signals";
+    final c = r.current;
+    if (c == null) return 'On · waiting for the pod';
+    return 'Recording · ${durationLabel(c.duration)} · ${formatBytes(c.bytes)}';
+  }
+
+  /// "On this phone": the breakdown, and a way to free the space raw recordings take.
+  static Future<void> _showStorage(BuildContext context, WidgetRef ref) async {
+    refreshStorage(ref);
+    final StorageUsage u;
+    try {
+      u = await ref.read(storageUsageProvider.future);
+    } on Object {
+      if (context.mounted) showAtriumToast(context, "Couldn't measure the storage.");
+      return;
+    }
+    if (!context.mounted) return;
+    await showAtriumSheet<void>(
+      context,
+      title: 'On this phone',
+      paragraphs: ['Atrium uses ${formatBytes(u.total)} here. Nothing is stored anywhere else.'],
+      content: ListGroup(
+        children: [
+          ListRow(title: '30-second readings', value: formatBytes(u.readings)),
+          ListRow(title: 'Raw recordings', value: formatBytes(u.raw)),
+          if (u.waiting > 0) ListRow(title: 'Waiting to be read in', value: formatBytes(u.waiting)),
+          ListRow(title: 'Settings and summaries', value: formatBytes(u.app)),
+          if (u.exports > 0) ListRow(title: 'Copies made for sharing', value: formatBytes(u.exports)),
+        ],
+      ),
+      actions: (sheet) => [
+        if (u.raw > 0)
+          DangerButton(
+            'Delete raw recordings',
+            onPressed: () async {
+              Navigator.pop(sheet);
+              await _confirmDeleteRaw(context, ref);
+            },
+          ),
+        if (u.exports > 0)
+          GreyButton(
+            'Delete copies made for sharing',
+            onPressed: () async {
+              Navigator.pop(sheet);
+              await clearShareCopies();
+              refreshStorage(ref);
+            },
+          ),
+        GreyButton('Done', onPressed: () => Navigator.pop(sheet)),
+      ],
+    );
+  }
+
+  static Future<void> _confirmDeleteRaw(BuildContext context, WidgetRef ref) => showAtriumSheet<void>(
+    context,
+    title: 'Delete raw recordings?',
+    paragraphs: const ["This deletes every raw recording on this phone, including one in progress. It can't be undone. Export first if you want a copy."],
+    actions: (sheet) => [
+      DangerButton(
+        'Delete recordings',
+        onPressed: () async {
+          Navigator.pop(sheet);
+          await ref.read(rawRecorderProvider.notifier).deleteAll(includeCurrent: true);
+          refreshStorage(ref);
+          if (context.mounted) showAtriumToast(context, 'Raw recordings deleted');
         },
       ),
       GreyButton('Cancel', onPressed: () => Navigator.pop(sheet)),

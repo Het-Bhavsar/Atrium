@@ -18,6 +18,7 @@ import 'package:atrium/features/pod/data/pod_api.g.dart';
 import 'package:atrium/features/pod/data/pod_session.dart';
 import 'package:atrium/features/pod/domain/pod.dart';
 import 'package:atrium/features/profile/data/profile_store.dart';
+import 'package:atrium/features/research/data/raw_recorder.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -143,6 +144,8 @@ class _AtriumAppState extends ConsumerState<AtriumApp> {
     super.initState();
     // Real builds: reconnect to the bonded pod and start syncing as soon as the app opens.
     if (kRealData) ref.read(podSessionProvider);
+    // Raw signal recording, when it is on: records on every connect (demo: from a synthetic signal while open).
+    ref.read(rawRecorderProvider);
   }
 
   @override

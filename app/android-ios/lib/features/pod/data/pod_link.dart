@@ -19,6 +19,7 @@ abstract final class Gatt {
   static const int chargeState = 0x0101;
   static const int ppgControl = 0x0201;
   static const int ppgData = 0x0202;
+  static const int motionData = 0x0204;
   static const int fitQuality = 0x0206;
   static const int logInfo = 0x0501;
 
@@ -262,13 +263,45 @@ class PodLink implements PodFlutterApi {
   /// own green trace.
   static const int fitControl = 0x05;
 
+  /// PPG Control while raw signal recording runs: the raw PPG (bit 0) and accelerometer (bit 1) streams.
+  static const int recordControl = 0x03;
+
+  /// What the fit guide and raw recording each asked of PPG Control. The pod gets their OR, so either can stop without
+  /// stopping the other. The pod clears it on disconnect; each sets its bits again after a reconnect.
+  int _fitBits = 0;
+  int _recordBits = 0;
+  int get ppgControlBits => _fitBits | _recordBits;
+  bool get recordingStreams => _recordBits != 0;
+
+  Future<void> _writeControl() => _host.write(Gatt.ppgControl, Uint8List.fromList([ppgControlBits]), true);
+
   /// Fit guide (#24): PPG Control = fit mode plus the raw stream, then Fit Quality (0x0206) once a second.
   Stream<FitQuality> startFit() {
-    _host
-      ..write(Gatt.ppgControl, Uint8List.fromList([fitControl]), true)
-      ..setNotify(Gatt.fitQuality, true);
+    _fitBits = fitControl;
+    unawaited(_writeControl());
+    _host.setNotify(Gatt.fitQuality, true);
     return _notify.stream.where((n) => n.$1 == Gatt.fitQuality && n.$2.length >= 2).map((n) => FitQuality(q: n.$2[0], flags: n.$2[1]));
   }
+
+  /// Raw signal recording: both raw streams on, PPG Data and Motion Data notifications on (Motion Data needs an ATT MTU
+  /// of 83 or more; native asks for 247 on Android, iOS negotiates its own).
+  Future<void> startRawStreams() async {
+    _recordBits = recordControl;
+    await _host.setNotify(Gatt.ppgData, true);
+    await _host.setNotify(Gatt.motionData, true);
+    await _writeControl();
+  }
+
+  /// Ends raw recording's share of PPG Control; fit mode, if running, keeps its own bits and the PPG notifications.
+  Future<void> stopRawStreams() async {
+    _recordBits = 0;
+    await _host.setNotify(Gatt.motionData, false);
+    if (_fitBits == 0) await _host.setNotify(Gatt.ppgData, false);
+    await _writeControl();
+  }
+
+  /// PPG Data and Motion Data notifications exactly as received, for recording.
+  Stream<(int, Uint8List)> rawPackets() => _notify.stream.where((n) => n.$1 == Gatt.ppgData || n.$1 == Gatt.motionData);
 
   /// Heart Rate Measurement (SIG 0x2A37): flags, then bpm as u8 (or u16 when flag bit 0 is set).
   Stream<int> heartRate() {
@@ -291,8 +324,11 @@ class PodLink implements PodFlutterApi {
   /// has read (missed notifications, or a long gap): run a sync.
   static bool needsSync({required int headPage, required int cursor}) => headPage > cursor + 1;
 
-  /// Fit mode times out on the pod after 180 s; writing 4 again restarts it.
-  Future<void> renewFit() => _host.write(Gatt.ppgControl, Uint8List.fromList([fitControl]), true);
+  /// Fit mode times out on the pod after 180 s; writing it again restarts it (with any recording bits).
+  Future<void> renewFit() {
+    _fitBits = fitControl;
+    return _writeControl();
+  }
 
   /// Raw PPG (0x0202): the green slot's samples as the pod's FIFO delivers them (streamed while PPG Control bit 0 is set).
   Stream<PpgChunk> ppg() {
@@ -300,10 +336,12 @@ class PodLink implements PodFlutterApi {
     return _notify.stream.where((n) => n.$1 == Gatt.ppgData).map((n) => PpgChunk.parse(n.$2)).where((c) => c != null).cast<PpgChunk>();
   }
 
+  /// Leaves the fit guide. A recording keeps its streams: PPG Control drops only the fit bits.
   Future<void> stopFit() async {
+    _fitBits = 0;
     await _host.setNotify(Gatt.fitQuality, false);
-    await _host.setNotify(Gatt.ppgData, false);
-    await _host.write(Gatt.ppgControl, Uint8List.fromList([0x00]), true);
+    if (_recordBits == 0) await _host.setNotify(Gatt.ppgData, false);
+    await _writeControl();
   }
 
   /// Ship mode (Command 0x0605 op 0x02): on the Plinth it takes effect at the next lift.

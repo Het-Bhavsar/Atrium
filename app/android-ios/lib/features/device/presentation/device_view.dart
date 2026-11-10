@@ -24,6 +24,7 @@ import 'package:atrium/features/pod/domain/link_machine.dart';
 import 'package:atrium/features/pod/domain/pod.dart';
 import 'package:atrium/features/pod/domain/sync_age.dart';
 import 'package:atrium/features/pod/presentation/sync_status.dart';
+import 'package:atrium/features/research/data/raw_recorder.dart';
 import 'package:atrium/features/settings/data/log_out.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -123,6 +124,17 @@ class _DeviceViewState extends ConsumerState<DeviceView> {
             await PodPermissions.openBackgroundSettings();
             ref.invalidate(backgroundAccessProvider);
           },
+        ),
+        const SizedBox(height: Space.m),
+      ]);
+    }
+    if (ref.watch(rawRecorderProvider.select((r) => r.capReached))) {
+      children.addAll([
+        NoticeCard(
+          icon: 'storage',
+          title: 'Raw recording stopped',
+          body: 'Recordings reached the 500 MB limit. Nothing was deleted. Tap to export or delete them, and recording starts again.',
+          onTap: () => context.go('/settings/recordings'),
         ),
         const SizedBox(height: Space.m),
       ]);

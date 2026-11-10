@@ -70,6 +70,7 @@ Atrium has no accounts and no server: the phone talks to the pod directly over B
 - Onboarding asks for a name, age, height and weight. They're saved in `profile.json` in the app's private folder, and Settings edits them.
 - Readings live in `epochs.bin` beside it.
 - Both are encrypted at rest by the OS (iOS Data Protection, Android file-based encryption).
+- **Raw signal recording** (Settings, Research; off by default) keeps the pod's raw light and motion stream on this phone while connected. See "Raw recordings".
 - **Export data** (Settings) writes CSVs from what is stored on the phone and opens the system share sheet; the app sends nothing itself. Columns below, under "Data export".
 - **Log out** (Settings, at the bottom) clears this phone: it forgets the pod (`forgetPod`), deletes the readings and the profile, resets settings except the theme, and returns to Welcome. **Delete all data** removes only the readings; **Forget this pod** (Device) only unpairs.
 - The only network request is the pod software check: opening Device > Pod software fetches the latest release of `Het-Bhavsar/Atrium` from the GitHub API and, if you update, its `atrium-pod-<version>.bin` asset. Nothing about you or the pod is sent. Android's release manifest declares `INTERNET` for it.
@@ -189,6 +190,49 @@ Files are comma-separated, UTF-8, with one header row; an empty cell means the v
 | `burst_ratio_r` | ratio | Red/IR ratio of an oxygen burst ending in this epoch; 0.00 = none. A research value, not a blood-oxygen percentage |
 | `burst_confidence` | 0–1 | Quality of that burst |
 | `record_hex` | hex | The 12 record bytes as logged, to decode again |
+
+## Raw recordings (research)
+
+Settings > Research > **Raw signal recording** (off by default) records the pod's raw light and motion signals on this phone, for research. It is not a medical measurement. Code: `features/research/`.
+
+- **Live only.** The pod keeps no raw data on board; its log holds 30-second records only. Raw signals reach the phone only while it is connected, as a live stream, so nothing is recorded while the pod is out of reach or the phone has closed the app.
+- **How.** On every connect (the first and each reconnect) the app waits 1.5 s for the connect's own writes, then sets PPG Control (0x0201) bits 0 and 1 and turns on PPG Data (0x0202) and Motion Data (0x0204) notifications. Motion Data needs an ATT MTU of 83 or more: Android asks for 247, and iOS negotiates its own. The pod stops both streams on a disconnect, and a disconnect ends the session.
+- **Shared with the fit guide.** The fit guide and the signal check also use PPG Control (fit mode, bit 2, plus the PPG stream). `PodLink` keeps each one's bits and writes their OR, so leaving the fit guide writes 0x03 and keeps the recording, and stopping a recording keeps the fit guide's 0x05. PPG notifications stay on while either needs them.
+- **In the background.** No new foreground service. Recording goes on as long as the system keeps the app's Bluetooth link: on iOS through the existing `bluetooth-central` background mode, and on Android while the process is alive. The app reconnects only in front (as before), so after a drop in the background the next session starts at the next connect. A pod software update owns the link, so nothing is recorded during one; recording resumes when it ends.
+- **Firmware modes.** The PPG stream carries the slots of the pod's current mode (smart: green at 25 Hz; full: green, IR and red; research modes 6 to 9 add direct ambient). During an oxygen-trend burst, IR and red join green. In lite it flows only in the 30 s optics phase. In sleep the PPG stream keeps flowing: the pod streams whenever its optics run, and `stream_bps` in `modes.c` is a budget figure only. Sleep asks for a 4 s connection interval, though, so several notifications queue per interval and the pod drops them when its buffers are full; the session's missed-notification count shows it [VERIFY on the bench].
+- **Battery [ASSUMED, not measured].** In smart the stream is about 165 B/s: PPG 75 B/s plus 6 B/s of headers, and motion 83 B/s (12.5 Hz, 12 samples per 80-byte notification). Its cost comes from `firmware/src/power/modes.c`: research modes 8 and 9 differ only in stream (650 against 325 B/s, at the same 100 ms interval) and 1 ms/s of CPU, and their non-optical budgets differ by 35 µA, which is 0.11 µA per B/s. So the stream adds about 18 µA: 8 % on smart's 215 µA typical and 14 % on sleep's 129 µA. Over a day of 16 h smart and 8 h sleep, that is about 9 % more current, about 8 hours less of a 4-day charge. The phone's own battery use is not included.
+- **Storage.** `<support>/raw/raw-<start ms>.bin` holds one session per connection. Beside it, `raw-<start ms>.json` is a summary rewritten every 5 s and at the end: start, end, PPG samples per slot, motion samples, and missed notifications and gaps from the sequence numbers, which wrap at 65535. A session the app never closed is summarised again from its bytes. Everything is kept out of backups with the rest of the data folder.
+- **Limit: 500 MB** of session files, about a month of continuous recording in smart (0.7 MB an hour) or about two days at 200 Hz. A write that would pass the limit is refused: recording stops, the streams are turned off, and Settings, Raw recordings and Device say so. Nothing is deleted without the user; exporting and deleting recordings lets it record again.
+- **Delete.** Raw recordings (Settings) deletes a session. "On this phone" shows the breakdown and deletes all recordings, including one in progress. "Delete all data" and "Log out" delete them too.
+- **Demo build.** There is no pod, so while the app is open the setting records a synthetic signal in the same wire format (smart mode, green and motion). Its sessions and export files are marked "demo".
+
+**Session file (`.bin`).** It starts with `ARW1` (4 bytes). Then one record per notification as received, little-endian:
+
+| Offset | Type | Field |
+|---|---|---|
+| 0 | u16 | characteristic: 0x0202 PPG Data or 0x0204 Motion Data |
+| 2 | i64 | phone receive time, Unix ms (UTC) |
+| 10 | u16 | length n |
+| 12 | n bytes | the notification exactly as received (docs/ble_gatt.md section 4.2) |
+
+**Export** (Raw recordings, a session, Export) shares `raw-<start>-ppg.csv`, `raw-<start>-motion.csv` and the `.bin` itself.
+
+`raw-…-ppg.csv`: one row per light sample.
+
+| Column | Unit | Meaning |
+|---|---|---|
+| `phone_rx_utc`, `phone_rx_ms` | ISO 8601 / Unix ms, UTC | When the sample's notification reached the phone |
+| `pod_uptime_ms` | ms since the pod booted | The packet's first-sample time plus the sample's index in its slot times 1000 / rate |
+| `sequence` | | The notification's sequence number |
+| `slot` | green, ir, red, ambient | The slot's usual light. Below the pod's green headroom limit green becomes IR in the same slot, which the stream doesn't flag |
+| `tag` | hex | The MAXM86161A FIFO tag: 0x01 to 0x04, or 0x0D to 0x0F after picket-fence replacement |
+| `picket_fence` | 0 or 1 | 1 for tags 0x0D to 0x0F |
+| `value` | counts, 19-bit | Ambient-cancelled for LED slots, raw photodiode level for the ambient slot |
+| `mode`, `rate_hz` | | The packet header's measurement mode and sample rate |
+
+Tags 0x1D to 0x1F (sub-DAC update, invalid, time stamp) carry no sample and are left out of the CSV; they stay in the `.bin`.
+
+`raw-…-motion.csv`: one row per accelerometer sample: `phone_rx_utc`, `phone_rx_ms`, `pod_uptime_ms` (first-sample time plus index × 1000 / rate), `sequence`, `x_mg`, `y_mg`, `z_mg` (pod frame, mg), `rate_hz`.
 
 ## Sync status (#20)
 

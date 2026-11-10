@@ -23,6 +23,7 @@ import 'package:atrium/features/onboarding/presentation/wake_view.dart';
 import 'package:atrium/features/onboarding/presentation/welcome_view.dart';
 import 'package:atrium/features/profile/presentation/profile_view.dart';
 import 'package:atrium/features/profile/presentation/you_view.dart';
+import 'package:atrium/features/research/presentation/recordings_view.dart';
 import 'package:atrium/features/settings/presentation/name_story_view.dart';
 import 'package:atrium/features/settings/presentation/settings_view.dart';
 import 'package:atrium/features/today/presentation/today_view.dart';
@@ -44,6 +45,7 @@ List<GoRoute> _details(List<String> names) => [
         'pad' => const PadView(),
         'profile' => const ProfileView(),
         'story' => const NameStoryView(),
+        'recordings' => const RecordingsView(),
         _ => const FirmwareView(),
       },
     ),
@@ -92,7 +94,7 @@ GoRouter buildRouter({String initial = '/today', void Function(Map<String, Strin
         ),
         StatefulShellBranch(
           routes: [
-            GoRoute(path: '/settings', builder: (_, _) => const SettingsView(), routes: _details(['pad', 'firmware', 'profile', 'story'])),
+            GoRoute(path: '/settings', builder: (_, _) => const SettingsView(), routes: _details(['pad', 'firmware', 'profile', 'story', 'recordings'])),
           ],
         ),
       ],
