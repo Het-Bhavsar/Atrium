@@ -64,7 +64,7 @@ Key parts (LCSC numbers checked 2026-11-08; re-check stock before ordering):
 | U2 | BQ24040DSQR linear charger with a battery-temperature input, WSON-10 2 × 2 mm | C81080 | R5 2.7 k on ISET: 540 / 2700 = 200 mA (187–210 mA with K_ISET 510–560 AΩ and 1 % R, SLUS941H). R24 2 k on PRE-TERM: 10 % termination, 20 % pre-charge. TS to TH2 (10 k NTC, NCP15XH103F03RC C77131) on the board above the cell, 3.0 mm from U2 (build item B-10): JEITA window, charge stops at the limits. 10 h safety timer, input over-voltage cut-off. CHG to PD6; PG and NC open; thermal pad to GND. Replaces the TP4054, which had no temperature input |
 | U3 | TPS61023DRLR boost, SOT-563 (DRLT on a larger reel) | C919459 | 5.2 V out, PFM at light load; EN from the MCU [VERIFY load disconnect] |
 | U4 | SY6280AAC current-limited switch, SOT-23-5 | C55136 | ISET for the 0.4 A minimum; EN from the MCU, toggles VIN for the soft-reset pattern |
-| U5, U6 | 74LVC1T45 level translator | [VERIFY LCSC] | SWDCLK fixed direction, SWDIO with DIR from the MCU |
+| U5, U6 | SN74LVC1T45DBVR level translator, SOT-23-6 | C7843 | SWDCLK fixed direction, SWDIO with DIR from the MCU |
 | U7 | XC6206P182MR 1.8 V LDO, SOT-23 | C21659 | VCCB of the translators, enabled only while the pod is powered |
 | U8 | HAL248 SW omnipolar hall, 1.8–5.5 V, 3 µA | C6320892 | Lid sensor |
 | J1 | USB-C 16-pin receptacle | C2765186 | 5.1 k CC pull-downs, VBUS TVS (D4 TSD05DYFR, C22396185) |
@@ -117,7 +117,7 @@ CH32V003F4U6, QFN-20, ch32fun toolchain.
 | 19 | PD5 | LDO_PWR | Feeds XC6206 VIN, 1 M to GND |
 | 20 | PD6 | CHRG | BQ24040 CHG (open drain), internal pull-up |
 
-HAL248 output type [VERIFY]: if open-drain, fit the 4.7 M pull-up (DNP otherwise).
+The HAL248 output is open drain (Hallwee V3.3, page 4), so R19 330k is fitted as its pull-up (O-48).
 
 ## Firmware
 

@@ -18,6 +18,26 @@ hold. Fill in a new table for each release; never edit an old one.
    "Simulated" and "measured" are never mixed in one cell.
 5. **Open items.** Every open item in [open-items.md](open-items.md) that affects the release is listed by number.
 
+## Unreleased (main, 11 November 2026)
+
+| | |
+|---|---|
+| Hardware | The v0.1.2-evt boards with the pre-fabrication changes since, not yet tagged. (1) 10 November (O-48): radio RF match in Nordic's order (C3 shunt first), ANT1 far pad unconnected, case R19 330k lid pull-up fitted, flex JP6 tied to the flex ground pour. (2) 10 November (O-49): power island C50 / C52 now 10 µF 0402, charging case D4 VBUS clamp, R3 / R4 2.2 k, R25 SWDIO_DIR pull-down; schematics redrawn in titled blocks. (3) 11 November (O-50): ANT1 on Kinghelm's land pattern (0.70 × 0.90 mm pads at 1.875 mm pitch), a straight feed into pad 2 and the antenna keep-out reshaped to keep ground at x 18.76 mm; all 20 panel copies. Silkscreen text unchanged |
+| Firmware | Unchanged from v0.1.2-evt |
+| App | Unchanged from v0.1.2-evt |
+| Built units | None yet |
+
+| Check | Where it ran | Result |
+|---|---|---|
+| Board DRC | EasyEDA, 2026-11-10 and 2026-11-11 | Radio island and panel: 0 errors after the antenna change, proven live with a planted short on each. Power island: 0 (2026-11-10). Flex: re-run 2026-11-10 after the JP6 tie. Case: only J1's own pads to its own slots (0.171 mm against 0.2 mm), inside the vendor footprint |
+| Gerber check | Host, on the exported Gerbers, 2026-11-11 | Radio island: no shorts or opens against the IPC-D-356A netlist; drills and every layer but top copper, top mask, top paste and top silk identical to v0.1.2-evt, and those change only at the antenna; JLC HDI rules met except the two O-47 vias. Panel: drills identical hole for hole, inner and bottom layers identical, top-layer changes equal to 20 × the radio change. BOM and CPL unchanged apart from ANT1's pad-1 position in the radio CPL |
+| Mechanical fit | CAD, 2026-11-11, on the 10 November boards | Pod: no part clashes with the housing, cell, stiffener, flex or the other board; same open items as before (O-38 crush, courtyard near-misses). Case: no clashes; D4 and R25 clear; TH2 still 0.100 mm from the deck (O-46). The antenna change moves pads only. The copper-layer checks (optical-module pads, pogo pads) need the copper STEP exports and were not re-run |
+| Datasheet review | 2026-11-11 | O-1 to O-4, O-6, O-7, O-22 to O-24, O-26, O-29 to O-31, O-33 closed with sources; O-50 opened and closed |
+| Firmware and app tests | Not re-run | Unchanged |
+
+Open items that affect this state: O-5, O-9 to O-21, O-25, O-28, O-32, O-34 to O-38, O-40, O-43 to O-47 in [open-items.md](open-items.md), and the build items in
+[build-assembly-test.md](build-assembly-test.md#12-open-items).
+
 ## v0.1.2-evt (EVT, 10 November 2026)
 
 | | |

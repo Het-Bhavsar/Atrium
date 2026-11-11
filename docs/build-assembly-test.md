@@ -237,9 +237,9 @@ There is no published factory procedure for PPG. A fixed grey target (or a simpl
 
 | # | Item | Close with |
 |---|---|---|
-| B-1 | Closed 2026-11-09: U1 0.21, U10 0.22, U2 / U13 0.20, U12 EP 0.38 in the production paste Gerbers; confirm U12 against the AP6683 land pattern | – |
+| B-1 | Closed 2026-11-09: U1 0.21, U10 0.22, U2 / U13 0.20, U12 EP 0.38 in the production paste Gerbers. U12 checked 2026-11-11 against the AP6683 package drawing (page 11): leads 0.25 × 0.25 mm at the corners on a 0.65 mm pitch, diamond exposed pad 0.48 mm; the board has the same pitch, positions and exposed pad, with 0.40 × 0.20 mm lead pads (80 % of the lead width, 0.175 mm toe). Check the U12 joints on the first panel's AOI; for DVT, widen the lead pads to 0.25 mm | – |
 | B-2 | JLC: WLCSP 0.4 / DSBGA 0.35 placement, 0201 both sides on HDI, X-ray, nano-coated foil | JLC engineering |
-| B-3 | Cell tab type and length (welded extension tab wanted) for the pod cell; leads and PCM on the case cell | Sharvi drawing / samples |
+| B-3 | Pod cell order spec (O-26): 400909, at most 9.2 × 9.2 × 4.05 mm, two nickel tabs 4.6 mm apart and centred on one 9 mm edge, positive on the BT1 side, tab length enough to fold down onto the power island (welded extension wanted); ask the supplier for a drawing with the order. Case cell: leads and PCM | Supplier drawing / samples |
 | B-4 | Dummy-cell soldering trial with a thermocouple at the seal | Bench, before the first pod |
 | B-5 | Perimeter UV adhesive grade (skin-safe) and leak-test method | Supplier data, bench |
 | B-6 | MSL and protective film on the MAXM86161; reflow bake | ADI data sheet |

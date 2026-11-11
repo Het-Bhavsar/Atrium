@@ -1,5 +1,5 @@
 Designator,Device,Footprint,Mid X,Mid Y,Ref X,Ref Y,Pad X,Pad Y,Pins,Layer,Rotation,SMD,Comment,Value,Type,Supplier,Datasheet
-ANT1,KH-1608-H08,ANT-SMD_L1.7-W0.9,19.4mm,5.5mm,19.4mm,5.5mm,19.4mm,4.744mm,2,T,90,Yes,KH-1608-H08,,,LCSC,https://item.szlcsc.com/datasheet/KH-1608-H08/3244678.html
+ANT1,KH-1608-H08,ANT-SMD_L1.7-W0.9,19.4mm,5.5mm,19.4mm,5.5mm,19.4mm,4.562mm,2,T,90,Yes,KH-1608-H08,,,LCSC,https://item.szlcsc.com/datasheet/KH-1608-H08/3244678.html
 C1,GRM0335C1H120GA01D,C0201,17.63mm,2.4mm,17.63mm,2.4mm,17.904mm,2.4mm,2,T,180,Yes,12pF,12pF,,LCSC,https://item.szlcsc.com/datasheet/GRM0335C1H120GA01D/172785.html
 C2,GRM0335C1H120GA01D,C0201,16.46mm,3.75mm,16.46mm,3.75mm,16.46mm,4.024mm,2,T,270,Yes,12pF,12pF,,LCSC,https://item.szlcsc.com/datasheet/GRM0335C1H120GA01D/172785.html
 C3,GJM0335C1H1R0BB01D,C0201,17.15mm,6.127mm,17.15mm,6.127mm,17.15mm,5.852mm,2,T,90,Yes,1pF,1pF,,LCSC,https://atta.szlcsc.com/upload/public/pdf/source/20181211/C237514_B3409DDFEFAC0419E560973322D8BE24.pdf

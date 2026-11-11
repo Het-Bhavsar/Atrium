@@ -37,7 +37,7 @@ components:
   L2: {board: RADIO, side: top, part: 15 nH 0402, lcsc: C395049, note: "DC/DC second inductor"}
   U2: {board: RADIO, side: bot, part: TPS7A0218PYCHR 1.8 V LDO, pkg: DSBGA-4 0.64x0.64 (YCH), lcsc: C3752366, note: "Iq 25 nA. VSYS -> VDD_1V8. LCSC stock 121 (2026-11-07), two per pod: buy early."}
   C20: {board: RADIO, side: bot, part: 1 uF X5R 0201, lcsc: C76929, note: "U2 in"}
-  C21: {board: RADIO, side: bot, part: 1 uF X5R 0201, lcsc: C76929, note: "U2 out", verify: "TPS7A02 min output C (datasheet says >= 0.5 uF effective)"}
+  C21: {board: RADIO, side: bot, part: 1 uF X5R 0201, lcsc: C76929, note: "U2 out. TPS7A02 needs >= 0.5 uF effective (SBVS277C 6.3, O-6)"}
   U3: {board: RADIO, side: bot, part: MAXM86161AEFD+T, pkg: OLGA-14 2.9x4.3x1.4, lcsc: C54021201,
        note: "Optical module, flush in the base window, 0.1 mm proud. Standard PCBA only. Active code; JLC stock 0 (2026-11-10), order through JLC parts sourcing. MAXM86161EFD+T (C3178309) fits the same land."}
   C30: {board: RADIO, side: top, part: 10 uF X5R 0402, lcsc: C15525, note: "VLED -> PGND, directly above U3 pin 5 with its own via (ADI layout guide)"}
@@ -58,7 +58,7 @@ components:
   Z41: {board: RADIO, side: top, part: 0 ohm 0201 (series pi element), lcsc: C473473, note: "Pi-match series: 0 ohm until tuned"}
   C42: {board: RADIO, side: top, part: 0201 C0G, lcsc: TBD, dnp: true, note: "Pi-match shunt 2 (nRF side; 2026-11-10: on the land C3 had)"}
   ANT1: {board: RADIO, side: top, part: KH-1608-H08 2.45 GHz chip antenna 0603, lcsc: C2925416,
-         note: "At the radio-island tip. Copper-free zone through ALL layers from x = 17.26 mm. Kinghelm asks for 5 x 3 mm minimum; we have ~7.6 mm2 (~50 %). Known, accepted, tune on VNA. Pin 1 (far end) is not connected: none of Kinghelm's layouts grounds it (2026-11-10: GND tie removed)."}
+         note: "At the radio-island tip. Kinghelm land pattern (spec V1.0 p6): 0.70 x 0.90 mm pads at 1.875 mm pitch (2026-11-11, O-50). Copper-free zone through all layers from x = 18.76 mm; the top layer has one notch for the feed line. Kinghelm asks for 5 x 3 mm minimum; we have ~7.6 mm2 (~50 %). Known, accepted, tune on VNA. Pin 1 (far end) is not connected: none of Kinghelm's layouts grounds it (2026-11-10: GND tie removed)."}
   TP1: {board: RADIO, side: top, part: test pad 0.6 mm, note: "P0.21/nRESET, bench use only"}
   TP2: {board: RADIO, side: bot, part: test pad 0.5 mm, note: "MAXM GPIO (pin 13), unused"}
 
@@ -68,8 +68,8 @@ components:
   C50: {board: POWER, side: top, part: 10 uF X5R 10 V 0402 (CL05A106MP5NUNC), lcsc: C315248, note: "IN (>= 1 uF effective). About 2.0 uF left at 5.3 V DC bias (Samsung curve); no 0201 keeps 1 uF at 4.35-5.3 V, so the 1 uF 0201 was replaced (2026-11-10)"}
   C51: {board: POWER, side: bot, part: 22 uF X5R 0402 6.3 V, lcsc: C415703, note: "PMID (TI: 22 uF close to pins). 0402 height <= 0.65 mm fits under the island."}
   C52: {board: POWER, side: bot, part: 10 uF X5R 10 V 0402 (CL05A106MP5NUNC), lcsc: C315248, note: "BAT (>= 1 uF effective). About 2.5 uF left at 4.35 V. Vertical between the clamp band and R51, pad 1 on the CELL_P track to BT1 (2026-11-10)"}
-  C53: {board: POWER, side: bot, part: 4.7 uF X5R 0402 6.3 V, lcsc: C23733, note: "BQ21061 VDD. TI SLUSDU0A 8.2.2.2 recommends 4.7 uF, > 1 uF after derating", verify: "LCSC number (CL05A475MQ5NRNC) not yet checked on LCSC"}
-  C56: {board: POWER, side: bot, part: 1 uF X5R 0201, lcsc: C76929, note: "VINLS (>= 1 uF)", verify: "VINLS/LSLDO termination when LDO unused: copy TI BQ21061 EVM"}
+  C53: {board: POWER, side: bot, part: 4.7 uF X5R 0402 10 V (CL05A475MP5NRNC), lcsc: C23733, note: "BQ21061 VDD. TI SLUSDU0A 8.2.2.2 recommends 4.7 uF, > 1 uF after derating"}
+  C56: {board: POWER, side: bot, part: 1 uF X5R 0201, lcsc: C76929, note: "VINLS (>= 1 uF). LS/LDO (D4) is shorted to VINLS (E4) as TI states for an unused LDO (SLUSDU0A Table 5-1, O-2)"}
   R50: {board: POWER, side: top, part: 10 kohm 0201 1 %, lcsc: C473048, note: "TS: in parallel with TH5"}
   TH5: {board: POWER, side: top, part: NCP03XH103F05RL 10k B3380 0201, lcsc: C98098, note: "Charger TS NTC, beside the cell: hardware charge-temperature cut-off even if firmware hangs"}
   U11: {board: POWER, side: top, part: LSM6DSOXTR IMU, pkg: LGA-14 2.5x3.0x0.83, lcsc: C481766, note: "SA0 = GND -> 0x6A. Powered from U13 (own 1.8 V LDO): BQ21061 VDD is rated only as the charger's own I/O supply (SLUSDU0A 7.3.3)."}
@@ -78,9 +78,9 @@ components:
   C60: {board: POWER, side: top, part: 100 nF X5R 0201, lcsc: C76928, note: "IMU VDD (pin 8)"}
   TH4: {board: RADIO, side: top, part: NCP03XH103F05RL 10k B3380 0201, lcsc: C98098, note: "Pod/room temperature, radio island top under the shell, beside R11. Moved off the power island (no room once the board clamps are kept out; review 2026-11-07); frees a jumper line, now GND."}
   U12: {board: POWER, side: bot, part: AP6683 1-cell protection with integrated FET, pkg: DFN-4-EP 1x1, lcsc: C2849565,
-        verify: "thresholds (VCU, VDL 2.8 V, discharge OCP), RDS(on), VDD R/C values from the ALLPOWER datasheet"}
-  R51: {board: POWER, side: bot, part: 330 ohm 0201, lcsc: C274872, note: "U12 VDD series R", verify: "value per AP6683 application circuit"}
-  C55: {board: POWER, side: bot, part: 100 nF X5R 0201, lcsc: C76928, note: "U12 VDD to CELL-", verify: "value per AP6683 application circuit"}
+        note: "VCU 4.30 V typ, VDL 2.8 V typ, discharge OCP 0.9 A, short 10 A, RDS(on) 55 mOhm (ALLPOWER data sheet p3, O-4)"}
+  R51: {board: POWER, side: bot, part: 330 ohm 0201, lcsc: C274872, note: "U12 VDD series R. Not in the data sheet application circuit (its eval board uses 1k); harmless, kept (O-22)"}
+  C55: {board: POWER, side: bot, part: 100 nF X5R 0201, lcsc: C76928, note: "U12 VDD to CELL-. Eval board uses 0.1 uF (O-22)"}
   D10: {board: POWER, side: bot, part: ESD5V3U04-0201 TVS, lcsc: C521889, note: "VIN, at the power-end jumper landing. Same part as D12/D13 (ESDA5-1F4 C1973991 has no EasyEDA symbol).", verify: "working voltage >= 5.25 V (Plinth 5 V +5 %) from the TECH PUBLIC datasheet"}
   D12: {board: POWER, side: top, part: ESD5V3U04-0201, lcsc: C521889, note: "SWDIO jig contact P3, at the power-end jumper landing beside D10 (P3 is 3.6 mm from the power end, 7.6 mm from the radio end). 2026-11-08: SWD ESD moved off the radio island (no room at the radio landing), series resistors dropped."}
   D13: {board: POWER, side: top, part: ESD5V3U04-0201, lcsc: C521889, note: "SWDCLK jig contact P4, at the power-end jumper landing beside D10", verify: "nRF52832 SWDIO/SWDCLK pin ESD rating (HBM) from the PS, with the 47 ohm series resistors removed"}

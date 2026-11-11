@@ -37,7 +37,7 @@ Every check below passes on the current CAD.
 | Shell wall, capsule with the R 1.8 round | 0.38 mm (min 0.30) |
 | Module corners inside the window | ≥ 0.05 (window 3.4 × 6.14) |
 | No module metal in the antenna zone | Module to x 18.56, zone from 18.76 (the window and gasket reach 18.81; no metal) |
-| Antenna at the tip (ANT1 x 18.935–19.865) | Body 0.175 inside its zone, pad corner 0.20 from the board edge, 0.30 to the shell wall, 2.7 to the nearest rib |
+| Antenna at the tip (ANT1 x 18.935–19.865) | Body 0.175 inside its zone, pad corner 0.20 from the board edge in the CAD model (the board's Kinghelm pads end 0.27 from it since 2026-11-11, O-50), 0.30 to the shell wall, 2.7 to the nearest rib |
 | Contact holes from the window | 1.96 mm (rule ≥ 1.5) |
 | Skin NTC (TH1) boss gap | 0.10 mm, gel-filled |
 | Plinth magnets from the antenna zone | 7.06 mm (rule ≥ 5) |
@@ -118,6 +118,7 @@ Assembly: the islands, flex and cell drop into the inverted shell onto the ribs,
 ## Battery bay (Sharvi HT19 400909, 4.0 × 9 × 9 mm)
 
 - Pocket 9.3 × 9.3 mm. Cell top at z 0.7 below the top face, leaving 0.2 mm of air for swell.
+- The supplier lists the cell as 9 ± 1 × 9 ± 1 × 4.0 ± 0.2 mm, so order it to at most 9.2 mm (B-3, O-26).
 - **The bay is sized for the nominal cell.** A worst-case cell (9.5 × 9.5 × 4.2 + 8 % swell) needs a 9.55 mm pocket and H ≈ 5.64. Measure 10 cells before freezing the shell.
 - Tabs exit toward the power island and fold down onto its CELL+ / CELL− pads. Nothing rigid presses on the pouch: the stiffener and flex lie under it.
 - **Flex S-bends:** the rise from the flex body to the island bottom is 0.80 mm (0.1 more than before, because of the stiffener).
