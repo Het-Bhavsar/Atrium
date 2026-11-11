@@ -18,13 +18,13 @@ hold. Fill in a new table for each release; never edit an old one.
    "Simulated" and "measured" are never mixed in one cell.
 5. **Open items.** Every open item in [open-items.md](open-items.md) that affects the release is listed by number.
 
-## Unreleased (main, 11 November 2026)
+## v0.1.3-evt (EVT, 11 November 2026)
 
 | | |
 |---|---|
-| Hardware | The v0.1.2-evt boards with the pre-fabrication changes since, not yet tagged. (1) 10 November (O-48): radio RF match in Nordic's order (C3 shunt first), ANT1 far pad unconnected, case R19 330k lid pull-up fitted, flex JP6 tied to the flex ground pour. (2) 10 November (O-49): power island C50 / C52 now 10 µF 0402, charging case D4 VBUS clamp, R3 / R4 2.2 k, R25 SWDIO_DIR pull-down; schematics redrawn in titled blocks. (3) 11 November (O-50): ANT1 on Kinghelm's land pattern (0.70 × 0.90 mm pads at 1.875 mm pitch), a straight feed into pad 2 and the antenna keep-out reshaped to keep ground at x 18.76 mm; all 20 panel copies. Silkscreen text unchanged |
-| Firmware | Unchanged from v0.1.2-evt |
-| App | Unchanged from v0.1.2-evt |
+| Hardware | The v0.1.2-evt boards with the pre-fabrication changes since. (1) 10 November (O-48): radio RF match in Nordic's order (C3 shunt first), ANT1 far pad unconnected, case R19 330k lid pull-up fitted, flex JP6 tied to the flex ground pour. (2) 10 November (O-49): power island C50 / C52 now 10 µF 0402, charging case D4 VBUS clamp, R3 / R4 2.2 k, R25 SWDIO_DIR pull-down; schematics redrawn in titled blocks. (3) 11 November (O-50): ANT1 on Kinghelm's land pattern (0.70 × 0.90 mm pads at 1.875 mm pitch), a straight feed into pad 2 and the antenna keep-out reshaped to keep ground at x 18.76 mm; all 20 panel copies. Silkscreen text unchanged. Production files and the EasyEDA project at the commit tagged v0.1.3-evt |
+| Firmware | Unchanged: pod 0.1.1 (MCUboot **development** key, bench units only) and case firmware 0.1.1. The same image files are attached to the v0.1.3-evt release, byte for byte (pod SHA-256 `864a3418…f7dd`), so the app's update check finds the pod image on the latest release |
+| App | Unchanged at 0.1.2; the same APKs are attached to the v0.1.3-evt release |
 | Built units | None yet |
 
 | Check | Where it ran | Result |
@@ -35,7 +35,7 @@ hold. Fill in a new table for each release; never edit an old one.
 | Datasheet review | 2026-11-11 | O-1 to O-4, O-6, O-7, O-22 to O-24, O-26, O-29 to O-31, O-33 closed with sources; O-50 opened and closed |
 | Firmware and app tests | Not re-run | Unchanged |
 
-Open items that affect this state: O-5, O-9 to O-21, O-25, O-28, O-32, O-34 to O-38, O-40, O-43 to O-47 in [open-items.md](open-items.md), and the build items in
+Open items that affect this release: O-5, O-9 to O-21, O-25, O-28, O-32, O-34 to O-38, O-40, O-43 to O-47 in [open-items.md](open-items.md), and the build items in
 [build-assembly-test.md](build-assembly-test.md#12-open-items).
 
 ## v0.1.2-evt (EVT, 10 November 2026)
