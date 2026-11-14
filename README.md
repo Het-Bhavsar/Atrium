@@ -15,6 +15,10 @@
 </p>
 
 <p align="center">
+  <a href="https://certification.oshwa.org/in000108.html"><img src="docs/images/oshw-certification-mark-IN000108.svg" alt="OSHW certification mark, UID IN000108" width="180"></a>
+</p>
+
+<p align="center">
   <a href="docs/quick-start.md">Quick start</a> ·
   <a href="#the-story">Story</a> ·
   <a href="#inside">Inside</a> ·
@@ -288,4 +292,6 @@ community that enables made-in-India hardware development. Source location:
   [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 - **No warranty.** Each licence disclaims all warranties and liability to the extent the law allows.
 
-Atrium aims for [OSHWA certification](docs/certification.md) at its first public release.
+Atrium is certified open source hardware: [OSHW] IN000108 | Certified open source hardware | [oshwa.org/cert](https://certification.oshwa.org/in000108.html).
+OSHWA certified version 0.1.0-evt on 14 November 2026. The certification covers the openness of the design, not its
+safety or quality ([certification.md](docs/certification.md)).

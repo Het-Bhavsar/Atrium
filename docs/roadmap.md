@@ -39,5 +39,5 @@ Where Atrium goes after EVT, and where help is most useful. Items marked **help 
 ## Openness
 
 - Native KiCad versions of the schematics and boards. **Help wanted**
-- OSHWA certification at the first public release.
+- OSHWA certification: done, UID IN000108 (14 November 2026, version 0.1.0-evt).
 - Translations of the app and the docs. **Help wanted**

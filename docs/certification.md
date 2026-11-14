@@ -1,23 +1,32 @@
-# Certification plan
+# Certification
 
 ## Open hardware: OSHWA
 
-Het Bhavsar will self-certify Atrium with OSHWA as an individual ([requirements](https://certification.oshwa.org/requirements.html)), under the
-standard certification, project type **Wearables**, country code IN. It is a wellness device, so the Open Healthware
-track does not apply. Certification covers the openness of the design. It says nothing about safety or quality, and
-the mark must never be used to suggest either.
+<a href="https://certification.oshwa.org/in000108.html"><img src="images/oshw-certification-mark-IN000108.svg" alt="OSHW certification mark, UID IN000108" width="220"></a>
+
+Atrium is certified open source hardware, **OSHWA UID IN000108**, certified on 14 November 2026 for version 0.1.0-evt
+([listing](https://certification.oshwa.org/in000108.html)). Het Bhavsar self-certified it as an individual
+([requirements](https://certification.oshwa.org/requirements.html)), under the standard certification, project type
+**Wearables**, country India. It is a wellness device, so the Open Healthware track does not apply. Certification
+covers the openness of the design. It says nothing about safety or quality, and the mark must never be used to suggest
+either.
+
+Use the mark from `images/oshw-certification-mark-IN000108.svg` as OSHWA supplies it (graphite #333333 and coral
+#FF4444, or one colour in black, white or grey), and do not change it. In plain text, write:
+`[OSHW] IN000108 | Certified open source hardware | oshwa.org/cert`. Usage rules:
+[certification.oshwa.org/mark-usage.html](https://certification.oshwa.org/mark-usage.html).
 
 | OSHWA requirement | Atrium | Status |
 |---|---|---|
-| Hardware under an open licence | CERN-OHL-S-2.0 (`LICENSE`) | ready |
-| All software needed to operate it under an OSI licence | Pod and case firmware, phone app: Apache-2.0 | ready |
-| Documentation under an open licence, no NC or ND | CC BY-SA 4.0 (`docs/LICENSE`) | ready |
-| Original design files, publicly available | Schematics and boards as `.SchDoc` / `.PcbDoc` with PDFs; enclosure as STEP, STL and drawings | the repository is private until release |
-| Design files in the preferred format for making changes | Boards: the native EasyEDA Pro project in `hardware/easyeda/`, plus Altium exports. Enclosure: STEP, which any CAD tool can edit; the parametric CAD scripts it was generated from are not published | ready for boards; STEP for the enclosure |
-| Bill of materials | Every board's `production/*_BOM.csv`, with manufacturer part and LCSC numbers | ready |
-| Assembly instructions (optional) | [`build-assembly-test.md`](build-assembly-test.md), [`quick-start.md`](quick-start.md) | ready |
-| Third-party parts identified, with accessible datasheets | See below | ready |
-| Hardware labelled with a version or release date | Bottom silkscreen: `ATRIUM EVT v0.1.0 2026-11` on the case board, `EVT v0.1` on the flex inside each pod (O-42) | ready |
+| Hardware under an open licence | CERN-OHL-S-2.0 (`LICENSE`) | met |
+| All software needed to operate it under an OSI licence | Pod and case firmware, phone app: Apache-2.0 | met |
+| Documentation under an open licence, no NC or ND | CC BY-SA 4.0 (`docs/LICENSE`) | met |
+| Original design files, publicly available | Schematics and boards as `.SchDoc` / `.PcbDoc` with PDFs; enclosure as STEP, STL and drawings | met: public since 9 November 2026 |
+| Design files in the preferred format for making changes | Boards: the native EasyEDA Pro project in `hardware/easyeda/`, plus Altium exports. Enclosure: STEP, which any CAD tool can edit; the parametric CAD scripts it was generated from are not published | met: native project for the boards; STEP for the enclosure |
+| Bill of materials | Every board's `production/*_BOM.csv`, with manufacturer part and LCSC numbers | met |
+| Assembly instructions (optional) | [`build-assembly-test.md`](build-assembly-test.md), [`quick-start.md`](quick-start.md) | met |
+| Third-party parts identified, with accessible datasheets | See below | met |
+| Hardware labelled with a version or release date | Bottom silkscreen: `ATRIUM EVT v0.1.0 2026-11` on the case board, `EVT v0.1` on the flex inside each pod (O-42) | met |
 
 **What is open and what is not.** Everything I made for Atrium (Het Bhavsar, published through the Local Forge open-source community) is open: schematics, board layouts, Gerbers, enclosure
 CAD, firmware, app, documentation and images. The parts on the boards are ordinary catalogue parts made by others,
@@ -26,10 +35,9 @@ module, the LSM6DSOX motion sensor, the BQ21061 charger, the cell and its protec
 case MCU and the passives. Their internal designs are not open, and OSHWA does not require them to be. The names
 "Atrium" and "Local Forge" and their logos are not licensed (see the README).
 
-**Before applying:**
-1. Make the repository public.
-2. Submit the form at [application.oshwa.org](https://application.oshwa.org/) as Het Bhavsar (individual), and register each later
-   version under a new UID instead of overwriting this one.
+**Later versions.** The certificate names version 0.1.0-evt. Releases since then (v0.1.1-evt to v0.1.3-evt) keep the
+same licences and publish the same kinds of files. Register a later version that changes the hardware materially under
+a new UID at [application.oshwa.org](https://application.oshwa.org/) instead of editing this one.
 
 ## Product compliance (before any sale)
 

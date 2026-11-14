@@ -13,6 +13,7 @@ This page lists everything in or used by the repository that someone else made, 
 | Newsreader typeface | `app/android-ios/assets/fonts/` | SIL Open Font License 1.1 | Licence text in `OFL.txt` beside the font |
 | Component symbols, footprints and 3D models | `hardware/easyeda/Atrium_EVT.epro2`, and the component bodies in the STEP files and renders | The terms of the EasyEDA / LCSC component library they came from | Atrium's own schematics, layouts and enclosure parts are CERN-OHL-S-2.0 |
 | Results computed from the *pulse-transit-time-ppg* 1.1.0 dataset (PhysioNet) | `docs/research/brain-blood-flow/data/finger/` | Open Database License 1.0 | Per-record results only; the recordings are not stored here |
+| OSHW certification mark with Atrium's UID IN000108 | `docs/images/oshw-certification-mark-IN000108.svg` | A mark of the Open Source Hardware Association, used under the OSHWA certification licence agreement; not covered by Atrium's licences | Use it only as OSHWA's usage guide allows (`docs/certification.md`) |
 
 ## Used to build, not stored here
 
