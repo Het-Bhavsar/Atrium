@@ -31,6 +31,7 @@ ordering, and the charging-case board. All dimensions are in mm.
 | Power island | Same stack. BQ21061 charger, AP6683 protection, LSM6DSOX, 1.8 V LDO | `pod/power-island/` |
 | Flex jumper | 2-layer polyimide, 0.0865 mm, ENIG both sides, SUS430 stiffener; no parts | `pod/flex-jumper/` |
 | Islands panel | Both islands, 4 × 5 sets (83 × 71 mm), tabs and mouse bites, for one PCB and PCBA order | `pod/islands-panel/` |
+| Islands panel, 1 × 2 | The same panel cut to 2 sets (26 × 35.6 mm) for a small EVT run: 2 pods per assembled panel | `pod/islands-panel-1x2/` |
 | Charging case | 2-layer FR-4, 0.8 mm. CH32V003, BQ24040 charger with cell-temperature cut-off, TPS61023 boost, SY6280 limit, USB-C | `case/charging-case/` |
 
 Each board folder has the same three parts:

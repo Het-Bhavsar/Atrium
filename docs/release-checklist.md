@@ -18,6 +18,21 @@ hold. Fill in a new table for each release; never edit an old one.
    "Simulated" and "measured" are never mixed in one cell.
 5. **Open items.** Every open item in [open-items.md](open-items.md) that affects the release is listed by number.
 
+## Unreleased (since v0.1.3-evt)
+
+| | |
+|---|---|
+| Hardware | (1) 14 November: charging case via holes 0.20 → 0.30 mm with the 0.45 mm pads unchanged, so the case builds as a standard JLC 2-layer board with no plugged-via or 4-wire-test surcharge; copper, mask, paste and silk Gerbers identical to v0.1.3-evt, drills and drill drawing changed. (2) 14 November: new `hardware/pod/islands-panel-1x2/`, the islands panel cut to 2 sets for a small EVT order. Silkscreen text unchanged |
+| Firmware | Unchanged since v0.1.3-evt |
+| App | On main since v0.1.3-evt (f833d13): OTA checked against the v0.1.3-evt release, demo runs the real update flow, onboarding redesign. Version still 0.1.2+3; no new APKs |
+| Built units | None yet |
+
+| Check | Where it ran | Result |
+|---|---|---|
+| Board DRC | EasyEDA, 2026-11-14 | Case: only J1's own pads to its own slots, as before. 1 × 2 panel: 0 errors, proven live with a planted short |
+| Gerber check | Host, 2026-11-14 | Case: every copper, mask, paste and silk layer identical to v0.1.3-evt; holes 0.30 mm, hole edge to other-net copper ≥ 0.225 mm. 1 × 2 panel: identical to the 4 × 5 panel inside the frame opening on all copper, paste and silk layers and every drill file |
+| Renders | Not regenerated | The case renders are unchanged: only the 81 via holes grew by 0.1 mm |
+
 ## v0.1.3-evt (EVT, 11 November 2026)
 
 | | |

@@ -37,7 +37,7 @@ How the first pods and charging cases are fabricated, assembled, flashed and deb
 |---|---|---|
 | Radio + power islands | JLC06081H-2313, 6-layer HDI 1+4+1, 0.82 mm, ENIG, impedance control (CPWG 0.124 / 0.127), Tg170 | Buried-via and lamination fees are "manual quote"; confirm the stacked skip via and filled via-in-pad on the WLCSP / DSBGA with JLC engineering (O-32). WLCSP microvia capture pad vs Nordic's land (O-33). Mask openings on both sides of the six clamp bands. |
 | Flex jumper | 2-layer polyimide, 0.0865 mm, ENIG both sides, flat pattern (bend allowances 0.47 / 0.51 mm), 0.1 mm SUS430 stiffener | Single-copper-layer bend zones; JLC minimum static bend radius vs r 0.38–0.43 mm (O-25); stiffener material options (O-9). No SMT parts on the flex. |
-| Charging case | 2-layer FR-4 0.8 mm (35 µm / 0.71 core / 35 µm), 1 oz, ENIG or lead-free HASL, green or black mask | JLC 2-layer surcharge for 0.2 mm via holes [VERIFY]; two plated 0.8 mm cell-lead holes at (−15.5, ±2.0). |
+| Charging case | 2-layer FR-4 0.8 mm (35 µm / 0.71 core / 35 µm), 1 oz, ENIG or lead-free HASL, green or black mask | Vias 0.30 / 0.45 mm, JLC's standard (no via surcharge); two plated 0.8 mm cell-lead holes at (−15.5, ±2.0). |
 
 Production files are in each board's `production/` folder: `hardware/pod/radio-island/production/` (`Atrium_Radio_Island_gerber.zip`, `Atrium_Radio_Island_BOM.csv`, `Atrium_Radio_Island_CPL.csv`), `hardware/pod/power-island/production/`, `hardware/pod/flex-jumper/production/`, `hardware/pod/islands-panel/` and `hardware/case/charging-case/production/`.
 
