@@ -12,6 +12,7 @@ import 'package:atrium/core/theme/tokens.dart';
 import 'package:atrium/core/widgets/components.dart';
 import 'package:atrium/core/widgets/graphics.dart';
 import 'package:atrium/core/widgets/scaffolds.dart';
+import 'package:atrium/features/device/data/demo_firmware.dart';
 import 'package:atrium/features/device/data/firmware_update_provider.dart';
 import 'package:atrium/features/device/domain/firmware_image.dart';
 import 'package:atrium/features/device/domain/firmware_update.dart';
@@ -84,8 +85,8 @@ class _DeviceViewState extends ConsumerState<DeviceView> {
     final now = DateTime.now();
     final overdue = kRealData && syncOverdue(lastSync, now);
     final syncedAgo = kRealData ? lastSyncedLabel(lastSync, now) : d.lastSync;
-    final ota = kRealData ? ref.watch(firmwareUpdateProvider) : null;
-    final podSoftware = kRealData ? (ota!.current ?? PodVersion.tryParse(ref.watch(podSessionProvider.select((p) => p.firmware)))) : null;
+    final ota = ref.watch(firmwareUpdateProvider);
+    final podSoftware = kRealData ? (ota.current ?? PodVersion.tryParse(ref.watch(podSessionProvider.select((p) => p.firmware)))) : (ota.current ?? demoFrom);
     final life = d.onPlinth
         ? (d.charging || d.alert == PodAlert.cold ? d.eta! : 'Ready to wear')
         : d.connected
@@ -162,17 +163,17 @@ class _DeviceViewState extends ConsumerState<DeviceView> {
               if (kRealData) ...[const SizedBox(height: Space.s), LastSyncedLine(lastSync: lastSync, now: now, center: true)],
               const SizedBox(height: Space.l),
               _SmallButton(
-                ota?.busy ?? false
+                ota.busy
                     ? 'Updating pod software…'
                     : _searching
                     ? 'Searching…'
                     : 'Search again',
-                onPressed: _searching || (ota?.busy ?? false) ? null : _searchAgain,
+                onPressed: _searching || ota.busy ? null : _searchAgain,
               ),
             ],
           ),
         ),
-        if (ota?.busy ?? false) ...[
+        if (ota.busy) ...[
           const SizedBox(height: Space.m),
           NoticeCard(
             icon: 'chip',
@@ -309,32 +310,22 @@ class _DeviceViewState extends ConsumerState<DeviceView> {
               subtitle: "It keeps about $podLogCapacityHours hours; Atrium syncs whenever it's near",
               value: '${kRealData ? hoursSinceSync(lastSync, now) : d.hoursHeld} h',
             ),
-            if (kRealData)
-              ListRow(
-                icon: 'chip',
-                title: 'Pod software',
-                subtitle: switch (ota!.phase) {
-                  OtaPhase.available => '${ota.release!.version} is available',
-                  OtaPhase.upToDate || OtaPhase.done => 'Up to date',
-                  OtaPhase.pending => 'Waiting for the pod to confirm',
-                  OtaPhase.unconfirmed => 'Update not confirmed yet',
-                  _ when ota.busy => 'Updating…',
-                  _ => 'Check for updates',
-                },
-                value: podSoftware?.toString() ?? 'Unknown',
-                trailing: ota.phase == OtaPhase.available ? const _UpdateBadge() : null,
-                chevron: true,
-                onTap: () => context.pushDetail('/firmware'),
-              )
-            else
-              ListRow(
-                icon: 'chip',
-                title: 'Pod software',
-                subtitle: s.firmware == FirmwareState.done ? 'Demo finished' : 'Demo · an update is available',
-                trailing: s.firmware == FirmwareState.done ? null : const _UpdateBadge(),
-                chevron: true,
-                onTap: () => context.pushDetail('/firmware'),
-              ),
+            ListRow(
+              icon: 'chip',
+              title: 'Pod software',
+              subtitle: switch (ota.phase) {
+                OtaPhase.available => '${ota.release!.version} is available',
+                OtaPhase.upToDate || OtaPhase.done => 'Up to date',
+                OtaPhase.pending => 'Waiting for the pod to confirm',
+                OtaPhase.unconfirmed => 'Update not confirmed yet',
+                _ when ota.busy => 'Updating…',
+                _ => 'Check for updates',
+              },
+              value: podSoftware?.toString() ?? 'Unknown',
+              trailing: ota.phase == OtaPhase.available ? const _UpdateBadge() : null,
+              chevron: true,
+              onTap: () => context.pushDetail('/firmware'),
+            ),
             // The pod has no readable serial (privacy, ble_gatt.md section 2): real builds show only the build stage.
             const ListRow(icon: 'device', title: 'Hardware', value: kRealData ? 'EVT' : 'EVT · 3F2A'),
           ],

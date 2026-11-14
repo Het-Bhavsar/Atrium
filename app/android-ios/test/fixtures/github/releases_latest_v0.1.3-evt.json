@@ -1,0 +1,66 @@
+{
+ "tag_name": "v0.1.3-evt",
+ "name": "Atrium EVT \u00b7 hardware 2026-11-11",
+ "draft": false,
+ "prerelease": false,
+ "published_at": "2026-11-11T10:58:51Z",
+ "body": "Atrium EVT hardware as of 11 November 2026, built from the commit tagged `v0.1.3-evt`. The app (0.1.2) and the pod and case firmware (0.1.1) are unchanged; their files are attached again so this release carries everything.\n\n**Hardware**\n- **Antenna:** ANT1 now sits on Kinghelm's own land pattern for the KH-1608-H08 (0.70 \u00d7 0.90 mm pads at 1.875 mm pitch). The library footprint it replaces put copp",
+ "assets": [
+  {
+   "name": "atrium-0.1.2-demo-arm64-v8a.apk",
+   "size": 23718573,
+   "digest": "sha256:9f220b97f355a0dc413112e8da5a10d21ca88140c9bc26c7eb87fd1130163323",
+   "browser_download_url": "https://github.com/Het-Bhavsar/Atrium/releases/download/v0.1.3-evt/atrium-0.1.2-demo-arm64-v8a.apk",
+   "content_type": "application/vnd.android.package-archive"
+  },
+  {
+   "name": "atrium-0.1.2-demo-armeabi-v7a.apk",
+   "size": 21291131,
+   "digest": "sha256:c687b8375b9830fbe7ec728d8f065837fd68fa31ea34756d809514e7b6328a09",
+   "browser_download_url": "https://github.com/Het-Bhavsar/Atrium/releases/download/v0.1.3-evt/atrium-0.1.2-demo-armeabi-v7a.apk",
+   "content_type": "application/vnd.android.package-archive"
+  },
+  {
+   "name": "atrium-0.1.2-pod-arm64-v8a.apk",
+   "size": 24505005,
+   "digest": "sha256:e3dfbf056d4293ac68edb592a9e317bb3eff33f8b3ca62e67ec5fd51eba21d59",
+   "browser_download_url": "https://github.com/Het-Bhavsar/Atrium/releases/download/v0.1.3-evt/atrium-0.1.2-pod-arm64-v8a.apk",
+   "content_type": "application/vnd.android.package-archive"
+  },
+  {
+   "name": "atrium-0.1.2-pod-armeabi-v7a.apk",
+   "size": 22192251,
+   "digest": "sha256:92d1dea11221a5dfa590dc06c9a8ae56c471d0ff32fdbb9ebd67c84204a659f4",
+   "browser_download_url": "https://github.com/Het-Bhavsar/Atrium/releases/download/v0.1.3-evt/atrium-0.1.2-pod-armeabi-v7a.apk",
+   "content_type": "application/vnd.android.package-archive"
+  },
+  {
+   "name": "atrium-case-0.1.1-evt.bin",
+   "size": 7680,
+   "digest": "sha256:9a509833085d10bad453a80337f51bb27a3285d7e4471cd5e75e556f25d6326e",
+   "browser_download_url": "https://github.com/Het-Bhavsar/Atrium/releases/download/v0.1.3-evt/atrium-case-0.1.1-evt.bin",
+   "content_type": "application/octet-stream"
+  },
+  {
+   "name": "atrium-case-0.1.1-evt.hex",
+   "size": 21613,
+   "digest": "sha256:aa668e695fefc6eb89cfd7b2ebd74e4319b53c7c6afc89784c594c598499eea6",
+   "browser_download_url": "https://github.com/Het-Bhavsar/Atrium/releases/download/v0.1.3-evt/atrium-case-0.1.1-evt.hex",
+   "content_type": "application/octet-stream"
+  },
+  {
+   "name": "atrium-pod-0.1.1-merged.hex",
+   "size": 660534,
+   "digest": "sha256:0052a96a6772404f89db5ab607a35396014351ba4be39db76cfe9bcff15a0549",
+   "browser_download_url": "https://github.com/Het-Bhavsar/Atrium/releases/download/v0.1.3-evt/atrium-pod-0.1.1-merged.hex",
+   "content_type": "application/octet-stream"
+  },
+  {
+   "name": "atrium-pod-0.1.1.bin",
+   "size": 213968,
+   "digest": "sha256:864a3418d642a9a03e3b2fa40d28a82a6d7a4873814be120c4cf5370b7b7f7dd",
+   "browser_download_url": "https://github.com/Het-Bhavsar/Atrium/releases/download/v0.1.3-evt/atrium-pod-0.1.1.bin",
+   "content_type": "application/octet-stream"
+  }
+ ]
+}

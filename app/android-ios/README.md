@@ -39,7 +39,7 @@ One build switch, `ATRIUM_REAL_DATA` (`lib/core/config.dart`), picks the data:
 | Pairing, fit guide | Simulated | Real scan, pair, clock set, Fit Quality (0x0206) and heart rate (0x2A37) |
 | Device | Simulated | Mode writes 0x0601 and ship mode writes 0x0605; Search again reconnects; last sync time and the pod's software version (DIS 0x2A26) |
 | Today | Static | Pull to sync the log; last sync time, and "Sync soon" once it is over 16 h old |
-| Pod software | A simulated run, labelled "Demo" on screen; it never says "updated" | The latest signed GitHub release, sent over MCUmgr SMP (see "Pod software update") |
+| Pod software | The real update flow and screen against a simulated pod (`device/data/demo_firmware.dart`): a generated MCUboot image, an upload, a trial slot the pod then confirms, and a pod back on 0.1.1. A line on the screen says nothing is downloaded or sent | The latest signed GitHub release, sent over MCUmgr SMP (see "Pod software update") |
 | Sleep, oxygen trend (Labs) | Hidden | With Labs on and 7 earlier nights: last night's red/IR ratio as a multiple of the user's own baseline, never a percentage |
 
 Synced epochs are kept on the phone in `epochs.bin` (`epoch_store.dart`), which re-decodes with the log decoder. The time of the last sync is kept beside it (`epochs.bin.synced`), so Today and Device show its age after a restart or out of the pod's reach. Recovery, Sleep score and Effort show the learning state, because their formulas don't exist yet. Real builds show only plain sentences about what the log holds, not the demo stories.
@@ -256,6 +256,8 @@ Native changes for this (small, both platforms): `disconnect()` now also cancels
 Demo builds run a timer instead, say "Demo" on every state, and finish with "Demo finished. Nothing was sent to a pod." No version numbers are written into the app.
 
 Picking a local `.bin` file isn't offered: it needs a file-picker plugin (native code on both platforms) the app doesn't carry yet.
+
+Tested against the real release: `test/ota_release_test.dart` parses the trimmed `releases/latest` reply of v0.1.3-evt (`test/fixtures/github`), which picks `atrium-pod-0.1.1.bin` (213,968 B, under the 216,938 B slot) with its GitHub digest. Set `ATRIUM_POD_IMAGE` to a local copy of that file and the same test also parses the image itself: MCUboot header, version 0.1.1, its SHA-256 TLV, and the digest. The image is not stored here.
 
 ## Build notes
 

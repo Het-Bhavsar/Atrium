@@ -63,7 +63,7 @@ class AtriumColors extends ThemeExtension<AtriumColors> {
   Color get effort => red;
 
   /// Text and marks on photographs, in both themes.
-  static const Color onPhoto = Color(0xFFF6F2EA);
+  static const Color onPhoto = Color(0xFFFFFFFF); // white, not cream (owner rule)
 
   static const AtriumColors light = AtriumColors(
     ground: Color(0xFFFFFFFF),

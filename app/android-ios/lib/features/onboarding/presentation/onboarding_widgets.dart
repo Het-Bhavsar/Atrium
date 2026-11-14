@@ -8,7 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 /// The Atrium mark (prototype `MARK`): the hall outline, its floor, and the light beam with a pulse.
-String atriumMarkSvg({String ink = '#F6F2EA', String beam = '#FF6F5C', double w = 7}) =>
+String atriumMarkSvg({String ink = '#FFFFFF', String beam = '#FF6F5C', double w = 7}) =>
     '<svg viewBox="140 190 320 280" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke-linecap="round" stroke-linejoin="round">'
     '<path d="M292 270 L308 270 L362 438 L238 438 Z" fill="$beam" fill-opacity="0.1" stroke="none"/>'
     '<path d="M178 452 V306 C178 226 246 198 290 262" stroke="$ink" stroke-width="$w"/>'
@@ -245,47 +245,6 @@ class ObCutout extends StatelessWidget {
     return SizedBox(
       height: height,
       child: Center(child: Image.asset(image, width: w)),
-    );
-  }
-}
-
-/// `.feat`: leading mark, bold title and/or muted text, hairline above all but the first.
-class ObFeature extends StatelessWidget {
-  const ObFeature({required this.leading, required this.body, this.title, this.first = false, this.last = false, super.key});
-  final Widget leading;
-  final String? title;
-  final String body;
-  final bool first;
-  final bool last;
-
-  @override
-  Widget build(BuildContext context) {
-    final t = AtriumColors.of(context);
-    return Container(
-      padding: EdgeInsets.only(top: first ? 0 : 12, bottom: last ? 0 : 12),
-      decoration: BoxDecoration(
-        border: first ? null : Border(top: BorderSide(color: t.hair, width: 0.5)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          leading,
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (title != null)
-                  Text(
-                    title!,
-                    style: TextStyle(fontSize: 16, height: 1.35, fontWeight: FontWeight.w700, color: t.ink),
-                  ),
-                Text(body, style: TextStyle(fontSize: 14.5, height: 1.4, color: t.ink2)),
-              ],
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

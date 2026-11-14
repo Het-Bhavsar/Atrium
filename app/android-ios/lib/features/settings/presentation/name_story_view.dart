@@ -66,7 +66,7 @@ class NameStoryView extends StatelessWidget {
           child: Column(
             children: [
               SvgPicture.string(
-                atriumMarkSvg(ink: dark ? '#F6F2EA' : '#111113', beam: dark ? '#FF6F5C' : '#B4372A'),
+                atriumMarkSvg(ink: dark ? '#FFFFFF' : '#111113', beam: dark ? '#FF6F5C' : '#B4372A'),
                 width: 132,
                 height: 132 * 280 / 320,
               ),

@@ -4,9 +4,7 @@
 import 'dart:io';
 
 import 'package:atrium/core/config.dart';
-import 'package:atrium/core/theme/tokens.dart';
 import 'package:atrium/core/widgets/components.dart';
-import 'package:atrium/core/widgets/graphics.dart';
 import 'package:atrium/features/onboarding/presentation/onboarding_widgets.dart';
 import 'package:atrium/features/pod/data/pod_permissions.dart';
 import 'package:flutter/material.dart';
@@ -18,19 +16,11 @@ class BluetoothView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final t = AtriumColors.of(context);
     return OnboardingScaffold(
       content: [
         const StepsDots(2),
-        ObArt(
-          child: Container(
-            width: 96,
-            height: 96,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(color: t.accent.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(26)),
-            child: AIcon('bt', size: 52, color: t.accent, stroke: 1.5),
-          ),
-        ),
+        // The pod's underside: the optical window and the charging contacts, the side that rests on the skin.
+        const ObArt(child: ObCutout('assets/img/pod-skin.png', widthFactor: 0.72, maxWidth: 300, height: 220)),
         const ObTitle('Atrium talks to the pod over Bluetooth'),
         const ObLede('Your phone asks next. Bluetooth is used only to pair with your pod and copy its readings to this phone.'),
       ],

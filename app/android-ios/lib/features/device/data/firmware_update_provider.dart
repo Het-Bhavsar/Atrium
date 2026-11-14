@@ -3,6 +3,8 @@
 
 import 'dart:async';
 
+import 'package:atrium/core/config.dart';
+import 'package:atrium/features/device/data/demo_firmware.dart';
 import 'package:atrium/features/device/data/github_release_source.dart';
 import 'package:atrium/features/device/data/mcumgr_transport.dart';
 import 'package:atrium/features/device/domain/firmware_image.dart';
@@ -12,22 +14,30 @@ import 'package:atrium/features/pod/data/pod_session.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Where pod software comes from, and how it reaches the pod (overridden in tests).
-final firmwareSourceProvider = Provider<FirmwareSource>((ref) => GitHubReleaseSource());
-final dfuTransportProvider = Provider<DfuTransport>((ref) => McumgrTransport());
+/// The demo build runs the same flow and screen against a simulated release, upload and pod (`demo_firmware.dart`).
+final firmwareSourceProvider = Provider<FirmwareSource>((ref) => kRealData ? GitHubReleaseSource() : DemoFirmwareSource());
+final dfuTransportProvider = Provider<DfuTransport>((ref) => kRealData ? McumgrTransport() : DemoDfu());
 
-/// Real-data builds: the pod software update (#21). It lives above the screen, so leaving Pod software doesn't stop it.
+/// The pod software update (#21). It lives above the screen, so leaving Pod software doesn't stop it.
 final firmwareUpdateProvider = NotifierProvider<FirmwareUpdateNotifier, OtaState>(FirmwareUpdateNotifier.new);
 
 class FirmwareUpdateNotifier extends Notifier<OtaState> {
   late FirmwareUpdateFlow _flow;
 
+  late PodHandover _pod;
+
   @override
   OtaState build() {
+    final dfu = ref.read(dfuTransportProvider);
+    _pod = kRealData || dfu is! DemoDfu ? _SessionHandover(ref) : DemoPodHandover(dfu);
     _flow = FirmwareUpdateFlow(
       source: ref.read(firmwareSourceProvider),
-      dfu: ref.read(dfuTransportProvider),
-      pod: _SessionHandover(ref),
+      dfu: dfu,
+      pod: _pod,
       onChange: (s) => state = s,
+      // The demo pod swaps and confirms in seconds; the real waits are for the pod's own timing.
+      swapWait: kRealData ? const Duration(seconds: 10) : const Duration(seconds: 1),
+      confirmPoll: kRealData ? const Duration(seconds: 10) : const Duration(milliseconds: 1500),
     );
     return _flow.state;
   }
@@ -38,7 +48,7 @@ class FirmwareUpdateNotifier extends Notifier<OtaState> {
   Future<void> cancel() => _flow.cancel();
 
   /// Why [start] would refuse now, for the button (battery and connection).
-  String? get blocker => _SessionHandover(ref).blocker();
+  String? get blocker => _pod.blocker();
 }
 
 /// The app's pod link (PodSession) stepping aside for MCUmgr and coming back after the restart.

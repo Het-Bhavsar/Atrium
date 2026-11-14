@@ -2,9 +2,7 @@
 // SPDX-License-Identifier: Apache-2.0
 
 import 'dart:async';
-import 'dart:math' as math;
 
-import 'package:atrium/core/app_state.dart';
 import 'package:atrium/core/config.dart';
 import 'package:atrium/core/theme/tokens.dart';
 import 'package:atrium/core/widgets/components.dart';
@@ -13,7 +11,6 @@ import 'package:atrium/core/widgets/scaffolds.dart';
 import 'package:atrium/features/device/data/firmware_update_provider.dart';
 import 'package:atrium/features/device/domain/firmware_image.dart';
 import 'package:atrium/features/device/domain/firmware_update.dart';
-import 'package:atrium/features/device/presentation/device_widgets.dart';
 import 'package:atrium/features/pod/data/pod_session.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,7 +22,8 @@ class FirmwareView extends StatelessWidget {
   const FirmwareView({super.key});
 
   @override
-  Widget build(BuildContext context) => kRealData ? const RealFirmwareView() : const _DemoFirmware();
+  // The demo build runs the same screen and flow against a simulated pod (`demo_firmware.dart`).
+  Widget build(BuildContext context) => const RealFirmwareView();
 }
 
 /// Phase titles; [OtaState.message] carries the detail.
@@ -129,6 +127,10 @@ class _RealFirmwareViewState extends ConsumerState<RealFirmwareView> {
       title: 'Pod software',
       back: 'Device',
       children: [
+        if (!kRealData) ...[
+          Text('Demo: a simulated pod, so nothing is downloaded or sent. Every step below is the real one.', style: AtriumType.secondary(t.ink2)),
+          const SizedBox(height: Space.m),
+        ],
         AtriumCard(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -136,7 +138,8 @@ class _RealFirmwareViewState extends ConsumerState<RealFirmwareView> {
               _VersionRow(name: 'On your pod', value: onPod?.toString() ?? 'Unknown'),
               const SizedBox(height: Space.s),
               _VersionRow(name: 'Latest release', value: r?.version.toString() ?? (s.working ? '…' : 'None found')),
-              if (r != null && r.notes.isNotEmpty) ...[const SizedBox(height: Space.m), Text(_trim(r.notes), style: AtriumType.secondary(t.ink))],
+              // Notes only when there is something to install: a release can carry the same pod image with notes about other parts.
+              if (r != null && r.notes.isNotEmpty && s.phase == OtaPhase.available) ...[const SizedBox(height: Space.m), Text(_trim(r.notes), style: AtriumType.secondary(t.ink))],
             ],
           ),
         ),
@@ -193,157 +196,5 @@ class _VersionRow extends StatelessWidget {
         Text(value, style: AtriumType.bodyStrong(t.ink)),
       ],
     );
-  }
-}
-
-/// Demo builds: the same steps on a timer, with nothing sent anywhere, and labelled as a demo throughout.
-class _DemoFirmware extends ConsumerStatefulWidget {
-  const _DemoFirmware();
-
-  @override
-  ConsumerState<_DemoFirmware> createState() => _DemoFirmwareState();
-}
-
-class _DemoFirmwareState extends ConsumerState<_DemoFirmware> {
-  final _rng = math.Random();
-  Timer? _timer;
-  double _p = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    // A demo left mid-way (page closed) never finished; offer it again.
-    if (ref.read(appStateProvider).firmware == FirmwareState.updating) {
-      Future.microtask(() => ref.read(appStateProvider.notifier).update((s) => s.copyWith(firmware: FirmwareState.available)));
-    }
-  }
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    super.dispose();
-  }
-
-  bool get _running => _timer != null;
-
-  void _start() {
-    ref.read(appStateProvider.notifier).update((s) => s.copyWith(firmware: FirmwareState.updating));
-    setState(() {
-      _p = 0;
-      _timer = Timer(const Duration(milliseconds: 200), _tick);
-    });
-  }
-
-  void _tick() {
-    if (!mounted) return;
-    setState(() => _p = math.min(100, _p + 4 + _rng.nextDouble() * 6));
-    if (_p < 100) {
-      _timer = Timer(const Duration(milliseconds: 220), _tick);
-    } else {
-      _timer = Timer(const Duration(milliseconds: 1200), () {
-        if (!mounted) return;
-        ref.read(appStateProvider.notifier).update((s) => s.copyWith(firmware: FirmwareState.done));
-        setState(() => _timer = null);
-        showAtriumToast(context, 'Demo finished. Nothing was sent to a pod.');
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final s = ref.watch(appStateProvider);
-    final t = AtriumColors.of(context);
-    final d = ref.watch(podStatusProvider);
-    final ok = d.onPlinth || d.batteryPercent >= 40;
-
-    final banner = AtriumCard(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AIcon('chip', size: 18, color: t.ink2),
-          const SizedBox(width: Space.m),
-          Expanded(
-            child: Text(
-              'Demo. Nothing is sent to a pod. A real build downloads the signed release and sends it over Bluetooth.',
-              style: AtriumType.secondary(t.ink),
-            ),
-          ),
-        ],
-      ),
-    );
-
-    final List<Widget> body;
-    if (s.firmware == FirmwareState.done) {
-      body = [
-        banner,
-        const SizedBox(height: Space.m),
-        AtriumCard(
-          padding: const EdgeInsets.fromLTRB(Space.xl, 28, Space.xl, 28),
-          child: Column(
-            children: [
-              AIcon('check', size: 44, color: t.green, stroke: 2),
-              const SizedBox(height: 10),
-              Text(
-                'Demo finished',
-                textAlign: TextAlign.center,
-                style: AtriumType.serifAt(28, color: t.ink),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                'In a real build the pod restarts on the new software, and Atrium reads its version before it says the update worked.',
-                textAlign: TextAlign.center,
-                style: AtriumType.body(t.ink2),
-              ),
-            ],
-          ),
-        ),
-      ];
-    } else {
-      final state = !_running ? (ok ? 'Ready (demo)' : 'Needs more battery (demo)') : (_p < 100 ? 'Sending to the pod (demo)' : 'Restarting the pod (demo)');
-      body = [
-        banner,
-        const SizedBox(height: Space.m),
-        AtriumCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('Newer pod software (demo)', style: AtriumType.bodyStrong(t.ink)),
-              const SizedBox(height: Space.s),
-              Text('Sample release notes: steadier heart rate while you walk, and faster sync after a few days away.', style: AtriumType.body(t.ink)),
-              const SizedBox(height: 10),
-              Text(
-                'A real update is signed, and the pod goes back to its previous software by itself if the new one does not run well.',
-                style: AtriumType.secondary(t.ink2),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: Space.m),
-        AtriumCard(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Expanded(child: Text(state, style: AtriumType.bodyStrong(t.ink))),
-                  if (_running) Text('${_p.round()}%', style: AtriumType.body(t.ink2)),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Meter(_p / 100),
-              const SizedBox(height: 10),
-              Text(
-                ok ? 'Simulated progress; no pod is involved.' : 'A real pod needs the Plinth, or enough battery off it.',
-                style: AtriumType.secondary(t.ink2),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: Space.xl),
-        PrimaryButton(_running ? 'Running the demo…' : 'Run the demo', onPressed: ok && !_running ? _start : null),
-      ];
-    }
-
-    return PlainPage(title: 'Pod software', back: 'Device', children: body);
   }
 }
