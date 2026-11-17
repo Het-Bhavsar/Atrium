@@ -11,13 +11,13 @@ The pod envelope is 20.9 × 11 × 5.3 mm (about 1.07 cm³), decided 2026-11-07. 
 | Item | Value |
 |---|---|
 | Envelope | 20.9 × 11 × 5.3 mm, stadium capsule |
-| Z stack | 0.5 top wall + 0.2 swell gap + 4.0 cell + 0.1 SUS430 contact stiffener + 0.12 flex + 0.03 bond + 0.35 base = 5.3 mm |
+| Z stack | 0.5 top wall + 0.18 swell gap + 4.0 cell + 0.1 SUS430 contact stiffener + 0.14 flex (0.11 JLC 2-layer flex + 0.03 PSA) + 0.03 bond + 0.35 base = 5.3 mm |
 | Base | 0.35 mm (thinned from 0.45 to make room for the stiffener) |
 | Cell | 400909, 4.0 × 9 × 9 mm, 30 mAh |
 | Islands | 6-layer HDI 1+4+1, 0.82 mm; 50 Ω CPWG 0.124 mm track / 0.127 mm gap |
 | Flex | 2-layer polyimide, under the cell, no RF |
 
-A cell 0.2 mm over nominal uses the whole swell gap (stack tolerance analysis in `hardware/simulation/`). Measure 10 cells before freezing the shell (open item O-11).
+A cell 0.18 mm over nominal uses the whole swell gap (stack tolerance analysis in `hardware/simulation/`). Measure 10 cells before freezing the shell (open item O-11).
 
 ## Design decisions
 

@@ -30,7 +30,7 @@ Every check below passes on the current CAD.
 | Check | Result |
 |---|---|
 | Envelope | 20.90 × 11.00 × 5.30 |
-| Z stack | 0.5 top + 0.2 swell + 4.0 cell + 0.1 stiffener + 0.12 flex + 0.03 bond + 0.35 base = 5.30 |
+| Z stack | 0.5 top + 0.18 swell + 4.0 cell + 0.1 stiffener + 0.14 flex (0.11 JLC flex + 0.03 PSA) + 0.03 bond + 0.35 base = 5.30 |
 | Interference: housing, islands, all 61 placed parts, cell, stiffener, flex | None |
 | Islands clamped: posts under, ribs over, 6 points | Pass |
 | Clamp bands clear of part courtyards (61 parts as placed) | Pass |
@@ -103,11 +103,11 @@ Assembly: the islands, flex and cell drop into the inverted shell onto the ribs,
 
 **Board thickness (decided 2026-11-08):** both islands are 6-layer HDI, JLC06081H-2313, 0.82 mm finished (±0.10), Tg170. They were 4-layer 0.6 mm. The board grows upward: its bottom face stays at z 4.00 on the base posts, so the MAXM86161 stays 0.1 mm proud and the TH1 boss and flex lands don't move. The shell ribs reach 0.22 mm further down. All checks pass at 0.82 and at 0.92 mm: the tallest top parts keep 1.68 mm (L1) and 1.75 mm (U11) under the roof, and the closest top body to the shell is U11 at 0.14 mm, sideways at the power tip and independent of the thickness. The ±0.10 thickness is taken by the clamp, not by the parts: see O-38.
 
-**Routed boards (2026-11-08):** the assemblies use the STEP exports of the routed boards (power and radio PCBA with every part model, tracks and vias, and the flat flex), and every part body is checked against the shell, base, gasket, cell, stiffener and flex. The exports are in the top-view frame (not mirrored), with z = 0 at each board's bottom face; each island sits bottom face on the posts. The flat flex is bent in the CAD: its bottom is on the base bond, the 0.0335 mm left under the stiffener is its PSA, and two tangent arcs run from each stiffener end up to the land pads. What the real parts showed:
+**Routed boards (2026-11-08):** the assemblies use the STEP exports of the routed boards (power and radio PCBA with every part model, tracks and vias, and the flat flex), and every part body is checked against the shell, base, gasket, cell, stiffener and flex. The exports are in the top-view frame (not mirrored), with z = 0 at each board's bottom face; each island sits bottom face on the posts. The flat flex is bent in the CAD: its bottom is on the base bond, the 0.03 mm left under the stiffener is its PSA, and the export (0.0865 mm) is stretched to JLC's 0.11 mm, and two tangent arcs run from each stiffener end up to the land pads. What the real parts showed:
 - The U3 (MAXM86161) 3D model is a 3.11 × 4.53 mm placeholder box centred 0.08 / 0.09 mm off its pad field. It runs 0.30 mm into the gasket and the base window edge. The footprint is centred (pads at 17.11, 5.50), so only the model needs fixing: 2.90 × 4.30 × 1.40. Until it is fixed, the assemblies and clash checks use the datasheet body.
 - The exported board stack is 0.844 mm (0.82 + mask), so the six rib tips crush it by 0.024 mm (O-38). The clamp bands now have solder-mask openings on both sides; the board STEP still exports one 0.844 mm slab, so the CAD check keeps reporting 0.024 until a measured board says otherwise.
 - The flex fab outline is the flat pattern: each S-bend needs more flex than the straight run between the stiffener end and the lands gives, 0.47 mm more on the power end (0.85 mm run) and 0.51 mm on the radio end (0.76 mm run). The outline steps from tongue to body at the stiffener edges (x 4.75 / 13.30), so no outline corner lies in a bend. The fit check passes on the flat-pattern export (O-39 closed).
-- The bends clear the cell overhang by 36 µm (power) and 45 µm (radio). If the flex top sat against the stiffener instead, it would be 12 / 20 µm. r 0.425 / 0.382 mm = 4.9 / 4.4 × the 0.0865 mm flex (O-25).
+- The bends clear the cell overhang by 31 µm (power) and 39 µm (radio) with the 0.11 mm JLC flex (2026-11-17; 36 / 45 µm on the 0.0865 mm export). r 0.425 / 0.381 mm = 4.3 / 3.9 × the ~0.098 mm single-copper bend zone, under JLC's 6 × guidance (O-25).
 - These bottom parts sit inside the 0.1 mm courtyard of the flex outline, which the PCB DRC can't see because the flex is a separate board: C53 0.023, C55 0.043, R51 0.062, D10 0.067, U2 0.068, C21 0.093. C30 is 0.023 from the radio −86° rib.
 - TH1's model is 0.24 mm tall, not the 0.33 mm in the footprint library, so the gel gap is 0.19 mm. Raise the boss 0.09 mm once the real part height is confirmed.
 - The radio board has square shoulders 0.23 mm outside the edge cuts (x 13.87–15.05, both sides) and is still 0.113 mm from the side wall.
@@ -117,14 +117,14 @@ Assembly: the islands, flex and cell drop into the inverted shell onto the ribs,
 
 ## Battery bay (Sharvi HT19 400909, 4.0 × 9 × 9 mm)
 
-- Pocket 9.3 × 9.3 mm. Cell top at z 0.7 below the top face, leaving 0.2 mm of air for swell.
+- Pocket 9.3 × 9.3 mm. Cell top at z 0.68 below the top face, leaving 0.18 mm of air for swell (0.20 until 2026-11-17: JLC's thinnest 2-layer flex is 0.11 mm, so the flex slot grew 0.02 mm and it came out of the swell air; the pod stays 5.3 mm).
 - The supplier lists the cell as 9 ± 1 × 9 ± 1 × 4.0 ± 0.2 mm, so order it to at most 9.2 mm (B-3, O-26).
 - **The bay is sized for the nominal cell.** A worst-case cell (9.5 × 9.5 × 4.2 + 8 % swell) needs a 9.55 mm pocket and H ≈ 5.64. Measure 10 cells before freezing the shell.
 - Tabs exit toward the power island and fold down onto its CELL+ / CELL− pads. Nothing rigid presses on the pouch: the stiffener and flex lie under it.
-- **Flex S-bends:** the rise from the flex body to the island bottom is 0.80 mm (0.1 more than before, because of the stiffener).
+- **Flex S-bends:** the rise from the flex body to the island bottom is 0.78 mm (0.80 before the 0.11 mm JLC flex, 2026-11-17).
   - The bend can start at the stiffener's end, not the cell's: past it the cell sits 0.1 mm above the flex, and the first arc stays under that.
   - The run from the stiffener end to the first pad column is 0.85 mm (power) and 0.76 mm (radio). Two tangent arcs then give r ≈ 0.43 / 0.38 mm. The power end of the stiffener moved in to x 4.75 (2026-11-08) when the power landing column moved to x 3.675.
-  - With single-copper-layer bend zones (about 0.07 mm), that is about 5.4 × t: borderline for a static bend [VERIFY JLC's minimum]. On the full 0.12 mm two-layer build it would be 3.2 × t, so the bend zones must be single-layer.
+  - JLC's flex has a 25 µm core, so a single-copper-layer bend zone is about 0.098 mm and r is 3.9–4.3 × t, under JLC's ≥ 6 × recommendation for one layer (O-25). On the full 0.11 mm two-layer build it would be 3.5 × t, so the bend zones must be single-layer.
   - Keep the stiffener ends at x 4.75 / 13.30: they set the bend start. The radio end can't move in: that bend runs under the cell overhang, and at 13.25 it would clear the cell by about 5 µm.
   - Every contact pad stays on the stiffener: GND_B's pad edge is 0.15 mm inside x 13.30 at the 2.2 mm GND pitch (it was past the edge at 2.4).
 

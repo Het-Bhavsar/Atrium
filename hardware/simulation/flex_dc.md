@@ -20,5 +20,5 @@
 
 ## S-bend radii (static, single copper layer)
 
-- power: run 0.85 mm, rise 0.80 mm -> r 0.426 mm = 6.1 x t (t ~0.07 mm in the bend) [VERIFY JLC static bend radius]
-- radio: run 0.76 mm, rise 0.80 mm -> r 0.380 mm = 5.4 x t (t ~0.07 mm in the bend) [VERIFY JLC static bend radius]
+- power: run 0.85 mm, rise 0.78 mm -> r 0.427 mm = 4.4 x t (t ~0.098 mm in the bend; JLC recommends >= 6 x t for one layer, i.e. r >= 0.59) [VERIFY on the first flex lot: bend-to-install, no cracks]
+- radio: run 0.76 mm, rise 0.78 mm -> r 0.380 mm = 3.9 x t (t ~0.098 mm in the bend; JLC recommends >= 6 x t for one layer, i.e. r >= 0.59) [VERIFY on the first flex lot: bend-to-install, no cracks]

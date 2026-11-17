@@ -36,7 +36,7 @@ How the first pods and charging cases are fabricated, assembled, flashed and deb
 | Board | Fab spec | Before ordering |
 |---|---|---|
 | Radio + power islands | JLC06081H-2313, 6-layer HDI 1+4+1, 0.82 mm, ENIG, impedance control (CPWG 0.124 / 0.127), Tg170 | Buried-via and lamination fees are "manual quote"; confirm the stacked skip via and filled via-in-pad on the WLCSP / DSBGA with JLC engineering (O-32). WLCSP microvia capture pad vs Nordic's land (O-33). Mask openings on both sides of the six clamp bands. |
-| Flex jumper | 2-layer polyimide, 0.0865 mm, ENIG both sides, flat pattern (bend allowances 0.47 / 0.51 mm), 0.1 mm SUS430 stiffener | Single-copper-layer bend zones; JLC minimum static bend radius vs r 0.38–0.43 mm (O-25); stiffener material options (O-9). No SMT parts on the flex. |
+| Flex jumper | 2-layer polyimide, 0.11 mm finished (JLC: 25 µm PI core, 1/3 oz Cu, yellow coverlay PI 12.5 / AD 15; ±0.05), ENIG both sides, flat pattern (bend allowances 0.47 / 0.51 mm), 0.1 mm SUS430 stiffener | Single-copper-layer bend zones; JLC minimum static bend radius vs r 0.38–0.43 mm (O-25); stiffener material options (O-9). No SMT parts on the flex. |
 | Charging case | 2-layer FR-4 0.8 mm (35 µm / 0.71 core / 35 µm), 1 oz, ENIG or lead-free HASL, green or black mask | Vias 0.30 / 0.45 mm, JLC's standard (no via surcharge); two plated 0.8 mm cell-lead holes at (−15.5, ±2.0). |
 
 Production files are in each board's `production/` folder: `hardware/pod/radio-island/production/` (`Atrium_Radio_Island_gerber.zip`, `Atrium_Radio_Island_BOM.csv`, `Atrium_Radio_Island_CPL.csv`), `hardware/pod/power-island/production/`, `hardware/pod/flex-jumper/production/`, `hardware/pod/islands-panel/` and `hardware/case/charging-case/production/`.
@@ -141,7 +141,7 @@ The model is pessimistic: the joint is held at 250 °C and the seal's heat capac
 6. Kapton over each joint. Fold the tabs as the bay drawing shows. Nothing rigid may press on the pouch.
 7. Check: cell voltage at the CELL+ test pad, and charge current about 15 mA once the firmware sets ICHG. CHG_PG should go low on VIN.
 
-**Swell:** the bay leaves 0.2 mm. Measure 10 cells before freezing the shell (O-11), and cycle 300 times (O-21). Hold the cell with the bay, not glue. If a tape is needed, use thin PET double-coated PSA and only where the z-stack has room [VERIFY against the stack].
+**Swell:** the bay leaves 0.18 mm. Measure 10 cells before freezing the shell (O-11), and cycle 300 times (O-21). Hold the cell with the bay, not glue. If a tape is needed, use thin PET double-coated PSA and only where the z-stack has room [VERIFY against the stack].
 
 ## 6. Pod: mechanical assembly
 
