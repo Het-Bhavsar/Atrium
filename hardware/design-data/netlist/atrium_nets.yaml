@@ -16,7 +16,7 @@
 meta:
   envelope_mm: [20.9, 11.0, 5.3]
   vdd: 1.8
-  i2c_addresses: {MAXM86161: 0x62, LSM6DSOX: 0x6A, BQ21061: 0x6B}
+  i2c_addresses: {MAXM86161: 0x62, LSM6DSV16BX: 0x6A, BQ21061: 0x6B}
 
 components:
   # ------------------------------------------------------------- RADIO island
@@ -72,7 +72,7 @@ components:
   C56: {board: POWER, side: bot, part: 1 uF X5R 0201, lcsc: C76929, note: "VINLS (>= 1 uF). LS/LDO (D4) is shorted to VINLS (E4) as TI states for an unused LDO (SLUSDU0A Table 5-1, O-2)"}
   R50: {board: POWER, side: top, part: 10 kohm 0201 1 %, lcsc: C473048, note: "TS: in parallel with TH5"}
   TH5: {board: POWER, side: top, part: NCP03XH103F05RL 10k B3380 0201, lcsc: C98098, note: "Charger TS NTC, beside the cell: hardware charge-temperature cut-off even if firmware hangs"}
-  U11: {board: POWER, side: top, part: LSM6DSOXTR IMU, pkg: LGA-14 2.5x3.0x0.83, lcsc: C481766, note: "SA0 = GND -> 0x6A. Powered from U13 (own 1.8 V LDO): BQ21061 VDD is rated only as the charger's own I/O supply (SLUSDU0A 7.3.3)."}
+  U11: {board: POWER, side: top, part: LSM6DSV16BXTR IMU, pkg: LGA-14 2.5x3.0x0.74, lcsc: C5267394, note: "Owner 2026-11-17: replaces the LSM6DSOX on the same LGA-14 land (adds the bone-conduction TDM audio channel and Qvar for a later revision). SA0 = GND -> 0x6A, WHO_AM_I 0x71. Unused per DS13771 Table 1: TDMout, BCLK, AH1, AH2 to GND (AH2 = pin 9, via-in-pad L1-L2 to the Inner1 GND plane); WCLK (internal pull-up) and INT2 open. The voice channel needs TDMout/BCLK/WCLK at nRF I2S pins: next board revision (O-51). Powered from U13 (own 1.8 V LDO): BQ21061 VDD is rated only as the charger's own I/O supply (SLUSDU0A 7.3.3)."}
   U13: {board: POWER, side: bot, part: TPS7A0218PYCHR 1.8 V LDO, pkg: DSBGA-4 0.64x0.64 (YCH), lcsc: C3752366, note: "VSYS -> VDD_IMU. Iq 25 nA. Replaces powering the IMU from BQ21061 VDD (review 2026-11-07, B2). Input cap is C51 (22 uF, same VSYS/PMID net): place U13 within 2 mm of it (no room for a separate C62 once the clamp bands are kept out)."}
   C63: {board: POWER, side: bot, part: 1 uF X5R 0201, lcsc: C76929, note: "U13 out (TPS7A02 needs >= 0.5 uF effective) and U11 VDDIO (pin 5) decoupling: place at pin 5. C60 sits at VDD (pin 8). C61 removed: no room once the clamp bands are kept out."}
   C60: {board: POWER, side: top, part: 100 nF X5R 0201, lcsc: C76928, note: "IMU VDD (pin 8)"}
@@ -98,7 +98,7 @@ nets:
   # Power
   VIN:        [P1, FPC1.VIN_P, D10.1, U10.A1, C50.1]
   GND:        [P2, P5, U10.A4, D10.2, D12.2, D13.2, C50.2, C51.2, C52.2, C53.2, C56.2, C60.2, R50.2, TH5.2, TH4.2,
-               U11.GND, U11.SA0, U11.SDx, U11.SCx, U10.LP, U12.VM, FPC1.GND_P,
+               U11.GND, U11.SA0, U11.TDMout, U11.BCLK, U11.AH1, U11.AH2, U10.LP, U12.VM, FPC1.GND_P,
                FPC1.GND_R, U1.VSS, U1.VSS_PA, C1.2, C2.2, C3.2, C4.2, C5.2, C6.2, C7.2, C8.2, C9.2, U2.GND, C20.2, C21.2, U13.GND, C63.2,
                U3.PGND, U3.GND_DIG, U3.GND_ANA, C30.2, C31.2, C32.2, R5.2, TH1.2, C10.2, R41.2, C12.2, C40.2, C42.2]
   CELL_P:     [BT1.+, U10.A3, U10.B3, C52.1, R51.1]
@@ -142,7 +142,7 @@ nets:
 
 no_connect: [U1.P0.00, U1.P0.01, U1.P0.04, U1.P0.05, U1.P0.06, U1.P0.07, U1.P0.08, U1.P0.09,
              U1.P0.10, U1.P0.11, U1.P0.13, U1.P0.19, U1.P0.22, U1.P0.23, U1.P0.24, U1.P0.25, U1.P0.26, U1.P0.27,
-             U1.P0.29, U1.P0.30, U1.P0.31, U1.NC, U10.C1_MR, U10.C2_CE, U10.D2_INT, U10.C3, U10.C4, U11.INT2, U11.OCS_Aux, U11.SDO_Aux,
+             U1.P0.29, U1.P0.30, U1.P0.31, U1.NC, U10.C1_MR, U10.C2_CE, U10.D2_INT, U10.C3, U10.C4, U11.INT2, U11.WCLK,
              U3.NC6, U3.NC7, U3.NC8, ANT1.NC]
 
 jumper:   # FPC1 pads per end, 10 each. Net names; FPC1.<NET>_R / _P in the nets above.

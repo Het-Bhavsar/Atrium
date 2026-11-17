@@ -116,3 +116,48 @@ If the bench supports it, the design is ready:
 - run at the table current whenever the raw stream, the fit guide, a research mode or an oxygen burst runs, so the
   stream contract does not change;
 - go back to the table current if DC per mA falls under 0.7 of the reference.
+
+## Window, gasket and skin adhesive
+
+The pad's pill hole frames the base window (0.1 mm larger all round), so by design the module cover touches the skin and no adhesive is in the LED-to-PD path; the module face stands 0.05 mm proud of the pad face (bed 0.05 + 0.10 proud - pad 0.10). Cases below hold the LED current at the design operating point and add the crosstalk each case brings.
+
+| Skin | LED | case | signal x | crosstalk (% of DC) | PI eff (%) | AC SNR / sample (dB) | change (dB) |
+|---|---|---|---:|---:|---:|---:|---:|
+| Fitzpatrick I-II | green 530 | skin contact (design) | 1.00 | 0.1 | 2.91 | 40.2 | +0.0 |
+| Fitzpatrick I-II | green 530 | 20 um air gap (module 0.02 recessed) | 0.87 | 5.5 | 2.76 | 39.0 | -1.2 |
+| Fitzpatrick I-II | green 530 | clear adhesive across the window | 0.85 | 27.1 | 2.13 | 38.7 | -1.5 |
+| Fitzpatrick I-II | red 660 | skin contact (design) | 1.00 | 0.0 | 0.69 | 45.1 | +0.0 |
+| Fitzpatrick I-II | red 660 | 20 um air gap (module 0.02 recessed) | 0.87 | 1.6 | 0.68 | 44.1 | -0.9 |
+| Fitzpatrick I-II | red 660 | clear adhesive across the window | 0.85 | 9.5 | 0.63 | 43.8 | -1.3 |
+| Fitzpatrick I-II | IR 880 | skin contact (design) | 1.00 | 0.0 | 0.57 | 45.1 | +0.0 |
+| Fitzpatrick I-II | IR 880 | 20 um air gap (module 0.02 recessed) | 0.87 | 1.5 | 0.56 | 44.2 | -0.9 |
+| Fitzpatrick I-II | IR 880 | clear adhesive across the window | 0.85 | 9.1 | 0.52 | 43.8 | -1.3 |
+| Fitzpatrick III-IV | green 530 | skin contact (design) | 1.00 | 0.2 | 2.91 | 40.1 | +0.0 |
+| Fitzpatrick III-IV | green 530 | 20 um air gap (module 0.02 recessed) | 0.87 | 8.6 | 2.67 | 38.9 | -1.2 |
+| Fitzpatrick III-IV | green 530 | clear adhesive across the window | 0.85 | 37.7 | 1.82 | 38.5 | -1.6 |
+| Fitzpatrick III-IV | red 660 | skin contact (design) | 1.00 | 0.1 | 0.69 | 45.0 | +0.0 |
+| Fitzpatrick III-IV | red 660 | 20 um air gap (module 0.02 recessed) | 0.87 | 2.1 | 0.68 | 44.1 | -1.0 |
+| Fitzpatrick III-IV | red 660 | clear adhesive across the window | 0.85 | 11.9 | 0.61 | 43.7 | -1.4 |
+| Fitzpatrick III-IV | IR 880 | skin contact (design) | 1.00 | 0.0 | 0.57 | 45.2 | +0.0 |
+| Fitzpatrick III-IV | IR 880 | 20 um air gap (module 0.02 recessed) | 0.87 | 1.7 | 0.56 | 44.3 | -0.9 |
+| Fitzpatrick III-IV | IR 880 | clear adhesive across the window | 0.85 | 10.0 | 0.52 | 43.9 | -1.3 |
+| Fitzpatrick V-VI | green 530 | skin contact (design) | 1.00 | 1.0 | 2.89 | 40.0 | +0.0 |
+| Fitzpatrick V-VI | green 530 | 20 um air gap (module 0.02 recessed) | 0.87 | 27.5 | 2.12 | 38.8 | -1.3 |
+| Fitzpatrick V-VI | green 530 | clear adhesive across the window | 0.85 | 71.0 | 0.85 | 37.9 | -2.1 |
+| Fitzpatrick V-VI | red 660 | skin contact (design) | 1.00 | 0.1 | 0.69 | 45.0 | +0.0 |
+| Fitzpatrick V-VI | red 660 | 20 um air gap (module 0.02 recessed) | 0.87 | 4.2 | 0.66 | 44.0 | -1.0 |
+| Fitzpatrick V-VI | red 660 | clear adhesive across the window | 0.85 | 21.8 | 0.54 | 43.4 | -1.6 |
+| Fitzpatrick V-VI | IR 880 | skin contact (design) | 1.00 | 0.1 | 0.57 | 45.1 | +0.0 |
+| Fitzpatrick V-VI | IR 880 | 20 um air gap (module 0.02 recessed) | 0.87 | 2.3 | 0.56 | 44.1 | -0.9 |
+| Fitzpatrick V-VI | IR 880 | clear adhesive across the window | 0.85 | 13.1 | 0.50 | 43.7 | -1.4 |
+
+Module face versus pad face (Z stack, + = module proud): nominal +0.05 mm, worst case +/-0.165, RSS +/-0.073 mm (contributors: MAXM86161 body height 1.40 +/-0.05, solder joint +/-0.02, board bottom z (base posts) +/-0.03, base plate 0.35 +/-0.03, pad bed depth 0.05 +/-0.02, skin pad 0.10 +/-0.015).
+P(module recessed > 0.02 mm) = 0.20 %, > 0.05 mm = 0.002 % (sigma = RSS/3).
+
+### Reading it
+
+- With skin contact the cover reflection is index-matched: crosstalk is a fraction of a percent of the DC and costs nothing.
+- An air gap (module recessed under the pad face) raises the cover reflection to 4 %: dark-skin green crosstalk becomes 27 % of the DC and the PI drops to 2.12 %.
+- Adhesive across the window is the worst case: dark-skin green crosstalk 71 % of the DC (light piped sideways in the clear layer). Keep the pill hole: it must clear the module by >= 0.1 mm after die-cut and placement registration [VERIFY converter tolerance], and prefer a black (opaque) carrier so the ring also blocks ambient light.
+- The module face now stands 0.05 mm proud of the pad face (owner 2026-11-17: pad 0.15 -> 0.10 mm). P(module recessed under the pad face by > 0.02 mm) is 0.2 % (it was 21 % with the faces level). Check the step on EVT pods with a feeler or profilometer.
+- All glass/adhesive/barrier constants are ASSUMED; the EVT phantom test should include one run with the pad fitted.

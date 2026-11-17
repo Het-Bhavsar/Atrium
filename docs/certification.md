@@ -31,7 +31,7 @@ Use the mark from `images/oshw-certification-mark-IN000108.svg` as OSHWA supplie
 **What is open and what is not.** Everything I made for Atrium (Het Bhavsar, published through the Local Forge open-source community) is open: schematics, board layouts, Gerbers, enclosure
 CAD, firmware, app, documentation and images. The parts on the boards are ordinary catalogue parts made by others,
 each with a public datasheet reached through the LCSC number in the BOM: the nRF52832 radio SoC, the MAXM86161 optical
-module, the LSM6DSOX motion sensor, the BQ21061 charger, the cell and its protection, the chip antenna, the CH32V003
+module, the LSM6DSV16BX motion sensor, the BQ21061 charger, the cell and its protection, the chip antenna, the CH32V003
 case MCU and the passives. Their internal designs are not open, and OSHWA does not require them to be. The names
 "Atrium" and "Local Forge" and their logos are not licensed (see the README).
 

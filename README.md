@@ -178,7 +178,7 @@ If any of this is the part you want to build, start with the [roadmap](docs/road
 | **Boards** | Two rigid 6-layer HDI islands, 0.82 mm (1+4+1, laser microvias, filled via-in-pad), joined by a 2-layer polyimide flex under the cell |
 | **Radio** | Bluetooth LE, nRF52832 WLCSP; KH-1608 chip antenna at the tip, 50 Ω coplanar feed with arc bends, copper-free on every layer under the antenna |
 | **Optics** | MAXM86161A module (green, red and infrared LEDs, photodiode, front end) behind a pill window |
-| **Other sensors** | LSM6DSOX motion, a skin NTC and a top NTC |
+| **Other sensors** | LSM6DSV16BX motion, a skin NTC and a top NTC |
 | **Power** | 30 mAh Li-po (9 × 9 × 4 mm), BQ21061 charger, AP6683 protection, 1.8 V rails; about 4 days in the default mode (to be measured on EVT units) |
 | **Charging** | ENIG contacts on the skin side: VIN at the centre and ground either side, so it charges either way round, plus two SWD contacts for the programming jig and the charging case. A steel stiffener and two magnets hold it on the Plinth |
 | **Case** | 2-layer board: CH32V003 MCU, BQ24040 charger with cell-temperature cut-off, 5 V boost and current limit into the pod; about 8 pod charges per case charge (estimated) |

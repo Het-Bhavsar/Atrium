@@ -55,9 +55,9 @@ A cell 0.2 mm over nominal uses the whole swell gap (stack tolerance analysis in
     BAT  <-> CELL+  (400909)                                                              MAXM86161A VLED <- VSYS
     VDD 1.8 V -> own VIO (BQ_VDD)                                                         MAXM86161A (0x62) on I2C
     /PG ----------------------------------------------------------------------------->   P0.14 (100 k pull-up)
-  LSM6DSOX INT1 -------------------------------------------------------------------->    P0.12
+  LSM6DSV16BX INT1 ----------------------------------------------------------------->    P0.12
   I2C SDA/SCL <======================================================================>   P0.15 / P0.16 (4.7 k pull-ups)
-  U13 TPS7A0218 (VSYS -> VDD_IMU 1.8 V) -> LSM6DSOX (0x6A)                                TH4 NTC (radio top) -> P0.02/AIN0
+  U13 TPS7A0218 (VSYS -> VDD_IMU 1.8 V) -> LSM6DSV16BX (0x6A)                                TH4 NTC (radio top) -> P0.02/AIN0
   TH5 NTC -> BQ21061 TS (hardware charge-temp cut-off)                                    TH1 NTC (skin) -> P0.03/AIN1
   AP6683: CELL- <-> GND (integrated FET)                                                  VSYS/3.2 -> P0.28/AIN4
                                                                                           KH-1608-H08 antenna + pi-match
@@ -71,7 +71,7 @@ A cell 0.2 mm over nominal uses the whole swell gap (stack tolerance analysis in
 | CELL | 400909 via AP6683 | BQ21061 BAT | The AP6683 cuts CELL− on a fault |
 | VSYS (PMID) | BQ21061 | TPS7A0218 (both), MAXM86161 VLED | 4.5 V regulated while charging; about VBAT on battery. Ship mode disconnects it (10 nA). |
 | VDD_1V8 | TPS7A0218 (25 nA Iq) | nRF52832, I2C pull-ups, NTC dividers | |
-| VDD_IMU | U13 TPS7A0218 from VSYS (25 nA Iq) | LSM6DSOX | Own LDO on the power island. BQ21061 VDD is rated only as the charger's I/O supply (SLUSDU0A 7.3.3), so it feeds only U10 VIO (BQ_VDD, 4.7 µF). |
+| VDD_IMU | U13 TPS7A0218 from VSYS (25 nA Iq) | LSM6DSV16BX | Own LDO on the power island. BQ21061 VDD is rated only as the charger's I/O supply (SLUSDU0A 7.3.3), so it feeds only U10 VIO (BQ_VDD, 4.7 µF). |
 
 ## nRF52832 pin map
 

@@ -34,7 +34,7 @@ Atrium makes no stroke-volume, cardiac-output or haemodynamic claim.
 | Pod part | Can it do any of ICG? | Why |
 |---|---|---|
 | MAXM86161A (green, red, IR, one photodiode) | No | It is optical. It has no current source, no impedance channel and no electrodes |
-| LSM6DSOX accelerometer | Not ICG; see "Head ballistocardiography" below | It measures motion, not impedance |
+| LSM6DSV16BX accelerometer | Not ICG; see "Head ballistocardiography" below | It measures motion, not impedance |
 | Two skin NTCs | No | Temperature only |
 | VIN and GND skin pads | No | See below |
 
@@ -83,7 +83,7 @@ must be taken at rest ([He et al., IEEE TBME 2015](https://pmc.ncbi.nlm.nih.gov/
 For Atrium this is a research question, not a feature:
 - the everyday modes sample the accelerometer at 12.5 Hz in low-power mode, far too slow for a BCG waveform;
 - research modes 6 to 9 run it at 104 Hz (`ble_gatt.md` 4.3), and the vibration modes at 3.3 and 6.7 kHz. Whether
-  the J wave clears the LSM6DSOX's noise at the temporal region is unknown [VERIFY on the bench];
+  the J wave clears the LSM6DSV16BX's noise at the temporal region is unknown [VERIFY on the bench];
 - the pod has no ECG, so the R–J timing would have to use the PPG pulse foot as its anchor [ASSUMED; untested];
 - the published result is one group and 13 people, ear-mounted, at rest, as a relative trend with a reference.
 

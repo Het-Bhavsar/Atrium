@@ -167,7 +167,7 @@ Covered in full in [mechanical.md](mechanical.md#form-the-capsule):
 
 ## 8. Skin adhesive
 
-- **Pad:** the disposable 0.15 mm double-coated medical pad in the base bed, six to a card. Medical acrylic on the pod side; on the skin side, a high-tack acrylic or a silicone.
+- **Pad:** the disposable 0.10 mm double-coated medical pad in the base bed (the optical module stands 0.05 mm proud of its face), six to a card. Medical acrylic on the pod side; on the skin side, a high-tack acrylic or a silicone.
 - **Candidates [VERIFY thickness ≈ 0.15 mm]:** 3M 1577 and 2477P. For longer wear, compare a 4075 / 4076-class tape (14-day rated).
 - **Change interval:** every charge, when an edge lifts, or after 2 days. That sits inside the 3-day rating of the shorter-wear tapes and the pod's roughly 4-day battery.
 - **EVT cutting:** kiss-cut the die-line (`mechanical/pod/DXF/skin_pad_dieline.dxf`) on a vinyl cutter or a CO₂ laser.
@@ -192,7 +192,7 @@ Covered in full in [mechanical.md](mechanical.md#form-the-capsule):
    - SY6280 limits at about 0.45 A into a short.
    - Pogo VIN switches with VIN_EN.
    - With a golden pod docked: the case reads presence through SWDIO and does a hard reset through CTRL-AP.
-4. **Cell:** KP-502030 with wire leads (check: PCM present, lead gauge, exit position).
+4. **Cell:** KP-502030 with nickel tabs off its protection board (owner 2026-11-17; check: PCM present, tab width, thickness and length past the PCM, exit position).
    - Leads up through the two plated 0.8 mm holes, past the cell end, soldered on top: red to BT1 (+), black to BT2 (−).
    - Pre-tin. 2–3 s per joint is within the simulated limit at 5 mm.
    - Small slack loop, a glue dot for strain relief, foam pad under the cell.
@@ -239,7 +239,7 @@ There is no published factory procedure for PPG. A fixed grey target (or a simpl
 |---|---|---|
 | B-1 | Closed 2026-11-09: U1 0.21, U10 0.22, U2 / U13 0.20, U12 EP 0.38 in the production paste Gerbers. U12 checked 2026-11-11 against the AP6683 package drawing (page 11): leads 0.25 × 0.25 mm at the corners on a 0.65 mm pitch, diamond exposed pad 0.48 mm; the board has the same pitch, positions and exposed pad, with 0.40 × 0.20 mm lead pads (80 % of the lead width, 0.175 mm toe). Check the U12 joints on the first panel's AOI; for DVT, widen the lead pads to 0.25 mm | – |
 | B-2 | JLC: WLCSP 0.4 / DSBGA 0.35 placement, 0201 both sides on HDI, X-ray, nano-coated foil | JLC engineering |
-| B-3 | Pod cell order spec (O-26): 400909, at most 9.2 × 9.2 × 4.05 mm, two nickel tabs 4.6 mm apart and centred on one 9 mm edge, positive on the BT1 side, tab length enough to fold down onto the power island (welded extension wanted); ask the supplier for a drawing with the order. Case cell: leads and PCM | Supplier drawing / samples |
+| B-3 | Pod cell order spec (O-26): 400909, at most 9.2 × 9.2 × 4.05 mm, two nickel tabs 4.6 mm apart and centred on one 9 mm edge, positive on the BT1 side, tab length enough to fold down onto the power island (welded extension wanted); ask the supplier for a drawing with the order. Case cell: leads and PCM | Supplier drawing / samples Incoming: measure every cell; > 4.05 mm thick is a reject (O-55). |
 | B-4 | Dummy-cell soldering trial with a thermocouple at the seal | Bench, before the first pod |
 | B-5 | Perimeter UV adhesive grade (skin-safe) and leak-test method | Supplier data, bench |
 | B-6 | MSL and protective film on the MAXM86161; reflow bake | ADI data sheet |

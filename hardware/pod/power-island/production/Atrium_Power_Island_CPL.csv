@@ -10,7 +10,7 @@ R50,0201WMF1002TEE,R0201,2.62mm,2.33mm,2.62mm,2.33mm,2.862mm,2.33mm,2,T,180,Yes,
 R51,RC0201FR-07330RL,R0201,3.25mm,3.15mm,3.25mm,3.15mm,3.492mm,3.15mm,2,B,180,Yes,330Ω,330Ω,Thick Film Resistor,LCSC,https://item.szlcsc.com/datasheet/RC0201FR-07330RL/263580.html
 TH5,NCP03XH103F05RL,R0201,2.199mm,2.901mm,2.199mm,2.901mm,2.441mm,2.901mm,2,T,180,Yes,NCP03XH103F05RL,10KΩ,,LCSC,https://item.szlcsc.com/datasheet/NCP03XH103F05RL/99307.html
 U10,BQ21061YFPR,DSBGA-20_L2.0-W1.6-R4-C5-P0.40-BL-1,1.85mm,4.7mm,1.85mm,4.7mm,2.45mm,5.5mm,20,B,270,Yes,BQ21061YFPR,,,LCSC,https://www.ti.com/cn/lit/ds/symlink/bq21061.pdf
-U11,LSM6DSOXTR,LGA-14L_L3.0-W2.5-P0.50-TL,2.3mm,5.5mm,2.3mm,5.5mm,3.05mm,6.675mm,14,T,270,Yes,LSM6DSOXTR,,,LCSC,https://item.szlcsc.com/datasheet/LSM6DSOXTR/489350.html
+U11,LSM6DSV16BXTR,LGA-14L_L3.0-W2.5-P0.50-TL,2.3mm,5.5mm,2.3mm,5.5mm,3.05mm,6.675mm,14,T,270,Yes,LSM6DSV16BXTR,,,LCSC,https://www.st.com/resource/en/datasheet/lsm6dsv16bx.pdf
 U12,AP6683,DFN-4_L1.0-W1.0-P0.65-BL-EP,3.1mm,8.32mm,3.1mm,8.32mm,2.625mm,7.995mm,5,B,90,Yes,AP6683,,,LCSC,https://item.szlcsc.com/datasheet/AP6683/3049182.html
 U13,TPS7A0218PYCHR,WLCSP-4_L0.6-W0.6-P0.35-R2-C2-TL,1.75mm,6.25mm,1.75mm,6.25mm,1.925mm,6.425mm,4,B,180,Yes,TPS7A0218PYCHR,,,LCSC,https://www.ti.com/cn/lit/ds/symlink/tps7a02.pdf
 D12,ESD5V3U04-0201,X3-DFN0603-2_L0.6-W0.3-RD,3.7mm,2.17mm,3.7mm,2.17mm,3.7mm,1.97mm,2,T,90,Yes,ESD5V3U04-0201,,ESD,LCSC,https://item.szlcsc.com/datasheet/ESD5V3U04-0201/539383.html

@@ -9,7 +9,7 @@ Atrium is a wellness and research device. Every feature below gives wellness tre
 - **V1:** first public release.
 - **Later:** a research item, built after its signal is validated on the bench.
 
-Sensors are the EVT pod's: PPG module MAXM86161A (green, red and IR, one photodiode), IMU (LSM6DSOX), two 10 k NTCs (TH1 skin, TH4 top), VSYS sense (no fuel gauge), BLE (nRF52832), and charge state from the BQ21061. The GATT interface is in `ble_gatt.md`.
+Sensors are the EVT pod's: PPG module MAXM86161A (green, red and IR, one photodiode), IMU (LSM6DSV16BX), two 10 k NTCs (TH1 skin, TH4 top), VSYS sense (no fuel gauge), BLE (nRF52832), and charge state from the BQ21061. The GATT interface is in `ble_gatt.md`.
 
 ## Body metrics
 

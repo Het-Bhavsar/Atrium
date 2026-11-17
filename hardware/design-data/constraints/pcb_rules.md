@@ -32,7 +32,7 @@ Placement: all 64 parts were placed with real pads and clearances before routing
 
 ## Power island (x 0.6 to 4.16)
 
-- **Top**: U11 LSM6DSOX (see placement file), TH5 next to the cell, CELL+ / CELL- tab pads, C50, C52, C53, C56, C60, C61, R50.
+- **Top**: U11 LSM6DSV16BX (see placement file), TH5 next to the cell, CELL+ / CELL- tab pads, C50, C52, C53, C56, C60, C61, R50.
 - **Bottom**: U10 BQ21061 (DSBGA, 0.5 mm), U13 TPS7A0218 + C62/C63 (IMU supply), jumper pads (two rows at the inner edge), U12 AP6683 + R51/C55, C51 22 µF 0402 (height <= 0.65 mm), D10, C60/C61.
 - **Clamp bands** (`geometry.CLAMPS`, mechanical): power 114° / 246°, radio ±60° / ±86°, 0.35 × 1.0 mm at the edge, keep-out on both sides.
 - **Bottom part height <= 0.80 mm** (0.85 mm to the base).

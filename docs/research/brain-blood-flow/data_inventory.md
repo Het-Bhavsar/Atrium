@@ -16,7 +16,7 @@
 | Firmware ADC setup | tINT 117.3 µs; 16 µA full scale; LED settling 12 µs | `maxm86161.c` |
 | Ambient handling | in-module ambient cancellation; **no direct ambient slot**, so ambient leakage cannot be measured from the stream | `maxm86161.c`, `modes.c` |
 | Sample rate | **25 Hz** for every slot, in every mode. Full mode streams green, IR and red | `modes.c`, `ble_gatt.md` 4.2 |
-| IMU | LSM6DSOX, 12.5 Hz in every streaming mode | `modes.c` |
+| IMU | LSM6DSV16BX, 15 Hz in every everyday streaming mode | `modes.c` |
 | Raw streams | PPG Data 0x0202 (FIFO words with tags); Motion Data 0x0204 | `ble_gatt.md` 4.2 |
 | Time stamps | both streams carry pod uptime ms of the first sample, on the same clock [ASSUMED within one sample] | `ble_gatt.md` |
 

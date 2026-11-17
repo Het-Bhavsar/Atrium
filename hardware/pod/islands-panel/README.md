@@ -39,3 +39,7 @@ and board outline to SMD pad 0.195 mm, which absorbs a 1 µm rounding of the col
 5. Support the panel under the frame and bars on both passes (worst island deflection about 64 µm at a 2 N nozzle force).
 6. Bottom side first.
 7. Check the orientation of the WLCSP, DSBGA, LGA and DFN parts in the fab's CPL preview before paying.
+8. Impedance control: **yes**, on stack-up JLC06081H-2313, with a note "L1 CPWG 0.124 mm / 0.127 mm gap, 50 Ω ±10 %"
+   (the radio island's antenna feed; its tolerance corners reach 60 Ω without it, O-57).
+9. U11 is the LSM6DSV16BX (C5267394, an extended part with a small stock): check stock before ordering. It sits on the
+   same LGA-14 land the LSM6DSOX had; pin 9 (Qvar2) is tied to GND through a via in its pad.

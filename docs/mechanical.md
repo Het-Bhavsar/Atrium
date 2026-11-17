@@ -44,7 +44,7 @@ Every check below passes on the current CAD.
 | Stiffener over the magnets, either way round | ≥ 65 % of each magnet face |
 | Pod rests on its frame in the Plinth, module clear | Base on the nest floor, module 0.20 clear |
 | Skin pad inside the footprint, full pad not a ring | 18.8 × 8.9, 1.05 inside the outline; 130 mm² bonded, largest hole 13.3 % |
-| Pad in the bed, behind the frame; module level with the pad | Edge 0.25 inside the lip; pad face and module both 0.10 below the frame |
+| Pad in the bed, behind the frame; module 0.05 proud of the pad | Edge 0.25 inside the lip; pad face 0.05 and module 0.10 below the frame |
 | Base floor under the bed | 0.30 mm |
 | Pad lands in the bed off the card | 0.20 worst case against 0.25 clearance |
 
@@ -135,7 +135,7 @@ The adhesive must not show.
 **Frame and bed:**
 - The skin face is a **frame** and a **bed**. The frame is the shell's 0.5 mm rim plus a 0.25 mm lip of the base, flat at the skin plane. The pod rests on it in the Plinth, and a pillow or glasses arm meets it at the skin line.
 - Inside the frame the base is recessed **0.05 mm** into a stadium bed, which leaves a 0.30 mm floor and the full 0.35 mm at the lip.
-- The pad sits in the bed with **0.25 mm clearance** all round. Its skin face stands 0.10 mm below the frame, level with the optical module, so its edge is tucked into a 0.1 mm slot behind the frame where nothing can catch it. Nothing shows from the front or the side.
+- The pad sits in the bed with **0.25 mm clearance** all round. Its skin face stands 0.05 mm below the frame and the optical module 0.05 mm beyond it (pad 0.10 mm, 2026-11-17), so its edge is tucked into a narrow slot behind the frame where nothing can catch it. Nothing shows from the front or the side.
 - **Location:** the bed's own edge locates the pad, and the module's 0.1 mm boss inside the pad's hole stops it sliding. The hole is a pill that frames the base window (+0.1 mm), so the skin face shows only the frame, the pad and the pill window, with the black gasket between pad and module. There are no ribs or grooves on the pod.
 
 **The pad** (die-line `mechanical/pod/DXF/skin_pad_dieline.dxf`):

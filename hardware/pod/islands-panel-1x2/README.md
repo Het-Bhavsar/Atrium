@@ -35,5 +35,6 @@ preview). In addition:
    Piece" multiplies every quantity by the panel count.
 2. The panel is under 70 mm, so let JLC add the edge rails for Standard PCBA.
 3. JLC splits the L1–L5 and L2–L6 skip vias into stacked vias (no extra fee), as expected in O-32.
-4. If the MAXM86161A (C54021201) is out of stock, the MAXM86161 (C3178309) fits the same land pattern and runs the same
+4. Impedance control and the U11 (LSM6DSV16BX) stock check as in the 4 × 5 panel's notes 8 and 9.
+5. If the MAXM86161A (C54021201) is out of stock, the MAXM86161 (C3178309) fits the same land pattern and runs the same
    firmware (same register map and PART_ID); its green LED is dimmer (O-43).
