@@ -4,8 +4,14 @@
  */
 #include "oc_fast.h"
 
-void oc_fast_vin(struct oc_fast *f, bool on, uint32_t now_ms)
+void oc_fast_monitor(struct oc_fast *f, bool ready)
 {
+	f->monitor = ready;
+}
+
+bool oc_fast_vin(struct oc_fast *f, bool on, uint32_t now_ms)
+{
+	on = on && f->monitor;
 	if (on && !f->vin) {
 		f->vin_t0 = now_ms;
 		f->over = 0;
@@ -14,6 +20,7 @@ void oc_fast_vin(struct oc_fast *f, bool on, uint32_t now_ms)
 		f->over = 0;
 	}
 	f->vin = on;
+	return on;
 }
 
 bool oc_fast_armed(const struct oc_fast *f, uint32_t now_ms, uint16_t blank_ms)

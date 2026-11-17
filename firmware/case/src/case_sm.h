@@ -166,6 +166,11 @@ struct case_sm {
 };
 
 void case_sm_init(struct case_sm *sm, const struct case_cfg *cfg, uint32_t now_ms);
+
+/* After a watchdog reset: treat it as a contact fault, so the feed stays off for retry_ms and
+ * the LED shows the fault. A hang that recurs with a short then costs one watchdog timeout
+ * of short in every retry_ms, not a short most of the time. */
+void case_sm_watchdog_reset(struct case_sm *sm, uint32_t now_ms);
 void case_sm_step(struct case_sm *sm, const struct case_in *in, struct case_out *out);
 
 /* What the LED would show for the pod right now (for tests and the debug print). */

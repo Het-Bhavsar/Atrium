@@ -12,6 +12,7 @@
 #include "case_sm.h"
 #include "check.h"
 #include "oc_fast.h"
+#include "wdt.h"
 
 #define FRAME_MS 20
 
@@ -129,6 +130,8 @@ struct sim {
 	bool cut;
 	uint32_t cut_t;
 	bool fast_trip;    /* for the next tick */
+	bool zero_ok;      /* main's zero reading, taken with VIN off */
+	bool no_zero;      /* the zero reading never happens (a test of the gate) */
 	int trips;
 };
 
@@ -153,6 +156,7 @@ static int32_t sim_pod_ua(uint32_t t, bool *sat)
 
 static void sim_vin(bool on, uint32_t t)
 {
+	on = oc_fast_vin(&S.fast, on, t); /* as main: the pin takes what the gate returns */
 	if (on && !S.vin) {
 		S.edge_t = t;
 		S.edges++;
@@ -168,7 +172,6 @@ static void sim_vin(bool on, uint32_t t)
 	} else if (!on) {
 		S.vin = false;
 	}
-	oc_fast_vin(&S.fast, on, t);
 }
 
 /* one frame of main.c's loop */
@@ -203,7 +206,7 @@ static void sim_tick(void)
 	S.in.now_ms = T;
 	S.in.fast_trip = S.fast_trip;
 	S.fast_trip = false;
-	S.in.i_valid = S.out.vin_en && S.out.opa_on;
+	S.in.i_valid = S.vin && S.out.opa_on;
 	S.in.i_ua = S.in.i_valid ? sim_pod_ua(T, &S.in.i_sat) : 0;
 	if (!S.in.i_valid) {
 		S.in.i_sat = false;
@@ -212,7 +215,9 @@ static void sim_tick(void)
 	case_sm_step(&S.sm, &S.in, &S.out);
 	if (S.out.zero_req) {
 		w += ZERO_MS;
+		S.zero_ok = !S.vin && !S.no_zero;
 	}
+	oc_fast_monitor(&S.fast, S.out.opa_on && S.zero_ok);
 	sim_vin(S.out.vin_en, w);
 	for (int f = 0; f < CASE_TICK_MS / FRAME_MS; f++) {
 		uint32_t ft = T + (uint32_t)f * FRAME_MS;
@@ -293,6 +298,93 @@ static void inrush_inside_blank_no_trip(void)
 	CHECK(S.out.vin_en);
 }
 
+/* VIN_EN goes high only once the current reading works (OPA on, zero taken with VIN off) */
+static void vin_waits_for_the_monitor(void)
+{
+	struct oc_fast f = {0};
+
+	CHECK(!oc_fast_vin(&f, true, 100)); /* at boot: no monitor yet */
+	CHECK(!f.vin);
+	CHECK(!oc_fast_armed(&f, 200, 10));
+	oc_fast_monitor(&f, true);
+	CHECK(oc_fast_vin(&f, true, 300));
+	CHECK_EQ(f.vin_t0, 300); /* the blanking starts at the real edge */
+	oc_fast_monitor(&f, false); /* OPA off: VIN drops at the next write */
+	CHECK(!oc_fast_vin(&f, true, 400));
+	CHECK(!f.vin);
+
+	/* the whole loop with no zero reading ever taken: the pin never goes high */
+	sim_init(POD_INRUSH);
+	S.no_zero = true;
+	sim_run(3000);
+	CHECK_EQ(S.edges, 0);
+	CHECK(S.out.vin_en); /* the state machine wanted it on */
+}
+
+/* after a watchdog reset the feed stays off for the retry time, then probes again */
+static void watchdog_reset_holds_the_feed_off(void)
+{
+	sim_init(POD_INRUSH);
+	case_sm_watchdog_reset(&S.sm, S.t);
+	sim_run(CASE_TICK_MS);
+	CHECK(S.sm.fault);
+	CHECK_EQ(S.out.led, LED_FAULT);
+	sim_run(29000);
+	CHECK_EQ(S.edges, 0);
+	CHECK(!S.vin);
+	sim_run(2000);
+	CHECK(!S.sm.fault);
+	CHECK(S.edges >= 1);
+	CHECK(S.vin);
+}
+
+/* a hang that comes back every boot, with the pod shorted: at most one watchdog timeout of
+ * short per retry period, not a short most of the time */
+static void repeated_hang_short_duty(void)
+{
+	uint32_t short_ms = 0, span = 0;
+
+	for (int boot = 0; boot < 5; boot++) {
+		sim_init(POD_SHORT_FROM_START);
+		if (boot) {
+			case_sm_watchdog_reset(&S.sm, S.t);
+		}
+		/* run until VIN goes on, then hang: the pin stays high for one timeout */
+		uint32_t t0 = S.t;
+
+		while (S.edges == 0 && S.t - t0 < 40000) {
+			sim_tick();
+		}
+		CHECK_EQ(S.edges, 1);
+		short_ms += wdt_timeout_us(WDT_RUN_PR, WDT_RUN_RL) / 1000;
+		span += S.t - t0;
+	}
+	/* 4 of the 5 boots waited 30 s first */
+	CHECK(span >= 4 * 30000);
+	CHECK(short_ms * 100 / span < 1); /* under 1 % of the time */
+}
+
+static void watchdog_timing(void)
+{
+	uint32_t run = wdt_timeout_us(WDT_RUN_PR, WDT_RUN_RL);
+	uint32_t sleep = wdt_timeout_us(WDT_SLEEP_PR, WDT_SLEEP_RL);
+	uint32_t awu = WDT_AWU_MAX_COUNTS * WDT_AWU_STEP_US;
+
+	CHECK_EQ(run, 100000);
+	CHECK_EQ(sleep, 8192000);
+	CHECK(WDT_SLEEP_RL <= 0x0FFF && WDT_RUN_RL <= 0x0FFF);
+	/* fed every 20 ms frame: five frames fit in one timeout */
+	CHECK(5 * FRAME_MS * 1000 <= run);
+	/* the longest standby wakes with at least 10 % left, whatever the LSI's error */
+	CHECK(awu * 110 / 100 <= sleep);
+	/* the option byte: hardware watchdog, PD7 a GPIO, no reset on stop or standby, user flash */
+	CHECK_EQ(WDT_OB_USER & 0x01, 0);
+	CHECK_EQ(WDT_OB_USER & 0x06, 0x06);
+	CHECK_EQ(WDT_OB_USER & 0x18, 0x18);
+	CHECK_EQ(WDT_OB_USER & 0x20, 0);
+	CHECK_EQ((uint8_t)~WDT_OB_USER, 0x21);
+}
+
 const struct check_case fast_cases[] = {
 	{"fast: trips on the second reading over", trips_on_second_reading},
 	{"fast: one spike does not trip", one_spike_does_not_trip},
@@ -303,5 +395,9 @@ const struct check_case fast_cases[] = {
 	{"fast: a short from the feed start is cut after the blanking", short_from_feed_start},
 	{"fast: a short in the signature pulses is cut", short_in_signature_pulse},
 	{"fast: inrush inside the blanking does not trip", inrush_inside_blank_no_trip},
+	{"fast: VIN waits for the current monitor", vin_waits_for_the_monitor},
+	{"wdt: a watchdog reset holds the feed off 30 s", watchdog_reset_holds_the_feed_off},
+	{"wdt: a recurring hang shorts under 1 % of the time", repeated_hang_short_duty},
+	{"wdt: timeouts, standby wake and option byte", watchdog_timing},
 	{0, 0},
 };

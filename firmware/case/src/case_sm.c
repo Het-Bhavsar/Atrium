@@ -182,6 +182,11 @@ static void oc_fault(struct case_sm *sm, uint32_t now)
 	led_play(sm, LED_FAULT, LED_OFF, now);
 }
 
+void case_sm_watchdog_reset(struct case_sm *sm, uint32_t now_ms)
+{
+	oc_fault(sm, now_ms);
+}
+
 static void measure(struct case_sm *sm, const struct case_in *in, bool ldo_seen)
 {
 	const struct case_cfg *c = &sm->cfg;

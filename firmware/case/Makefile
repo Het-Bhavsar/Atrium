@@ -2,6 +2,8 @@
 # Usage, from the repo root:
 #   make -C firmware/case test            host unit tests (any C compiler)
 #   firmware/case/tools/case.sh build     the MCU image in Docker: firmware/case/build/atrium_case.hex
+#   firmware/case/tools/case.sh hang-test bring-up only: an image that hangs 3 s into a feed with
+#                                         VIN_EN high, to see the watchdog cut it (README)
 
 OUT := build
 HOSTCC ?= cc
@@ -29,7 +31,7 @@ ifdef CH32FUN
 TARGET := $(OUT)/atrium_case
 TARGET_MCU := CH32V003
 ADDITIONAL_C_FILES := $(CORE)
-EXTRA_CFLAGS := -Isrc -Wsign-compare
+EXTRA_CFLAGS := -Isrc -Wsign-compare $(CASE_DEFS)
 include $(CH32FUN)/ch32fun.mk
 
 # ch32fun builds $(TARGET).c: a one-line wrapper keeps the sources in src/

@@ -19,7 +19,10 @@
  * The blanking covers the pod's inrush (case/README.md, "Inrush and the 10 ms blanking"): under 2 ms
  * expected, so 10 ms is a 5x margin. Inside it only the SY6280 current limit applies.
  * The state machine is told afterwards (case_in.fast_trip) and handles the fault and the
- * 30 s retry. Plain C, host-tested.
+ * 30 s retry.
+ * VIN_EN never goes high before this check can run: oc_fast_vin() drives it high only once
+ * oc_fast_monitor() says the shunt amplifier is on and the zero reading was taken with VIN off.
+ * Plain C, host-tested.
  */
 #ifndef OC_FAST_H_
 #define OC_FAST_H_
@@ -31,13 +34,19 @@
 
 struct oc_fast {
 	uint8_t over;    /* readings in a row over the limit */
+	bool monitor;    /* the current reading works: OPA on, zero taken */
 	bool vin;        /* VIN_EN as main last drove it */
 	uint32_t vin_t0; /* when main last drove it on */
 };
 
-/* main drove VIN_EN to `on` at now_ms (every write; only a rising edge restarts the
- * blanking). Going off clears the count. */
-void oc_fast_vin(struct oc_fast *f, bool on, uint32_t now_ms);
+/* Whether the pod-current reading can run now: the OPA is on and the zero was taken with VIN
+ * off. Until it says so, oc_fast_vin() keeps VIN_EN low. */
+void oc_fast_monitor(struct oc_fast *f, bool ready);
+
+/* main asks for VIN_EN `on` at now_ms; returns the level to drive. High only while the
+ * monitor is ready; main writes the pin with what this returns, every time. A rising edge
+ * restarts the blanking; going off clears the count. */
+bool oc_fast_vin(struct oc_fast *f, bool on, uint32_t now_ms);
 
 /* VIN is on and at least blank_ms have passed since it went on. */
 bool oc_fast_armed(const struct oc_fast *f, uint32_t now_ms, uint16_t blank_ms);

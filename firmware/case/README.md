@@ -13,7 +13,7 @@ Firmware for the Atrium charging case (see [`docs/charging-case.md`](../../docs/
 
 ## Toolchain
 
-[ch32fun](https://github.com/cnlohr/ch32fun) (MIT), pinned at `b28d285`, with Ubuntu 24.04's `gcc-riscv64-unknown-elf` (rv32ec, ilp32e). It is fetched into the Docker image, not stored in the repo. It was chosen over the vendor SDK because it is bare-metal headers with a plain Makefile, small (the image is 7.7 KB of 16 KB flash, 204 B of 2 KB RAM), and flashes over SWIO with `minichlink` or a WCH-LinkE.
+[ch32fun](https://github.com/cnlohr/ch32fun) (MIT), pinned at `b28d285`, with Ubuntu 24.04's `gcc-riscv64-unknown-elf` (rv32ec, ilp32e). It is fetched into the Docker image, not stored in the repo. It was chosen over the vendor SDK because it is bare-metal headers with a plain Makefile, small (the image is 7.9 KB of 16 KB flash, 204 B of 2 KB RAM), and flashes over SWIO with `minichlink` or a WCH-LinkE.
 
 | Script | Usage | Does |
 |---|---|---|
@@ -25,19 +25,38 @@ Firmware for the Atrium charging case (see [`docs/charging-case.md`](../../docs/
 
 `build/` is git-ignored. The host tests also compile the pod's `src/power/vinpat.c`, so the case's VIN pulses are checked against the pod's own detector.
 
-**Flashing.** `minichlink -w firmware/case/build/atrium_case.bin flash -b` over the SWIO pad (PD1), then `minichlink -D` once, so PD7 works as a GPIO (the blue LED) and not as NRST. The MCU stays awake for 5 s after a reset and whenever USB is in, because SWIO does not answer in standby.
+**Flashing.** Over the SWIO pad (PD1) with a WCH-LinkE and `minichlink`. The MCU stays awake for 5 s after a reset and whenever USB is in, because SWIO does not answer in standby.
+
+1. `minichlink -w firmware/case/build/atrium_case.bin flash -b`
+2. Write the user option byte, once per board. Use **USER = 0xDE** (complement 0x21):
+   - bit 0 = 0: hardware watchdog, running from reset;
+   - bits 1 and 2 = 1: no reset on stop or standby;
+   - bits 4:3 = 11: PD7 is a GPIO (the blue LED), not NRST;
+   - bit 5 = 0: start in user flash.
+
+   A factory-fresh chip reads USER 0x97, with a software watchdog and NRST on. Write the whole 16-byte option block, with read protection off (RDPR 0xA5) and nothing write-protected:
+
+   ```bash
+   printf '\xa5\x5a\xde\x21\x00\xff\x00\xff\xff\x00\xff\x00\xff\x00\xff\x00' > /tmp/case_ob.bin
+   minichlink -w /tmp/case_ob.bin option
+   ```
+
+   Then power-cycle the board: option bytes load at reset. Check with `minichlink -i`: `USER/RDPR : 21de/5aa5`.
+3. **Do not run `minichlink -D` afterwards.** On a WCH-LinkE it writes USER = 0xFF (minichlink `LEConfigureNRSTAsGPIO`), which turns PD7 into a GPIO but puts the watchdog back in software mode. The 0xDE byte already makes PD7 a GPIO.
+
+The firmware also starts the watchdog first thing in `main`, so a board still in software mode is protected from the first lines of `main`, before VIN_EN can go high. Hardware mode adds the start-up code before `main`. The firmware sets the debug unit's IWDG_STOP (CSR 0x7C0, bit 8), so a programmer that halts the running core freezes the watchdog [VERIFY on the bench]. If reflashing a hardware-mode board keeps failing (a reset into halt runs the watchdog before the firmware can set that bit), clear it with `minichlink -u`, then repeat steps 1 and 2 [VERIFY].
 
 ## Pins (QFN-20)
 
 From CH32V003DS0 V1.8, table 2-1. The OPA pins are fixed by the silicon. The case netlist (`hardware/design-data/netlist/case_nets.yaml`, Rev B, 2026-11-10) matches all 18 MCU pins.
 
-**Inrush and the 10 ms blanking.** The shunt (RS1) is in the pod's ground return, so it sees only what the pod draws, not C6 on the case side. At a VIN-on edge the pod charges C50 (1 µF on the BQ21061 input) and, with a flat cell, its VSYS capacitors through the charger; at the SY6280's 0.34 A minimum limit even 10 µF reaches 5 V in about 0.15 ms, and with no limit the edge is set by the SY6280's turn-on slew, assumed at most about 2 ms [VERIFY SY6280 data sheet and on a scope]. After that the pod draws its charge current (15 mA) plus its system load, far under 80 mA. The OPA input filter (10k, 100 pF) settles in microseconds. 10 ms is a 5× margin on 2 ms and keeps a short that is there at the edge within the 50 ms of B-8. If the scope shows a longer inrush, raise `oc_blank_ms` in `case_sm.h`, and keep blank + 40 ms ≤ 50 ms or re-check the diodes.
+**Inrush and the 10 ms blanking.** The shunt (RS1) is in the pod's ground return, so it sees only what the pod draws, not C6 on the case side. At a VIN-on edge the pod charges C50 (10 µF 0402 on the BQ21061 input, about 2 µF left at 5 V bias) and, with a flat cell, its VSYS capacitors through the charger; at the SY6280's 0.34 A minimum limit even 10 µF reaches 5 V in about 0.15 ms, and with no limit the edge is set by the SY6280's turn-on slew, assumed at most about 2 ms [VERIFY SY6280 data sheet and on a scope]. After that the pod draws its charge current (15 mA) plus its system load, far under 80 mA. The OPA input filter (10k, 100 pF) settles in microseconds. 10 ms is a 5× margin on 2 ms and keeps a short that is there at the edge within the 50 ms of B-8. If the scope shows a longer inrush, raise `oc_blank_ms` in `case_sm.h`, and keep blank + 40 ms ≤ 50 ms or re-check the diodes.
 
 Board values the firmware depends on, from that netlist: BQ24040 ISET 2.7k (about 200 mA), boost 5.21 V (768k / 100k), SY6280 ISET 15k (0.45 A backstop above the 80 mA firmware trip), LED XL-1615RGBC-RF common anode to VDD with red 1k and green and blue 330 Ω, HAL248 pull-up R19 4.7M fitted only if the output is open drain (DNP).
 
 | Pin | Port | Net | Notes |
 |---|---|---|---|
-| 1 | PD7 | LED_B | TIM2_CH4, cathode. NRST turned off in the option byte |
+| 1 | PD7 | LED_B | TIM2_CH4, cathode. NRST turned off in the option byte (USER 0xDE) |
 | 2 | PA1 | OPA_N | OPN0: Rf 20k from PD4, Rg 1k to GND (×21) |
 | 3 | PA2 | OPA_P | OPP0: 10k from the shunt, 1.5M from VDD (pedestal) |
 | 5 | PD0 | VIN_EN | SY6280 EN, and the top of the NTC divider; 1M to GND |
@@ -71,6 +90,8 @@ Board choices the firmware relies on (all in the case netlist):
 | 1.8 V side | LDO_PWR 100 ms after VIN on; off with VIN and through every drop-out | `1.8 V side waits for VIN`, and checked on every tick of every state-machine test |
 | Pod state | Present: SWDIO high or > 0.4 mA; absent 2 s: no pod. Charging > 5 mA; full < 2.5 mA for 30 s, after which VIN goes off without USB and with the lid shut | `pod removal is seen`, `present by the SWDIO pull-up` |
 | Over-current | Fast path (`src/oc_fast.c`), decided by the main loop itself on every 20 ms LED frame. It records each VIN-on edge (the feed start and each VIN-on edge of the signature and soft-reset pulses) and, from 10 ms after it, reads the pod current once a frame; two readings in a row over 80 mA (or clipped) cut VIN at once. A short there from the edge is cut within 50 ms of it (10 ms blanking + 2 frames; 30–40 ms in the tests), a later short within 40 ms plus one 0.4 ms reading, on any tick: inside the 50 ms of build item B-8. Slow path, the state machine's: tick readings count from the second tick after VIN on, and 3 counted readings in a row over 80 mA (or clipped) trip, at the 400 ms tick at the earliest; none count during a pulse pattern. Either way: VIN off, red fast blink, retry in 30 s. SY6280 ISET (0.45 A) is the hardware limit, and the only one inside the 10 ms blanking | `fast: cut within 50 ms of a short`, `fast: a short from the feed start is cut after the blanking`, `fast: a short in the signature pulses is cut`, `fast: inrush inside the blanking does not trip`, `over-current trips and retries`, `inrush is blanked` |
+| Watchdog | Why: in a pogo short the SY6280 holds about 0.45 A through D1/D2, and only the firmware's cut keeps the diode inside its rating, so a hung MCU with VIN_EN high must not stay that way. The IWDG runs at 100 ms, in hardware mode from the option byte (USER 0xDE), and `main` starts it too. It is fed only in the main loop, once per 20 ms frame after that frame's over-current check, never from an interrupt. A hang resets the MCU: PD0 floats and R10 (1 MΩ) pulls the SY6280 EN low, so the feed stops within one timeout (100 ms nominal, LSI [VERIFY]). After a watchdog reset the feed stays off for 30 s with the fault LED, so a hang that comes back every boot shorts for under 1 % of the time. Standby lasts at most 7.2 s per AWU wake-up, with the watchdog stretched to 8.2 s while VIN is off, so the MCU now wakes every 7.2 s when idle (`src/wdt.h`) | `wdt: a watchdog reset holds the feed off 30 s`, `wdt: a recurring hang shorts under 1 % of the time`, `wdt: timeouts, standby wake and option byte` |
+| VIN gate | VIN_EN goes high only through `oc_fast_vin()`, and only once the shunt amplifier is on and the zero reading was taken with VIN off. BOOST and the 1.8 V side follow the level really driven. From reset until `main` decides, PD0 is a floating input and R10 holds the feed off; `board_init` then drives it low | `fast: VIN waits for the current monitor` |
 | Case cell | Below 3.4 V 3 times without USB: no feeding until 3.6 V or USB; red blinks on lid open | `low case battery` |
 | Temperature | NTC ≥ 45 °C while feeding: VIN off, retry in 10 min, and it stays off until a reading below 42 °C | `hot case cell` |
 | Case signature | Owner decision 2026-11-08. 3 s after VIN on with a pod there, and after each reset: two 200 ms VIN drop-outs. The pod reports "fed by the case" (Charge State flag bit 4) | `soft reset reboots the pod`, `hard reset`, `a day of top-ups and lid opens` (no reset in 24 h) |
@@ -83,7 +104,9 @@ SWD runs at the speed of the call overhead at 24 MHz [VERIFY on a scope]. ERASEA
 
 ## What needs hardware
 
-1. **Analog.** The zero with VIN off; 0, 2.5, 5 and 15 mA from a bench load on the pogo pins against a meter; the over-current trip into a short. On a scope (VIN_EN and the shunt): the pod's inrush after a VIN-on edge (expected under 2 ms, blanking 10 ms), and the cut into a short present at the edge (expected 30–50 ms), during the signature pulses, and mid-feed (within 40 ms).
+1. **Analog and protection.** The zero with VIN off; 0, 2.5, 5 and 15 mA from a bench load on the pogo pins against a meter.
+   - **Short test:** short POGO_VIN to GND through 1 Ω with the lid open, scope on U4.EN (or VIN_EN, PD0) and on POGO_VIN. VIN_EN must fall within 50 ms of POGO_VIN rising, and the fault LED must show; it comes back 30 s later and cuts again.
+   - **Watchdog test:** flash `firmware/case/tools/case.sh hang-test` (`build/wdt_hang/`), which hangs 3 s into a feed with VIN_EN high. U4.EN must fall within about 100 ms of the hang, and the MCU must restart with the fault LED and no feed for 30 s. Check `minichlink -i` reads USER 0xDE first. Flash the release image afterwards. On a scope (VIN_EN and the shunt): the pod's inrush after a VIN-on edge (expected under 2 ms, blanking 10 ms), and the cut into a short present at the edge (expected 30–50 ms), during the signature pulses, and mid-feed (within 40 ms).
 2. **VREFINT.** Against a meter at 3.4, 3.7 and 4.2 V; decide a per-unit trim if the spread is near ±2.5 %.
 3. **Presence.** SWDIO reads high with a powered pod and low with none, through U6 and the 1M pull-down.
 4. **HAL248.** Its output type and level with the lid open and shut. Assumed push-pull, high when open; open drain needs a pull-up of at least 4.7M.

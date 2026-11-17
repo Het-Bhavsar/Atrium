@@ -11,8 +11,14 @@
  *  - Each tick: read the lid, button, USB and charger CHG pins, VDD from VREFINT, and,
  *    with the outputs of the last tick, the pod current (OPA, 16 samples), the NTC (VIN on)
  *    and the SWDIO pull-up (1.8 V side on). Step the state machine, then set the outputs.
- *  - Standby: lid, button and VBUS wake it on either edge (EXTI 1-3, port C); the AWU
- *    wakes it for the next timer, in 480 ms steps up to 30.7 s. Standby keeps RAM and pin
+ *  - Watchdog (wdt.h): 100 ms, fed once per frame after its over-current check, never from
+ *    an interrupt. A hang resets the MCU; PD0 then floats and R10 turns the feed off. After a
+ *    watchdog reset the feed waits 30 s, as after a contact fault.
+ *  - VIN_EN goes high only through oc_fast_vin(), once the OPA is on and the zero reading
+ *    was taken with VIN off; BOOST and the 1.8 V side follow what was really driven.
+ *  - Standby (VIN always off there): lid, button and VBUS wake it on either edge (EXTI 1-3,
+ *    port C); the AWU wakes it for the next timer, in 480 ms steps, at most 7.2 s, because the
+ *    watchdog (stretched to 8.2 s for standby) keeps counting. Standby keeps RAM and pin
  *    states (CH32V003RM 2.3.3). Time asleep is counted in AWU periods; an EXTI wake-up
  *    adds nothing.
  *  - The MCU stays awake for 5 s after reset and whenever USB is in, so the SWIO
@@ -27,14 +33,47 @@
 #include "oc_fast.h"
 #include "sense.h"
 #include "swd.h"
+#include "wdt.h"
 
 #define OVS           16
 #define TICKS_PER_MS  (FUNCONF_SYSTEM_CORE_CLOCK / 8000)
 #define FRAME_MS      20
-#define AWU_STEP_MS   480 /* 61440 / 128 kHz [VERIFY LSI tolerance] */
-#define AWU_MAX       64  /* window 0-63: up to 30.7 s */
+#define AWU_STEP_MS   (WDT_AWU_STEP_US / 1000) /* 61440 / 128 kHz [VERIFY LSI tolerance] */
+#define AWU_MAX       WDT_AWU_MAX_COUNTS      /* 7.2 s: under the 8.2 s standby watchdog */
 #define BOOT_AWAKE_MS 5000
 #define SWD_HOLD      1000  /* idle clocks with CTRL-AP RESET set, about 1 ms */
+
+/* ---- watchdog (wdt.h) ---- */
+
+static void wdt_set(uint8_t pr, uint16_t rl)
+{
+	IWDG->CTLR = IWDG_WriteAccess_Enable;
+	while (IWDG->STATR & (IWDG_PVU | IWDG_RVU)) {
+	}
+	IWDG->PSCR = pr;
+	IWDG->RLDR = rl;
+	while (IWDG->STATR & (IWDG_PVU | IWDG_RVU)) {
+	}
+	IWDG->CTLR = CTLR_KEY_Reload; /* reload with the new value */
+}
+
+static void wdt_feed(void)
+{
+	IWDG->CTLR = CTLR_KEY_Reload;
+}
+
+/* Start the watchdog at 100 ms; returns true when the last reset was the watchdog's. */
+static bool wdt_start(void)
+{
+	bool was = (RCC->RSTSCKR & RCC_IWDGRSTF) != 0;
+
+	RCC->RSTSCKR |= RCC_RMVF;
+	/* frozen while a programmer halts the core, so flashing is not cut short */
+	__set_DEBUG_CR(__get_DEBUG_CR() | DBGMCU_IWDG_STOP);
+	IWDG->CTLR = CTLR_KEY_Enable; /* already running in hardware mode (WDT_OB_USER) */
+	wdt_set(WDT_RUN_PR, WDT_RUN_RL);
+	return was;
+}
 
 /* ---- time ---- */
 
@@ -259,36 +298,37 @@ static uint32_t awu_counts(uint32_t ms)
 	return n < 1 ? 1 : n > AWU_MAX ? AWU_MAX : n;
 }
 
-/* Standby until a pin changes or the AWU fires. Returns the time asleep, in ms. */
+/* Standby until a pin changes or the AWU fires (at most 7.2 s, for the watchdog). Returns the
+ * time asleep, in ms. Called only with VIN off (the feed keeps the MCU awake). */
 static uint32_t standby(uint32_t wake_in_ms)
 {
-	uint32_t counts = awu_counts(wake_in_ms);
+	uint32_t counts = awu_counts(wake_in_ms ? wake_in_ms : AWU_MAX * AWU_STEP_MS);
 
+	funDigitalWrite(PIN_VIN_EN, 0); /* already low; the long watchdog needs it so */
 	led_set((struct rgb){0, 0, 0});
 	led_pins(false);
 	TIM2->CTLR1 &= ~TIM_CEN;
 	opa(false);
 	ADC1->CTLR2 &= ~ADC_ADON;
 
-	if (wake_in_ms) {
-		RCC->RSTSCKR |= RCC_LSION;
-		while (!(RCC->RSTSCKR & RCC_LSIRDY)) {
-		}
-		EXTI->EVENR |= EXTI_Line9;
-		EXTI->FTENR |= EXTI_Line9;
-		PWR->AWUPSC = PWR_AWU_Prescaler_61440;
-		PWR->AWUWR = counts - 1; /* the window is the value + 1 (RM 2.4.4) */
-		PWR->AWUCSR |= 1u << 1;
-	} else {
-		PWR->AWUCSR &= ~(1u << 1);
-		RCC->RSTSCKR &= ~RCC_LSION;
+	/* the AWU always runs now: the watchdog has to be fed within 8.2 s */
+	RCC->RSTSCKR |= RCC_LSION;
+	while (!(RCC->RSTSCKR & RCC_LSIRDY)) {
 	}
+	EXTI->EVENR |= EXTI_Line9;
+	EXTI->FTENR |= EXTI_Line9;
+	PWR->AWUPSC = PWR_AWU_Prescaler_61440;
+	PWR->AWUWR = counts - 1; /* the window is the value + 1 (RM 2.4.4) */
+	PWR->AWUCSR |= 1u << 1;
 	uint8_t before = wake_pins();
+
+	wdt_set(WDT_SLEEP_PR, WDT_SLEEP_RL);
 
 	PWR->CTLR |= PWR_CTLR_PDDS;
 	PFIC->SCTLR |= 1u << 2; /* SLEEPDEEP */
 	__WFE();
 	SystemInit();
+	wdt_set(WDT_RUN_PR, WDT_RUN_RL); /* back to 100 ms before anything else */
 	PFIC->SCTLR &= ~(1u << 2); /* WFI naps are plain sleep again */
 
 	uint8_t after = wake_pins();
@@ -298,7 +338,7 @@ static uint32_t standby(uint32_t wake_in_ms)
 	led_pins(true);
 	clk_last = SysTick->CNT;
 	clk_rem = 0;
-	return wake_in_ms && after == before ? counts * AWU_STEP_MS : 0;
+	return after == before ? counts * AWU_STEP_MS : 0;
 }
 
 int main(void)
@@ -315,6 +355,10 @@ int main(void)
 	/* tests/test_oc_fast.c (sim_tick, sim_frame) replays this loop's VIN writes and frames */
 
 	SystemInit();
+	bool wdt_reset = wdt_start(); /* before anything can drive VIN_EN */
+	bool zero_ok = false;         /* a zero reading taken with VIN off */
+	bool ldo_on = false;          /* the 1.8 V side as last driven */
+
 	board_init();
 	clk_last = SysTick->CNT;
 
@@ -322,6 +366,9 @@ int main(void)
 	uint32_t next = SysTick->CNT;
 
 	case_sm_init(&sm, &cfg, boot);
+	if (wdt_reset) {
+		case_sm_watchdog_reset(&sm, boot); /* feed off for 30 s, fault on the LED */
+	}
 	for (;;) {
 		uint32_t t = now_ms();
 		uint16_t vdd = sense_vdd_mv(adc_sum(ADC_CH_VREFINT), OVS);
@@ -341,17 +388,17 @@ int main(void)
 		swd_ran = false;
 		fast_trip = false;
 		vdd_last = vdd;
-		if (out.vin_en && out.opa_on) {
+		if (fast.vin && out.opa_on) {
 			uint32_t s = adc_sum(ADC_CH_OPA);
 
 			in.i_valid = true;
 			in.i_ua = sense_pod_ua(s, zero, OVS, vdd);
 			in.i_sat = sense_saturated(s, OVS);
 		}
-		if (out.vin_en) {
+		if (fast.vin) {
 			in.temp_c10 = sense_ntc_c10(adc_sum(ADC_CH_NTC), OVS); /* NTC fed by VIN_EN */
 		}
-		if (out.ldo_pwr) {
+		if (ldo_on) {
 			in.pod_pullup = funDigitalRead(PIN_SWDIO);
 		}
 
@@ -361,12 +408,17 @@ int main(void)
 			opa(true);
 			Delay_Ms(10); /* OPA and the pedestal settle */
 			zero = adc_sum(ADC_CH_OPA);
+			zero_ok = true; /* VIN is still off here */
 		}
 		opa(out.opa_on);
-		funDigitalWrite(PIN_VIN_EN, out.vin_en);
-		oc_fast_vin(&fast, out.vin_en, now_ms()); /* after the zero reading's 10 ms */
-		funDigitalWrite(PIN_BOOST, out.boost_en);
-		funDigitalWrite(PIN_LDO, out.ldo_pwr);
+		oc_fast_monitor(&fast, out.opa_on && zero_ok);
+		/* high only with the monitor running; the edge time is after the zero's 10 ms */
+		bool vin = oc_fast_vin(&fast, out.vin_en, now_ms());
+
+		funDigitalWrite(PIN_VIN_EN, vin);
+		funDigitalWrite(PIN_BOOST, vin && out.boost_en);
+		ldo_on = vin && out.ldo_pwr;
+		funDigitalWrite(PIN_LDO, ldo_on);
 		if (out.swd_reset) {
 			swd_ok = swd_nrf_hard_reset(&swd_hw, SWD_HOLD, &idr) == SWD_OK;
 			swd_ran = true;
@@ -391,10 +443,21 @@ int main(void)
 						funDigitalWrite(PIN_VIN_EN, 0);
 						funDigitalWrite(PIN_LDO, 0);
 						funDigitalWrite(PIN_BOOST, 0);
+						ldo_on = false;
 						oc_fast_vin(&fast, false, now_ms());
 						fast_trip = true;
 					}
 				}
+#ifdef CASE_WDT_HANG_TEST
+				/* bring-up only (README, "What needs hardware" 1): hang 3 s into a feed,
+				 * VIN_EN high and the watchdog unfed; U4.EN must fall within ~100 ms */
+				if (fast.vin && now_ms() - fast.vin_t0 > 3000) {
+					for (;;) {
+					}
+				}
+#endif
+				/* the only feed: after this frame's over-current check */
+				wdt_feed();
 				next += FRAME_MS * TICKS_PER_MS;
 				nap_until(next);
 			}

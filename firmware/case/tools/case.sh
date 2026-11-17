@@ -2,11 +2,13 @@
 # Copyright (c) 2026 Het Bhavsar
 # SPDX-License-Identifier: Apache-2.0
 # Build and test the Atrium charging case firmware in Docker (CH32V003, ch32fun).
-# Usage: firmware/case/tools/case.sh image | test | build | shell
+# Usage: firmware/case/tools/case.sh image | test | build | hang-test | shell
 #   image  build the toolchain image (once)
 #   test   host unit tests (the case state machine, SWD, sensing, LED; and the pod's
 #          VIN pattern detector against the case's output)
 #   build  the MCU image: firmware/case/build/atrium_case.{bin,hex}, with the size
+#   hang-test  bring-up only: build/wdt_hang/atrium_case.{bin,hex}, which hangs 3 s into a feed
+#          with VIN_EN high so the watchdog's cut can be seen on a scope. Never ship it.
 set -euo pipefail
 
 case_dir=$(cd "$(dirname "$0")/.." && pwd)
@@ -24,11 +26,15 @@ test)
 build)
 	run 'make firmware && riscv64-unknown-elf-size build/atrium_case.elf'
 	;;
+hang-test)
+	run 'make firmware OUT=build/wdt_hang CASE_DEFS=-DCASE_WDT_HANG_TEST &&
+	     riscv64-unknown-elf-size build/wdt_hang/atrium_case.elf'
+	;;
 shell)
 	docker run --rm -it -v "$fw":/fw -w /fw/case "$img" bash
 	;;
 *)
-	echo "usage: $0 image | test | build | shell" >&2
+	echo "usage: $0 image | test | build | hang-test | shell" >&2
 	exit 2
 	;;
 esac

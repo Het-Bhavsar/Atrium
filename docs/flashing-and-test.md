@@ -53,7 +53,7 @@ With nrfjprog the same steps are `nrfjprog --recover`, `nrfjprog --program firmw
 
 ## Programming the charging case
 
-The case MCU is a CH32V003 on a single-wire debug interface (SWIO), programmed with a WCH-LinkE and `minichlink` through TP1 (SWIO, PD1), TP2 (3.3 V) and TP3 (GND) on the case board, before the case is closed, with no cell fitted when TP2 is used: `minichlink -w firmware/case/build/atrium_case.bin flash -b`, then `minichlink -D` once so PD7 is a GPIO. Build steps are in [`firmware/case/README.md`](../firmware/case/README.md). The case has no field update path.
+The case MCU is a CH32V003 on a single-wire debug interface (SWIO), programmed with a WCH-LinkE and `minichlink` through TP1 (SWIO, PD1), TP2 (3.3 V) and TP3 (GND) on the case board, before the case is closed, with no cell fitted when TP2 is used: `minichlink -w firmware/case/build/atrium_case.bin flash -b`, then the user option byte once per board: **USER = 0xDE**, which gives the hardware watchdog and PD7 as a GPIO (`minichlink -w case_ob.bin option`, the 16 bytes under "Flashing" in [`firmware/case/README.md`](../firmware/case/README.md)), and a power cycle. Do not run `minichlink -D` after it: on a WCH-LinkE that writes USER 0xFF and puts the watchdog back in software mode. Then run the short test: POGO_VIN to GND through 1 Ω, with VIN_EN falling within 50 ms on a scope. Build steps are in the same README. The case has no field update path.
 
 ## Field updates
 
