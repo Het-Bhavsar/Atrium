@@ -10,7 +10,7 @@ components:
   U1:  {board: CASE, side: top, part: CH32V003F4U6 RISC-V MCU, pkg: QFN-20 3x3 0.4p, lcsc: C5299908}
   U2:  {board: CASE, side: top, part: BQ24040DSQR linear Li-ion charger with battery-temperature (TS) input, pkg: WSON-10 2x2 0.4p EP, lcsc: C81080,
         note: "Rev B (2026-11-10), replaces the TP4054 (no temperature input, low stock). R5 2.7k on ISET: 540 / 2700 = 200 mA (189-207 mA, K_ISET 510-560 AΩ, SLUS941H table 7.5). ISET2 to VSS: the ISET current. R24 2k on PRE-TERM: termination 10 %, pre-charge 20 %. TS: TH2 10k NTC on the board above the cell (3.0 mm from U2, see build item B-10), 50 uA internal bias; outside the JEITA window the charger halves the current (cold) or drops to 4.06 V (warm) and stops at the limits, with no MCU involved. Fixed 10 h safety timer, 6.6 V input OVP. CHG open drain to PD6 as before; PG and NC unconnected. Thermal pad to GND"}
-  U3:  {board: CASE, side: top, part: TPS61023DRLR boost (same part as DRLT on a 3k reel; DRLT stock was 555), pkg: SOT-563, lcsc: C919459, note: "5.21 V: 0.6 V x (1 + 768k / 100k)"}
+  U3:  {board: CASE, side: top, part: TPS61023DRLR boost (same part as DRLT on a 3k reel; DRLT stock was 555), pkg: SOT-563, lcsc: C919459, note: "5.16 V typ: 0.595 V x (1 + 768k / 100k), 5.03-5.30 V over the 580-610 mV FB reference (SLVSF14B 6.5); under the 5.5 V OVP and the SY6280 5.5 V max"}
   U4:  {board: CASE, side: top, part: SY6280AAC current-limited switch, pkg: SOT-23-5, lcsc: C55136,
         note: "ISET 15k: 6800 / 15000 = 0.45 A (hardware backstop; firmware trips at 80 mA)"}
   U5:  {board: CASE, side: top, part: SN74LVC1T45DBVR (SWDCLK, A -> B), pkg: SOT-23-6, lcsc: C7843}

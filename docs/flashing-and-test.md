@@ -2,6 +2,8 @@
 
 How to reach the pod's SWD port, bring up a new pod and test it in production.
 
+![Flashing the pod: jig, probe, supply and the five base pads](images/flashing/pod_flashing_setup.png)
+
 ## Flashing pins
 
 Five ENIG pads on the flex bottom show through the base: **VIN, GND_A, GND_B, SWDIO and SWDCLK** (coordinates in [architecture.md](architecture.md#contacts-base-skin-side)). Programming uses four of them: VIN, one GND, SWDIO and SWDCLK. They are recessed in the base holes (base 0.35 mm plus 0.03 mm bond).
@@ -9,6 +11,17 @@ Five ENIG pads on the flex bottom show through the base: **VIN, GND_A, GND_B, SW
 - **Logic level is 1.8 V.** Use a probe that follows target voltage: a SEGGER J-Link (VTref), or an nRF52 / nRF53 DK through its Debug-out header (it senses VTG). Don't use a fixed 3.3 V CMSIS-DAP probe without a level shifter.
 - The pod has no VTref pad. The jig powers the pod from **VIN = 5 V** (the BQ21061 brings up VSYS and the 1.8 V rail) and feeds **1.8 V** from its own regulator into the probe's VTref.
 - SWD is reachable whenever VIN is present, even with a flat or missing cell: the BQ21061 runs the system from VIN through PMID.
+
+The path, checked net by net on the fabricated copper (IPC-D-356 netlists, 2026-11-17):
+
+| Signal | nRF52832 ball | Radio landing | Flex | Base contact | Power landing |
+|---|---|---|---|---|---|
+| SWDIO | G1 | JR9 | JR9 to P3 to JP1 | P3 (6.70, 3.30) | JP1, ESD D12 |
+| SWDCLK | F1 | JR10 | JR10 to P4 to JP10 | P4 (6.70, 7.70) | JP10, ESD D13 |
+| VIN | - | - | P1 to JP3 | P1 (10.45, 5.50) | JP3, charger IN |
+| GND | VSS | JR1, JR3, JR6 | P2, P5 | P2 / P5 (8.25 / 12.65, 5.50) | JP6, JP9 |
+
+nRESET (P0.21, ball H1) goes to a test pad on the radio island only; `recover` and `program` don't need it.
 
 ## Programming jig
 
@@ -53,7 +66,9 @@ With nrfjprog the same steps are `nrfjprog --recover`, `nrfjprog --program firmw
 
 ## Programming the charging case
 
-The case MCU is a CH32V003 on a single-wire debug interface (SWIO), programmed with a WCH-LinkE and `minichlink` through TP1 (SWIO, PD1), TP2 (3.3 V) and TP3 (GND) on the case board, before the case is closed, with no cell fitted when TP2 is used: `minichlink -w firmware/case/build/atrium_case.bin flash -b`, then the user option byte once per board: **USER = 0xDE**, which gives the hardware watchdog and PD7 as a GPIO (`minichlink -w case_ob.bin option`, the 16 bytes under "Flashing" in [`firmware/case/README.md`](../firmware/case/README.md)), and a power cycle. Do not run `minichlink -D` after it: on a WCH-LinkE that writes USER 0xFF and puts the watchdog back in software mode. Then run the short test: POGO_VIN to GND through 1 Ω, with VIN_EN falling within 50 ms on a scope. Build steps are in the same README. The case has no field update path.
+![Flashing the charging case: TP1 SWIO, TP2 VDD and TP3 GND to a WCH-LinkE](images/flashing/case_flashing_setup.png)
+
+The case MCU is a CH32V003 on a single-wire debug interface (SWIO), programmed with a WCH-LinkE and `minichlink` through TP1 (SWIO, PD1), TP2 (the board's VDD rail, fed with 3.3 V from the WCH-LinkE) and TP3 (GND) on the case board, before the case is closed, with no cell fitted when TP2 is used: `minichlink -w firmware/case/build/atrium_case.bin flash -b`, then the user option byte once per board: **USER = 0xDE**, which gives the hardware watchdog and PD7 as a GPIO (`minichlink -w case_ob.bin option`, the 16 bytes under "Flashing" in [`firmware/case/README.md`](../firmware/case/README.md)), and a power cycle. Do not run `minichlink -D` after it: on a WCH-LinkE that writes USER 0xFF and puts the watchdog back in software mode. Then run the short test: POGO_VIN to GND through 1 Ω, with VIN_EN falling within 50 ms on a scope. Build steps are in the same README. The case has no field update path.
 
 ## Field updates
 
