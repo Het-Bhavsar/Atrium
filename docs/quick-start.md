@@ -87,8 +87,8 @@ Add `--dart-define=ATRIUM_REAL_DATA=true` to `flutter run` to use a real pod ins
 1. **Pod boards:** order `hardware/pod/islands-panel/` (6-layer HDI, 0.82 mm, both islands on one panel, 20 pods per
    panel) as a two-sided PCBA. Read its [order notes](../hardware/pod/islands-panel/README.md#order-notes) first: cut
    the tabs, never snap them.
-2. **Flex:** order `hardware/pod/flex-jumper/production/` as a bare 2-layer polyimide flex with ENIG and the SUS430
-   stiffener. It has no parts.
+2. **Flex:** order `hardware/pod/flex-jumper/production/` as a 2-layer polyimide flex, 0.11 mm, ENIG, with a 0.10 mm
+   stainless steel stiffener (remark: SUS430, magnetic) as drawn on the Document layer. It has no parts.
 3. **Case board:** order `hardware/case/charging-case/production/` as a one-sided PCBA with a 0.10 mm stencil.
 4. **Parts not on the boards:** the 30 mAh cell, the case cell, magnets, spring pins and the skin pads are listed in
    [build, assembly and test](build-assembly-test.md).

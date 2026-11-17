@@ -57,3 +57,7 @@ Full report: [results/ppg_optics.md](ppg_optics.md)
 ## Pod thermal (steady state)
 
 Full report: [results/thermal.md](thermal.md)
+
+## Contact-stack mechanics under the pogo pins
+
+Full report: [results/mech_stiffness.md](mech_stiffness.md)

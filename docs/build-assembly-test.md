@@ -36,7 +36,7 @@ How the first pods and charging cases are fabricated, assembled, flashed and deb
 | Board | Fab spec | Before ordering |
 |---|---|---|
 | Radio + power islands | JLC06081H-2313, 6-layer HDI 1+4+1, 0.82 mm, ENIG, impedance control (CPWG 0.124 / 0.127), Tg170 | Buried-via and lamination fees are "manual quote"; confirm the stacked skip via and filled via-in-pad on the WLCSP / DSBGA with JLC engineering (O-32). WLCSP microvia capture pad vs Nordic's land (O-33). Mask openings on both sides of the six clamp bands. |
-| Flex jumper | 2-layer polyimide, 0.11 mm finished (JLC: 25 µm PI core, 1/3 oz Cu, yellow coverlay PI 12.5 / AD 15; ±0.05), ENIG both sides, flat pattern (bend allowances 0.47 / 0.51 mm), 0.1 mm SUS430 stiffener | Single-copper-layer bend zones; JLC minimum static bend radius vs r 0.38–0.43 mm (O-25); stiffener material options (O-9). No SMT parts on the flex. |
+| Flex jumper | 2-layer polyimide, 0.11 mm finished (JLC: 25 µm PI core, 1/3 oz Cu, yellow coverlay PI 12.5 / AD 15; ±0.05), ENIG both sides, flat pattern (bend allowances 0.47 / 0.51 mm), 0.10 mm stainless stiffener bonded by JLC on the body (SUS430 requested), 4 NPTH Ø0.60 | Single-copper-layer bend zones; JLC minimum static bend radius vs r 0.38–0.43 mm (O-25); stiffener material options (O-9). No SMT parts on the flex. |
 | Charging case | 2-layer FR-4 0.8 mm (35 µm / 0.71 core / 35 µm), 1 oz, ENIG or lead-free HASL, green or black mask | Vias 0.30 / 0.45 mm, JLC's standard (no via surcharge); two plated 0.8 mm cell-lead holes at (−15.5, ±2.0). |
 
 Production files are in each board's `production/` folder: `hardware/pod/radio-island/production/` (`Atrium_Radio_Island_gerber.zip`, `Atrium_Radio_Island_BOM.csv`, `Atrium_Radio_Island_CPL.csv`), `hardware/pod/power-island/production/`, `hardware/pod/flex-jumper/production/`, `hardware/pod/islands-panel/` and `hardware/case/charging-case/production/`.
@@ -146,11 +146,11 @@ The model is pessimistic: the joint is held at 250 °C and the seal's heat capac
 ## 6. Pod: mechanical assembly
 
 From [mechanical.md](mechanical.md):
-1. Base inner side up in a soft nest. Apply the 0.03 mm flex-to-base transfer tape on the flex footprint, with the five contact holes cut out.
-2. Lay the islands-and-flex assembly in: the islands sit on the base posts, the flex body on the tape, each contact pad centred in its hole.
-3. Fit the SUS430 stiffener (0.03 mm PSA on its underside) onto the flex, its four wing holes over the four base pins. Put a drop of UV acrylic or epoxy in each pin hole and cure. Push test: 2 N on each contact pad from below must not lift the pad.
+1. Base inner side up in a soft nest. Apply the 0.03 mm flex-to-base transfer tape (e.g. Nitto No.5603) on the flex footprint, with the five contact holes and the four pins cut out.
+2. Lay the islands-and-flex assembly in (the flex arrives with JLC's steel stiffener bonded on): the islands sit on the base posts, the four pins pass through holes H1–H4 in flex and steel, each contact pad centred in its hole.
+3. A drop of UV acrylic or epoxy in each pin hole, then cure. Push test: 2 N on each contact pad from below must not lift the pad.
 4. Window gasket (black LSR, or cut black silicone for EVT) round the MAXM86161, flush with the bed floor; thermal gel on the TH1 boss: fill the 0.19 mm gap (raise the boss 0.09 mm once the real TH1 height is confirmed).
-5. Cell: 0.065 mm double-coated tape on the stiffener, then the cell (9.1 mm along the pod, tabs to the power island); fold the tabs onto CELL+ / CELL−. Then the shell over the top: its ribs clamp the islands' top bands.
+5. Cell: 0.065 mm double-coated tape on the stiffener (Nitto No.5606, 0.06 mm, is close enough), then the cell (9.1 mm along the pod, tabs to the power island); fold the tabs onto CELL+ / CELL−. Then the shell over the top: its ribs clamp the islands' top bands.
 6. **Perimeter bond (the sweat seal):** medical UV-cure adhesive [VERIFY grade] run all round the base joint, then UV cure. For EVT a thin bead of skin-safe epoxy works.
 7. **Leak check:** submerge 10 min at 0.5 m with a dye wipe, or use a pressure-decay fixture [EST]. Then a final electrical test in the jig.
 

@@ -11,7 +11,7 @@ The pod envelope is 20.9 × 11 × 5.45 mm (about 1.10 cm³). The footprint was d
 | Item | Value |
 |---|---|
 | Envelope | 20.9 × 11 × 5.45 mm, stadium capsule |
-| Z stack | 0.5 top wall + 0.165 swell gap + 4.1 cell (measured) + 0.065 cell tape + 0.1 SUS430 contact stiffener + 0.14 flex (0.11 JLC 2-layer flex + 0.03 PSA) + 0.03 bond + 0.35 base = 5.45 mm |
+| Z stack | 0.5 top wall + 0.165 swell gap + 4.1 cell (measured) + 0.065 cell tape + 0.1 stainless contact stiffener (JLC-bonded) + 0.14 flex (0.11 JLC 2-layer flex + 0.03 stiffener adhesive) + 0.03 bond + 0.35 base = 5.45 mm |
 | Base | 0.35 mm (thinned from 0.45 to make room for the stiffener) |
 | Cell | 400909, 30 mAh; measured 9.1 × 8.8 × 4.1 mm (vernier, 2026-11-17), tabs out of the 8.8 mm edge toward the power island |
 | Islands | 6-layer HDI 1+4+1, 0.82 mm; 50 Ω CPWG 0.124 mm track / 0.127 mm gap |
