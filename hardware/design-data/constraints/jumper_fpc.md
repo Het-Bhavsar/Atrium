@@ -13,7 +13,13 @@ Outline: `hardware/design-data/outline/fpc_outline_edge_cuts.dxf`. Pads and cont
 | Stiffeners | One: 0.10 mm stainless steel, supplied and bonded by JLC on the flex top (order option Stainless steel 0.10; remark: SUS430, magnetic, required) over the whole body, x 4.75-13.30, y 1.45-9.55 (8.55 x 8.10). The flex body was widened to that footprint (2026-11-17; the added area is copper-free) and carries four NPTH D0.60 (H1-H4) at (5.70 / 12.35, 2.025 / 8.975) matching holes in the steel; base pins D0.45 pass through and are glued. Spreads the pogo load, is the Plinth magnet target, and carries the pad load into the base. No stiffener on the landing ends (the islands back the joints) or in the bend zones. Drawn as annotation on the Document layer. |
 | Bends | Two S-bends, one per end, formed after soldering, static. Rise 0.78 mm (flex under the stiffener, z 4.78 -> island bottom z 4.00; 0.80 before the 0.11 JLC flex, 2026-11-17) over 0.85 mm run at the power end (r ~ 0.43) and 0.76 mm at the radio end (r ~ 0.38) (two tangent arcs: r = (run^2 + rise^2) / (4 rise)). The run is landing-pad edge to stiffener edge. The radio run can't grow: that bend sits 0.21 mm under the cell overhang and may rise only 0.10 there before it meets the cell (37 um margin now; 0.81 mm would leave ~5 um). **Bend zones are single copper layer**: x 3.90-4.75 (power) and 13.30-14.06 (radio), all 10 lines on one layer, no plane, no vias, no pads, no coverlay or stiffener overlap; traces cross at 90 deg. On JLC's 25 µm core a single-copper bend zone is ~0.098 mm, so r is 3.9-4.3x t, under JLC's 6x rule of thumb; copper strain is 3.3-3.4 %. Exception: GND from JP6 crosses the power bend on the bottom layer (the 2 x 5 grid has 9 top exits for 10 nets), 8.0 % strain against ~11 % for a one-time install bend. Keep both coverlays. Form once over a 0.4 mm rod and test continuity (O-25). If JLC needs more, the only lever is length: +0.1 mm of L per end for each 0.1 mm of run. The power bend sits 0.24 mm under the cell (26 um margin). |
 
-## Pads: 10 per end, 0.45 x 0.50 mm, plated, each with a 0.25 mm via-in-pad (solder wicks through; reheat from the top)
+## Pads: 10 per end, 0.45 x 0.50 mm, plated, each with a via-in-pad (solder wicks through; reheat from the top)
+
+Power end, trimmed 2026-11-17 so the flex clears the power island's bottom parts at its landing (C53 0.11, C55 0.13,
+U10 0.15, D10 0.15, R51 0.145 mm; were 0.01-0.06): tongue end at x 2.80 and lower edge at y 3.445 (assembled). The
+outer column (GND, I2C_SDA, I2C_SCL, GND, SWDCLK) is 0.35 wide centred at x 3.175, inside the 0.45 island pads; the
+bottom row (SWDIO, GND) is 0.425 tall (y 3.645-4.07). Those six pads carry 0.15 / 0.35 mm vias, the other 14 keep
+0.25 / 0.45. Copper stays 0.20 from the outline. The radio tongue is y 3.05-7.95.
 
 | End | Pads |
 |---|---|
