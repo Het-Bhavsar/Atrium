@@ -185,7 +185,7 @@ The adhesive must not show.
 
 ## Plinth
 
-Desk charger. CAD in `mechanical/plinth/`.
+Desk charger. CAD in `mechanical/plinth/`. **Not built for EVT (owner, 2026-11-17): the charging case is the only charger.** The design below is kept for a later build.
 
 - Ø28 × 8 mm puck. The pod nest is the outline + 0.15, 1.6 mm deep, so the pod sits either way round. A 0.3 mm window relief, both ways round, keeps the pod resting on its base and not on the optical module, which stands 0.1 mm proud.
 - **Pins:** two pogos, VIN at the nest centre and GND at GND_B, +2.2 mm (Ø2 mm SMD class [VERIFY stroke vs the pad recess]).
