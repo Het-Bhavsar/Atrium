@@ -50,7 +50,7 @@ Each part folder holds:
 | `GLB/` | glTF binary | Viewing in a browser and product renders |
 | `DXF/` | DXF | Die-cut lines for the skin pad and adhesive; case PCB outline and keep-outs |
 
-The pod is 20.9 × 11 × 5.3 mm. Production intent for the shell is injection-moulded PC with an NCVM satin silver-grey
+The pod is 20.9 × 11 × 5.45 mm. Production intent for the shell is injection-moulded PC with an NCVM satin silver-grey
 finish (non-conductive, because the antenna sits 0.3 mm from the wall); a builder version prints in SLA resin with a
 mica silver paint. The base is PC or PA12, the gasket black LSR silicone or TPU 85A.
 

@@ -1,6 +1,6 @@
-atrium_pod.py check(), 20.9 x 11.0 x 5.3 mm
-  [PASS] envelope 20.9 x 11.0 x 5.3: 20.90 x 11.00 x 5.30
-  [PASS] Z stack sums to H: top 0.5 + swell 0.18 + cell 4.0 + stiffener 0.1 + flex 0.14 + bond 0.03 + base 0.35 = 5.30
+atrium_pod.py check(), 20.9 x 11.0 x 5.45 mm
+  [PASS] envelope 20.9 x 11.0 x 5.45: 20.90 x 11.00 x 5.45
+  [PASS] Z stack sums to H: top 0.5 + swell 0.165 + cell 4.10 + tape 0.065 + stiffener 0.1 + flex 0.14 + bond 0.03 + base 0.35 = 5.45
   [FAIL] no interference (housing, boards, parts, cell, stiffener, flex), clamp keep-outs aside: [('u1', 'c9', 0.0004), ('c21', 'flex', 0.0036), ('c53', 'flex', 0.0005)]
   [OPEN] clamp bands clear of courtyards in the current placement (PCB keep-out): radio -86°: C30(top); radio 60°: TH4(top)
   [PASS] islands clamped: posts under and ribs over at every clamp point: 6 points; radio island to base 0.000, to shell 0.000; power to base 0.000, to shell 0.000
@@ -22,7 +22,8 @@ atrium_pod.py check(), 20.9 x 11.0 x 5.3 mm
   [PASS] pad covers every contact hole while worn (it comes off before charging): covered: VIN, GND_A, GND_B, SWDIO, SWDCLK
   [PASS] Plinth magnets >= 5.0 mm from the antenna zone: 7.06 mm
   [PASS] magnet pockets clear of the pin bores (>= 0.2 wall): 0.22 mm
-  [PASS] stiffener over both magnets, either way round: min 65 % of a magnet face under steel; magnet to steel 0.82 mm [VERIFY pull]
+  [PASS] stiffener wings: pedestals >= 0.2 clear of the flex, holes >= 0.25 inside the steel, pedestal tops on the stiffener: pedestal to flex 0.25 mm, hole edge to wing edge 0.27 mm, pedestal top z 0.520 = stiffener underside
+  [PASS] stiffener over both magnets, either way round: min 100 % of a magnet face under steel; magnet to steel 0.82 mm [VERIFY pull]
   -- routed boards: EasyEDA exports in mechanical/boards/ --
   [PASS] routed boards: no part body clashes with the shell, base, gasket, cell, stiffener, flex or the other board: none
   [OPEN] routed boards: rib tips land on the board (crush <= 0.03, O-38): stack 0.844 (PCB_T 0.82 + mask) over the rib tips at 6 ribs, 0.024 crush
@@ -33,11 +34,11 @@ atrium_pod.py check(), 20.9 x 11.0 x 5.3 mm
   [PASS] ANT1 body in its zone, >= 0.25 from the shell wall and >= 0.5 from the ribs: body x 18.935..19.866 (zone from 18.76), 0.455 to the wall, 2.97 to the nearest rib
   [PASS] contact pads P1-P5 centred in the base holes (<= 0.02): d1.0 pads in d1.2 holes; offsets VIN 0.000, GND_A 0.000, GND_B 0.000, SWDIO 0.000, SWDCLK 0.000
   [PASS] jumper pads: every flex land pad over its island pad (<= 0.02): 20/20 aligned
-  [OPEN] flex S-bends clear of the cell overhang (>= 0.05): power: 31 um, r 0.425 (3.9x the 0.11 flex); radio: 39 um, r 0.381 (3.5x the 0.11 flex); flex top 0.0300 under the stiffener (PSA) [VERIFY JLC min bend radius]
+  [OPEN] flex S-bends clear of the cell overhang (>= 0.05): power: 31 um, r 0.425 (3.9x the 0.11 flex); radio: 35 um, r 0.381 (3.5x the 0.11 flex); flex top 0.0300 under the stiffener (PSA) [VERIFY JLC min bend radius]
   [PASS] flex flat pattern carries the bend allowance (each end longer by the S-path minus its run, within 0.05): flat lands at x 3.205 / 14.795, 0.47 / 0.51 outboard of the island pads; the bends need 0.45 (power) / 0.48 (radio) more flex than the 0.85 / 0.76 runs give (geometry FPC_BEND_EXTRA (0.47, 0.51))
   [OPEN] TH1 to its boss 0.1 (gel gap): 0.190: TH1 body 0.240 tall vs 0.33 in footprints.json, TH1 at (15.15, 9.55) vs placement (15.15, 9.55)
   [OPEN] board outlines inside the geometry islands (edge cuts): power 0.113 to the side wall; radio 0.21 mm2 outside (x 13.87..15.05 y 0.61..0.84, x 13.87..15.05 y 10.16..10.39); radio 0.113 to the side wall
   [info] flex S-bend: rise 0.78; run from the stiffener end 0.85 (power) / 0.76 (radio); r ≈ 0.43 / 0.38 mm = 3.9x the 0.098 single-copper bend zone (3.5x the 0.11 two-layer build; JLC asks >= 6x for one layer); first arc under the cell overhang: clear
-  [info] worst-case cell 9.5 x 9.5 x 4.2 + 8 % swell needs H 5.66 and a 9.55 pocket; this bay is 9.3 with a 0.18 swell gap (nominal cell)
-  [info] 20.9 x 11.0 x 5.3 mm, envelope 1.08 cm³; PC shell 0.25 g (zirconia 1.26 g) (SLA 0.25 g), base 0.06 g
+  [info] worst-case cell 9.5 x 9.5 x 4.2 + 8 % swell needs H 5.66 and a 9.55 pocket; this bay is 9.3 with a 0.165 swell gap (nominal cell)
+  [info] 20.9 x 11.0 x 5.45 mm, envelope 1.11 cm³; PC shell 0.25 g (zirconia 1.29 g) (SLA 0.25 g), base 0.06 g
 FAILED: ['no interference (housing, boards, parts, cell, stiffener, flex), clamp keep-outs aside'] | OPEN: ['clamp bands clear of courtyards in the current placement (PCB keep-out)', 'routed boards: rib tips land on the board (crush <= 0.03, O-38)', 'routed boards: every part >= 0.1 from the housing and the flex outline (courtyard)', 'U3 3D model is the MAXM86161 body, centred on its pad field', 'flex S-bends clear of the cell overhang (>= 0.05)', 'TH1 to its boss 0.1 (gel gap)', 'board outlines inside the geometry islands (edge cuts)']

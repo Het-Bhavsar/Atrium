@@ -1,14 +1,14 @@
 # Pod thermal (steady state)
 
-Shell to air 177 K/W, base plate 9.5 K/W, spreading into skin 56 K/W.
+Shell to air 175 K/W, base plate 9.5 K/W, spreading into skin 56 K/W.
 
 | Worn mode | P (mW) | skin rise under the pod (C) | TH1 bias (C) |
 |---|---:|---:|---:|
 | typical (189 uA) | 0.72 | 0.029 | 0.029 |
 | worst (279 uA + 217 uA green, Fitz. V-VI) | 1.88 | 0.077 | 0.077 |
-| HRV burst (green 100 sps, 60 s) | 4.56 | 0.187 | 0.187 |
+| HRV burst (green 100 sps, 60 s) | 4.56 | 0.186 | 0.186 |
 
-Charging in the Plinth: 24.2 mW (BQ21061 linear drop at VBAT 3.5 V, 15 mA) -> pod rise 9.2 C over ambient (nest 379 K/W).
+Charging in the Plinth: 24.2 mW (BQ21061 linear drop at VBAT 3.5 V, 15 mA) -> pod rise 9.1 C over ambient (nest 374 K/W).
 
 ## Reading it
 

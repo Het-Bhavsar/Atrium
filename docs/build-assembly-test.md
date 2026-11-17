@@ -141,16 +141,16 @@ The model is pessimistic: the joint is held at 250 °C and the seal's heat capac
 6. Kapton over each joint. Fold the tabs as the bay drawing shows. Nothing rigid may press on the pouch.
 7. Check: cell voltage at the CELL+ test pad, and charge current about 15 mA once the firmware sets ICHG. CHG_PG should go low on VIN.
 
-**Swell:** the bay leaves 0.18 mm. Measure 10 cells before freezing the shell (O-11), and cycle 300 times (O-21). Hold the cell with the bay, not glue. If a tape is needed, use thin PET double-coated PSA and only where the z-stack has room [VERIFY against the stack].
+**Swell:** the bay leaves 0.165 mm above the measured 4.1 mm cell. Measure 10 cells before freezing the shell (O-11), and cycle 300 times (O-21). Hold the cell with the bay, not glue. If a tape is needed, use thin PET double-coated PSA and only where the z-stack has room [VERIFY against the stack].
 
 ## 6. Pod: mechanical assembly
 
 From [mechanical.md](mechanical.md):
-1. Shell upside down in a soft nest.
-2. Lower the islands, flex and cell in as one assembly. The islands sit on the shell ribs at their clamp bands (radio ±60° / ±86°, power 114° / 246°).
-3. Window gasket (black LSR, or cut black silicone for EVT) round the MAXM86161, flush with the bed floor.
-4. Thermal gel on the TH1 boss: fill the 0.19 mm gap (raise the boss 0.09 mm once the real TH1 height is confirmed).
-5. Base on top: its seven posts clamp the islands. Check the contacts sit centred in their five holes.
+1. Base inner side up in a soft nest. Apply the 0.03 mm flex-to-base transfer tape on the flex footprint, with the five contact holes cut out.
+2. Lay the islands-and-flex assembly in: the islands sit on the base posts, the flex body on the tape, each contact pad centred in its hole.
+3. Fit the SUS430 stiffener (0.03 mm PSA on its underside) onto the flex, its four wing holes over the four base pins. Put a drop of UV acrylic or epoxy in each pin hole and cure. Push test: 2 N on each contact pad from below must not lift the pad.
+4. Window gasket (black LSR, or cut black silicone for EVT) round the MAXM86161, flush with the bed floor; thermal gel on the TH1 boss: fill the 0.19 mm gap (raise the boss 0.09 mm once the real TH1 height is confirmed).
+5. Cell: 0.065 mm double-coated tape on the stiffener, then the cell (9.1 mm along the pod, tabs to the power island); fold the tabs onto CELL+ / CELL−. Then the shell over the top: its ribs clamp the islands' top bands.
 6. **Perimeter bond (the sweat seal):** medical UV-cure adhesive [VERIFY grade] run all round the base joint, then UV cure. For EVT a thin bead of skin-safe epoxy works.
 7. **Leak check:** submerge 10 min at 0.5 m with a dye wipe, or use a pressure-decay fixture [EST]. Then a final electrical test in the jig.
 
@@ -239,7 +239,7 @@ There is no published factory procedure for PPG. A fixed grey target (or a simpl
 |---|---|---|
 | B-1 | Closed 2026-11-09: U1 0.21, U10 0.22, U2 / U13 0.20, U12 EP 0.38 in the production paste Gerbers. U12 checked 2026-11-11 against the AP6683 package drawing (page 11): leads 0.25 × 0.25 mm at the corners on a 0.65 mm pitch, diamond exposed pad 0.48 mm; the board has the same pitch, positions and exposed pad, with 0.40 × 0.20 mm lead pads (80 % of the lead width, 0.175 mm toe). Check the U12 joints on the first panel's AOI; for DVT, widen the lead pads to 0.25 mm | – |
 | B-2 | JLC: WLCSP 0.4 / DSBGA 0.35 placement, 0201 both sides on HDI, X-ray, nano-coated foil | JLC engineering |
-| B-3 | Pod cell order spec (O-26): 400909, at most 9.2 × 9.2 × 4.05 mm, two nickel tabs 4.6 mm apart and centred on one 9 mm edge, positive on the BT1 side, tab length enough to fold down onto the power island (welded extension wanted); ask the supplier for a drawing with the order. Case cell: leads and PCM | Supplier drawing / samples Incoming: measure every cell; > 4.05 mm thick is a reject (O-55). |
+| B-3 | Pod cell order spec (O-26): 400909, measured 9.1 × 8.8 × 4.1 mm (2026-11-17), at most 9.2 × 9.2 × 4.2 mm, two nickel tabs 4.6 mm apart and centred on the 8.8 mm edge, positive on the BT1 side, tab length enough to fold down onto the power island (welded extension wanted); ask the supplier for a drawing with the order. Case cell: leads and PCM | Supplier drawing / samples Incoming: measure every cell; > 4.2 mm thick is a reject (O-55). |
 | B-4 | Dummy-cell soldering trial with a thermocouple at the seal | Bench, before the first pod |
 | B-5 | Perimeter UV adhesive grade (skin-safe) and leak-test method | Supplier data, bench |
 | B-6 | MSL and protective film on the MAXM86161; reflow bake | ADI data sheet |

@@ -34,7 +34,7 @@
 
 ## Small. Quiet. Open.
 
-Atrium is a 20.9 × 11 × 5.3 mm pod worn on the temporal region, the flat of the head beside the eye. It reads the skin
+Atrium is a 20.9 × 11 × 5.45 mm pod worn on the temporal region, the flat of the head beside the eye. It reads the skin
 with light and motion: pulse, heart-rate variability, skin-temperature trend, sleep and activity. It keeps a log and
 syncs it to your phone over Bluetooth LE. A small Plinth charges it, and a pocket case charges it on the go.
 
@@ -174,7 +174,7 @@ If any of this is the part you want to build, start with the [roadmap](docs/road
 
 | | |
 |---|---|
-| **Pod** | 20.9 × 11 × 5.3 mm capsule, flat top, satin silver-grey (NCVM on PC, non-conductive for the antenna) |
+| **Pod** | 20.9 × 11 × 5.45 mm capsule, flat top, satin silver-grey (NCVM on PC, non-conductive for the antenna) |
 | **Boards** | Two rigid 6-layer HDI islands, 0.82 mm (1+4+1, laser microvias, filled via-in-pad), joined by a 2-layer polyimide flex under the cell |
 | **Radio** | Bluetooth LE, nRF52832 WLCSP; KH-1608 chip antenna at the tip, 50 Ω coplanar feed with arc bends, copper-free on every layer under the antenna |
 | **Optics** | MAXM86161A module (green, red and infrared LEDs, photodiode, front end) behind a pill window |

@@ -2,7 +2,7 @@
 
 The pod housing, battery bay, board clamp, skin pad, Plinth, charging case enclosure, programming jig and packaging, with the checks each one passes.
 
-**Envelope: 20.9 × 11 × 5.3 mm** (decided 2026-11-07; see [architecture.md](architecture.md#why-209-mm)).
+**Envelope: 20.9 × 11 × 5.45 mm** (footprint decided 2026-11-07, see [architecture.md](architecture.md#why-209-mm); height 5.3 → 5.45 mm on 2026-11-17 for the measured 4.1 mm cell).
 
 **Why not 20.4 mm:** the length is set by the chain along the radio-island bottom (inner edge, then the flex tongue, the window and the antenna zone), not by the crystal.
 - With the tongue and a 1.6 × 1.2 crystal at 20.4 mm, every part places, but the antenna would start 0.56 mm before its zone, over the MAXM86161.
@@ -29,8 +29,8 @@ Every check below passes on the current CAD.
 
 | Check | Result |
 |---|---|
-| Envelope | 20.90 × 11.00 × 5.30 |
-| Z stack | 0.5 top + 0.18 swell + 4.0 cell + 0.1 stiffener + 0.14 flex (0.11 JLC flex + 0.03 PSA) + 0.03 bond + 0.35 base = 5.30 |
+| Envelope | 20.90 × 11.00 × 5.45 |
+| Z stack | 0.5 top + 0.165 swell + 4.1 cell + 0.065 cell tape + 0.1 stiffener + 0.14 flex (0.11 JLC flex + 0.03 PSA) + 0.03 bond + 0.35 base = 5.45 |
 | Interference: housing, islands, all 61 placed parts, cell, stiffener, flex | None |
 | Islands clamped: posts under, ribs over, 6 points | Pass |
 | Clamp bands clear of part courtyards (61 parts as placed) | Pass |
@@ -53,7 +53,7 @@ The fit report also records the flex bend radii, the worst-case cell and the mas
 ## Form: the capsule
 
 **Shape:**
-- A stadium capsule: semicircular ends and straight long sides, 20.9 × 11 × 5.3 mm. This is the smallest size the parts allow: the 9 × 9 cell, the islands and the antenna zone set it.
+- A stadium capsule: semicircular ends and straight long sides, 20.9 × 11 × 5.45 mm. This is the smallest size the parts allow: the 9.1 × 8.8 cell, the islands and the antenna zone set it.
 - The top edge rolls into the side in one large R 1.8 round, the largest the parts allow:
   - R 2.0 leaves a 0.29 mm wall;
   - a larger inner round hits the cell.
@@ -115,12 +115,14 @@ Assembly: the islands, flex and cell drop into the inverted shell onto the ribs,
 
 **PCB keep-out:** the clamp bands are free of parts on both sides. Placement keeps them clear with the same sector shape the CAD uses for the ribs and posts. The current placement (re-placed around the hand-placed RF chain) has 61 parts, with TH4 on the radio top and TH1 at (15.15, 9.55) on the radio bottom; the base boss follows TH1. No band is in the antenna zone.
 
-## Battery bay (Sharvi HT19 400909, 4.0 × 9 × 9 mm)
+## Battery bay (Sharvi HT19 400909, measured 9.1 × 8.8 × 4.1 mm)
 
-- Pocket 9.3 × 9.3 mm. Cell top at z 0.68 below the top face, leaving 0.18 mm of air for swell (0.20 until 2026-11-17: JLC's thinnest 2-layer flex is 0.11 mm, so the flex slot grew 0.02 mm and it came out of the swell air; the pod stays 5.3 mm).
+- Pocket 9.3 × 9.3 mm. The cell (measured 9.1 × 8.8 × 4.1 mm, tabs out of the 8.8 mm edge) runs 9.1 mm along the pod and sits on a 0.065 mm tape on the stiffener. Its top is 0.665 mm below the top face, leaving 0.165 mm of air for swell.
+- **Why the tape is 0.065 mm:** the 9.1 mm cell overhangs the flex S-bends 0.05 mm further than the 9.0 mm design; lifting it 0.065 mm keeps the bends 31 / 35 µm clear (power / radio), the same margin as before.
 - The supplier lists the cell as 9 ± 1 × 9 ± 1 × 4.0 ± 0.2 mm, so order it to at most 9.2 mm (B-3, O-26).
 - **The bay is sized for the nominal cell.** A worst-case cell (9.5 × 9.5 × 4.2 + 8 % swell) needs a 9.55 mm pocket and H ≈ 5.64. Measure 10 cells before freezing the shell.
 - Tabs exit toward the power island and fold down onto its CELL+ / CELL− pads. Nothing rigid presses on the pouch: the stiffener and flex lie under it.
+- **Flex retention (2026-11-17):** the charging and programming pogo pins push the contact pads up through the base. The steel stiffener now runs past both long edges of the flex (8.55 × 8.10 mm, wings at y 1.45 / 9.55) and sits on four base pedestals (1.2 × 0.65 mm, 0.17 mm tall) whose Ø0.45 mm pins pass through Ø0.60 mm holes in the steel and are glued. The pin load goes pad → flex → steel → pins → base; the flex-to-base tape only seals. The pedestals are 0.25 mm clear of the flex, and both Plinth magnets now sit fully under the steel. Drawing: `mechanical/pod/drawings/contact_stiffener_drawing.pdf`, flat pattern `mechanical/pod/DXF/contact_stiffener_sus430.dxf`.
 - **Flex S-bends:** the rise from the flex body to the island bottom is 0.78 mm (0.80 before the 0.11 mm JLC flex, 2026-11-17).
   - The bend can start at the stiffener's end, not the cell's: past it the cell sits 0.1 mm above the flex, and the first arc stays under that.
   - The run from the stiffener end to the first pad column is 0.85 mm (power) and 0.76 mm (radio). Two tangent arcs then give r ≈ 0.43 / 0.38 mm. The power end of the stiffener moved in to x 4.75 (2026-11-08) when the power landing column moved to x 3.675.
@@ -218,7 +220,7 @@ The case that ships in the box (electronics in [charging-case.md](charging-case.
 
 The pod is worn **straight upright**: long axis vertical, in front of the ear, at about eyebrow-to-eye level, with no tilt (decided 2026-11-07; an earlier layout tilted it 10° toward the eye).
 - **Radio end up.** The antenna and the optical window are both at the radio end (window centre 3.8 mm from that tip), so both sit up. The antenna then faces open air, away from the jaw and from the glasses arm and hinge (worst if metal). The window sits in front of the ear, over the region of the superficial temporal artery; placement is confirmed on people in EVT.
-- **Glasses arm.** It must not cross the pod (5.3 mm tall). With glasses the pod moves up to eyebrow level (position A in [placement.md](placement.md)), so the arm passes under its bottom end: 4.2 mm clear in the placement figure, 0.6 mm in the worn render (`hero_worn.png`). Nothing of the pad shows outside the pod, so there is no flange for the arm to catch.
+- **Glasses arm.** It must not cross the pod (5.45 mm tall). With glasses the pod moves up to eyebrow level (position A in [placement.md](placement.md)), so the arm passes under its bottom end: 4.2 mm clear in the placement figure, 0.6 mm in the worn render (`hero_worn.png`). Nothing of the pad shows outside the pod, so there is no flange for the arm to catch.
 - **Taking it off:** tip the pod off from its bottom end (the power end); there is no pull tab.
 - **Pod axes when worn:**
   - +x = up (antenna end);

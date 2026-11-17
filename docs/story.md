@@ -33,7 +33,7 @@ the forms wanted.
 
 The EVT baseline split the electronics. A 9 × 9 × 4 mm, 30 mAh cell sits at the centre; a radio island and a power
 island sit in the rounded ends; a two-layer flex runs under the cell to join them and to carry the charging contacts.
-19.4 mm was tried first and did not fit; 20.9 × 11 × 5.3 mm does, with every part placed on real pads and clearances.
+19.4 mm was tried first and did not fit; 20.9 × 11 mm does (5.45 mm tall once the real cell was measured), with every part placed on real pads and clearances.
 
 The islands are six-layer HDI boards, 0.82 mm thick, because four layers could not escape the nRF52832's 0.4 mm ball
 grid. They were routed by hand, RF first: a 50 Ω coplanar feed with arc bends to a chip antenna in a zone kept free of

@@ -1,4 +1,4 @@
-# Atrium pod - logical netlist, LOCKED BASELINE 20.9 x 11 x 5.3 mm (2026-11-07, approved; was 19.4)
+# Atrium pod - logical netlist, BASELINE 20.9 x 11 x 5.45 mm (footprint 2026-11-07; height 5.3 -> 5.45 on 2026-11-17 for the measured 4.1 mm cell)
 #
 # Logical source of the schematic: every net has >= 2 pins, the jumper nets match on both
 # islands, and the pin map matches firmware/boards/atrium/atrium_pod/atrium_pod-pinctrl.dtsi.
@@ -14,7 +14,7 @@
 # verify: anything not yet checked against the primary datasheet.
 
 meta:
-  envelope_mm: [20.9, 11.0, 5.3]
+  envelope_mm: [20.9, 11.0, 5.45]
   vdd: 1.8
   i2c_addresses: {MAXM86161: 0x62, LSM6DSV16BX: 0x6A, BQ21061: 0x6B}
 

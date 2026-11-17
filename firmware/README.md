@@ -1,6 +1,6 @@
 # Firmware
 
-Firmware for the EVT pod (baseline 20.9 × 11 × 5.3 mm, approved 2026-11-07): an nRF52832 (WLCSP, nRF52832-CIAA) on Zephyr v4.4.2 with MCUboot, a MAXM86161A optical module, an LSM6DSV16BX IMU (U11 since 2026-11-17; it was the LSM6DSOX) and a BQ21061 charger.
+Firmware for the EVT pod (20.9 × 11 × 5.45 mm; footprint approved 2026-11-07, height 2026-11-17): an nRF52832 (WLCSP, nRF52832-CIAA) on Zephyr v4.4.2 with MCUboot, a MAXM86161A optical module, an LSM6DSV16BX IMU (U11 since 2026-11-17; it was the LSM6DSOX) and a BQ21061 charger.
 
 <p align="center">
   <img src="../docs/images/plates/firmware_architecture.jpg" alt="Firmware architecture: sensors, nRF52832 modules, the app over BLE, flash map, case firmware and tests" width="100%">

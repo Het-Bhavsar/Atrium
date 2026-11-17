@@ -4,20 +4,20 @@ How the Atrium pod is split into boards, how power and signals flow between them
 
 ## Why 20.9 mm
 
-The pod envelope is 20.9 × 11 × 5.3 mm (about 1.07 cm³), decided 2026-11-07. An earlier 19.4 mm envelope did not fit its parts: a footprint-accurate placement with real pads, 0.2 mm between parts, copper 0.2 mm from edges, the all-layer antenna zone, the base window, the flex landings and the clamp bands left about 20 radio-island parts and the BQ21061 without a valid position. At 20.9 mm all 64 parts place. The length is set by the chain along the radio-island bottom (inner edge, flex tongue, optical window, antenna zone), not by the crystal: at 20.4 mm with a 1.6 × 1.2 crystal every part places, but the antenna lands over the MAXM86161.
+The pod envelope is 20.9 × 11 × 5.45 mm (about 1.10 cm³). The footprint was decided 2026-11-07; the height went from 5.3 to 5.45 mm on 2026-11-17, when the real cell measured 9.1 × 8.8 × 4.1 mm. An earlier 19.4 mm envelope did not fit its parts: a footprint-accurate placement with real pads, 0.2 mm between parts, copper 0.2 mm from edges, the all-layer antenna zone, the base window, the flex landings and the clamp bands left about 20 radio-island parts and the BQ21061 without a valid position. At 20.9 mm all 64 parts place. The length is set by the chain along the radio-island bottom (inner edge, flex tongue, optical window, antenna zone), not by the crystal: at 20.4 mm with a 1.6 × 1.2 crystal every part places, but the antenna lands over the MAXM86161.
 
 ## Envelope and stack
 
 | Item | Value |
 |---|---|
-| Envelope | 20.9 × 11 × 5.3 mm, stadium capsule |
-| Z stack | 0.5 top wall + 0.18 swell gap + 4.0 cell + 0.1 SUS430 contact stiffener + 0.14 flex (0.11 JLC 2-layer flex + 0.03 PSA) + 0.03 bond + 0.35 base = 5.3 mm |
+| Envelope | 20.9 × 11 × 5.45 mm, stadium capsule |
+| Z stack | 0.5 top wall + 0.165 swell gap + 4.1 cell (measured) + 0.065 cell tape + 0.1 SUS430 contact stiffener + 0.14 flex (0.11 JLC 2-layer flex + 0.03 PSA) + 0.03 bond + 0.35 base = 5.45 mm |
 | Base | 0.35 mm (thinned from 0.45 to make room for the stiffener) |
-| Cell | 400909, 4.0 × 9 × 9 mm, 30 mAh |
+| Cell | 400909, 30 mAh; measured 9.1 × 8.8 × 4.1 mm (vernier, 2026-11-17), tabs out of the 8.8 mm edge toward the power island |
 | Islands | 6-layer HDI 1+4+1, 0.82 mm; 50 Ω CPWG 0.124 mm track / 0.127 mm gap |
 | Flex | 2-layer polyimide, under the cell, no RF |
 
-A cell 0.18 mm over nominal uses the whole swell gap (stack tolerance analysis in `hardware/simulation/`). Measure 10 cells before freezing the shell (open item O-11).
+A cell 0.165 mm over its measured 4.1 mm uses the whole swell gap (stack tolerance analysis in `hardware/simulation/`). Measure 10 cells before freezing the shell (open item O-11).
 
 ## Design decisions
 

@@ -43,7 +43,7 @@ Feature numbers and status come from `docs/FEATURES.md`.
 
 ## Numbers
 
-All readings are sample data. Hardware is the EVT pod: 20.9 × 11 × 5.3 mm, 30 mAh cell, charged on the Plinth.
+All readings are sample data. Hardware is the EVT pod: 20.9 × 11 × 5.45 mm, 30 mAh cell, charged on the Plinth.
 
 **Battery.** 30 mAh × 95 % usable over the average day-and-night draw. Smart at 0.30 mA gives about 4 days, matching `docs/FEATURES.md` (3.6–8 days simulated). The Full and Lite draws are [ASSUMED] until EVT is measured. Battery % is shown in 10 % steps.
 

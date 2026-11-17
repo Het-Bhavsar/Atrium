@@ -69,7 +69,7 @@ Sensors are the EVT pod's: PPG module MAXM86161A (green, red and IR, one photodi
 
 | Target | Value | Why |
 |---|---|---|
-| Size | 20.9 × 11 × 5.3 mm EVT pod | It is worn on the head, so it should go unnoticed |
+| Size | 20.9 × 11 × 5.45 mm EVT pod | It is worn on the head, so it should go unnoticed |
 | Battery | About 4 days per charge on a 30 mAh cell (3.6–8 simulated; measure in EVT); charged on the Plinth | Size beats battery life on the head |
 | Water | Sweat- and shower-resistant [VERIFY: IP rating to set before tooling] | 24/7 wear |
 | Radio | BLE 5, KH-1608-H08 chip antenna | |
