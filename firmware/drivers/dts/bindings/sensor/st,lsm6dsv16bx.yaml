@@ -1,0 +1,23 @@
+# Copyright (c) 2026 Het Bhavsar
+# SPDX-License-Identifier: Apache-2.0
+
+description: |
+  LSM6DSV16BX accelerometer and gyroscope with TDM audio output (ST DS13771), WHO_AM_I 0x71.
+  The Atrium driver (firmware/drivers/lsm6dsv16bx) runs the accelerometer only, at +-2 g, with
+  data-ready on INT1.
+
+compatible: "st,lsm6dsv16bx"
+
+include: i2c-device.yaml
+
+properties:
+  int1-gpios:
+    type: phandle-array
+    required: true
+    description: INT1, push-pull, active high (the reset setting of IF_CFG).
+  low-power-max-mhz:
+    type: int
+    default: 15000
+    description: |
+      Output rates up to this one (mHz) run in low-power mode with 2 averages; faster rates run
+      in high-performance mode. The chip's low-power modes go up to 240 Hz.

@@ -6,8 +6,8 @@
 
 #include <string.h>
 
-#define ODR_3333 0x9
-#define ODR_6667 0xA
+#define ODR_3840 0xB
+#define ODR_7680 0xC
 
 static void put16(uint8_t *p, uint16_t v)
 {
@@ -33,12 +33,12 @@ static uint32_t get32(const uint8_t *p)
 
 uint8_t vib_odr_code(enum pod_mode m)
 {
-	return m == MODE_RESEARCH_VIB3K3 ? ODR_3333 : m == MODE_RESEARCH_VIB6K7 ? ODR_6667 : 0;
+	return m == MODE_RESEARCH_VIB3K3 ? ODR_3840 : m == MODE_RESEARCH_VIB6K7 ? ODR_7680 : 0;
 }
 
 uint16_t vib_rate_hz(enum pod_mode m)
 {
-	return m == MODE_RESEARCH_VIB3K3 ? 3333 : m == MODE_RESEARCH_VIB6K7 ? 6667 : 0;
+	return m == MODE_RESEARCH_VIB3K3 ? 3840 : m == MODE_RESEARCH_VIB6K7 ? 7680 : 0;
 }
 
 size_t vib_transition(enum pod_mode from, enum pod_mode to, struct vib_reg out[VIB_MAX_WRITES])
@@ -48,23 +48,23 @@ size_t vib_transition(enum pod_mode from, enum pod_mode to, struct vib_reg out[V
 
 	if (mode_is_vibration(from) || odr) {
 		/* accelerometer off before anything else changes */
-		out[n++] = (struct vib_reg){VIB_REG_CTRL1_XL, 0x00};
+		out[n++] = (struct vib_reg){VIB_REG_CTRL1, 0x00};
 		out[n++] = (struct vib_reg){VIB_REG_FIFO_CTRL4, 0x00};
 	}
 	if (!odr) {
 		if (n) {
 			out[n++] = (struct vib_reg){VIB_REG_FIFO_CTRL3, 0x00};
-			out[n++] = (struct vib_reg){VIB_REG_CTRL6_C, VIB_CTRL6_LP_NORMAL};
 		}
 		return n;
 	}
-	out[n++] = (struct vib_reg){VIB_REG_CTRL6_C, 0x00};
 	out[n++] = (struct vib_reg){VIB_REG_FIFO_CTRL1, VIB_WTM};
 	out[n++] = (struct vib_reg){VIB_REG_FIFO_CTRL2, 0x00};
 	out[n++] = (struct vib_reg){VIB_REG_FIFO_CTRL3, odr}; /* accelerometer only, no gyro */
 	out[n++] = (struct vib_reg){VIB_REG_FIFO_CTRL4, VIB_FIFO_FIFO_MODE};
-	/* ODR, FS_XL 00 (+-2 g, the MLC program's and the driver's), LPF2_XL_EN 0 */
-	out[n++] = (struct vib_reg){VIB_REG_CTRL1_XL, (uint8_t)(odr << 4)};
+	out[n++] = (struct vib_reg){VIB_REG_CTRL8, 0x00}; /* +-2 g, as the driver sets */
+	out[n++] = (struct vib_reg){VIB_REG_CTRL9, 0x00}; /* LPF2 off */
+	/* ODR, OP_MODE_XL 000: high-performance */
+	out[n++] = (struct vib_reg){VIB_REG_CTRL1, odr};
 	return n;
 }
 
@@ -77,10 +77,10 @@ size_t vib_restart(struct vib_reg out[2])
 
 struct vib_status vib_parse_status(const uint8_t st[2])
 {
-	/* FIFO_STATUS2: 7 WTM_IA, 6 OVR_IA (completely filled), 5 FULL_IA (full at the next
-	 * ODR), 3 OVR_LATCHED (cleared by the read), 1:0 DIFF_FIFO[9:8] */
+	/* FIFO_STATUS2: 7 FIFO_WTM_IA, 6 FIFO_OVR_IA (completely filled), 5 FIFO_FULL_IA (full
+	 * at the next ODR), 3 FIFO_OVR_LATCHED (cleared by the read), 0 DIFF_FIFO[8] */
 	return (struct vib_status){
-		.level = (uint16_t)(st[0] | ((st[1] & 0x03) << 8)),
+		.level = (uint16_t)(st[0] | ((st[1] & 0x01) << 8)),
 		.wtm = (st[1] & 0x80) != 0,
 		.stopped = (st[1] & 0x48) != 0,
 	};
@@ -174,7 +174,8 @@ void vib_cap_burst(struct vib_cap *c, const uint8_t *raw, size_t n, uint16_t lev
 			c->flags |= VIB_FLAG_SKIPPED;
 			continue;
 		}
-		int32_t v = (int16_t)get16(p + 1 + 2 * c->axis);
+		/* the word holds z, y, x (ST's FIFO example): chip axis a is at 2 - a */
+		int32_t v = (int16_t)get16(p + 1 + 2 * (2 - c->axis));
 
 		if (c->neg) {
 			v = v == INT16_MIN ? INT16_MAX : -v;

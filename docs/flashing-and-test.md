@@ -65,7 +65,7 @@ MCUboot with two 220 KB slots, updated over BLE (SMP / mcumgr). The SWD pads are
 |---|---|---|
 | 1 | VIN current, cell disconnected | < 20 mA |
 | 2 | Flash and verify | Pass |
-| 3 | I2C IDs (IMU 0x6C WHO_AM_I, MAXM86161A PART_ID 0x36, BQ21061 STAT0 readable) | Pass |
+| 3 | I2C IDs (IMU 0x71 WHO_AM_I, the LSM6DSV16BX; MAXM86161A PART_ID 0x36, BQ21061 STAT0 readable) | Pass |
 | 4 | TH1, TH4 vs ambient | ±1.0 °C |
 | 5 | Charge current at the 15 mA setting | 13–17 mA |
 | 6 | RSSI at 1 m vs a golden pod | Within 4 dB |

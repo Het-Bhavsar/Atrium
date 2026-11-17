@@ -2,7 +2,7 @@
  * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
- * Vibration bench rig core: the LSM6DSOX on SPI, set up as mode 11 (vibcap.h: 6667 Hz,
+ * Vibration bench rig core: the LSM6DSV16BX on SPI, set up as mode 11 (vibcap.h: 7680 Hz,
  * high-performance, +-2 g, LPF2 off, accelerometer-only FIFO), and one drain step that turns
  * FIFO bursts into Vibration Data packets with vibcap.c unchanged. Plain C over a transfer
  * callback, so the host tests run it against a simulated chip with SPI timing. The Zephyr
@@ -19,12 +19,12 @@
 
 #define VIB_SPI_READ        0x80 /* first byte: bit 7 set to read, 6:0 the register */
 #define VIB_SPI_WHO_AM_I    0x0F
-#define VIB_SPI_WHO_AM_I_ID 0x6C
+#define VIB_SPI_WHO_AM_I_ID 0x71 /* LSM6DSV16BX */
 #define VIB_SPI_CTRL3_C     0x12 /* BOOT[7] BDU[6] ... IF_INC[2] SW_RESET[0] */
-#define VIB_SPI_CTRL4_C     0x13 /* I2C_disable[2] */
+#define VIB_SPI_IF_CFG      0x03 /* I2C_I3C_disable[0] */
 #define VIB_SPI_CTRL3_RESET 0x01
 #define VIB_SPI_CTRL3_RUN   0x04 /* IF_INC: the burst read walks the FIFO output registers */
-#define VIB_SPI_CTRL4_RUN   0x04 /* I2C off: SPI only, so SDA/SCL activity cannot confuse it */
+#define VIB_SPI_IF_CFG_RUN  0x01 /* I2C and I3C off: SPI only, so SDA/SCL activity cannot confuse it */
 
 /* the pod's axis rule (atrium_pod.dts imu-to-pod, pod z row 0 0 1): chip +Z, not negated */
 #define VIB_SPI_AXIS 2
@@ -65,7 +65,7 @@ struct vib_spi {
 int vib_spi_write(struct vib_spi *s, uint8_t reg, uint8_t val);
 int vib_spi_read(struct vib_spi *s, uint8_t reg, uint8_t *out, size_t n);
 
-/* Before the setup: 0 when WHO_AM_I reads 0x6C. */
+/* Before the setup: 0 when WHO_AM_I reads 0x71. */
 int vib_spi_probe(struct vib_spi *s);
 
 /*

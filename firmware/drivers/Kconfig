@@ -22,3 +22,14 @@ module-str = maxm86161
 source "subsys/logging/Kconfig.template.log_config"
 
 endif # MAXM86161
+
+config LSM6DSV16BX
+	bool "LSM6DSV16BX accelerometer"
+	default y
+	depends on DT_HAS_ST_LSM6DSV16BX_ENABLED
+	depends on SENSOR
+	select I2C
+	select GPIO
+	help
+	  Accelerometer of the pod's IMU (U11): rate, data-ready on INT1 and
+	  x, y, z at +-2 g. The gyroscope, TDM and Qvar stay off.

@@ -7,6 +7,7 @@
 #include <string.h>
 #include <zephyr/ztest.h>
 
+#include "lsm6dsv16bx_regs.h"
 #include "vibcap.h"
 
 ZTEST_SUITE(vibcap, NULL, NULL, NULL, NULL, NULL);
@@ -35,10 +36,10 @@ static void collect(const uint8_t *pkt, size_t len, void *user)
 	got.count++;
 }
 
-/* A FIFO word: accelerometer tag, then x, y, z little-endian. */
+/* A FIFO word: accelerometer tag, then z, y, x little-endian (the LSM6DSV16BX order). */
 static void word(uint8_t *w, uint8_t tag, int16_t x, int16_t y, int16_t z)
 {
-	int16_t v[3] = {x, y, z};
+	int16_t v[3] = {z, y, x};
 
 	w[0] = (uint8_t)(tag << 3);
 	for (int i = 0; i < 3; i++) {
@@ -47,7 +48,7 @@ static void word(uint8_t *w, uint8_t tag, int16_t x, int16_t y, int16_t z)
 	}
 }
 
-/* The LSM6DSOX at `hz_mhz`: sample j is taken at t0_us + j x period; z carries j. A drain at
+/* The LSM6DSV16BX at `hz_mhz`: sample j is taken at t0_us + j x period; z carries j. A drain at
  * t_us reads up to VIB_BURST_WORDS of the words taken and not yet read. */
 struct imu_sim {
 	uint32_t mhz;
@@ -78,7 +79,7 @@ static size_t drain(struct imu_sim *m, struct vib_cap *c, uint64_t t_us)
 
 ZTEST(vibcap, test_packet_round_trip)
 {
-	struct vib_hdr h = {.seq = 0xBEEF, .rate_hz = 6667, .t_ms = 0x01020304,
+	struct vib_hdr h = {.seq = 0xBEEF, .rate_hz = 7680, .t_ms = 0x01020304,
 			    .index = 0xA0B0C0D0, .mode = 11, .flags = VIB_FLAG_GAP};
 	int16_t s[VIB_MAX_SAMPLES];
 	uint8_t pkt[VIB_MAX_PKT];
@@ -97,7 +98,7 @@ ZTEST(vibcap, test_packet_round_trip)
 	/* the layout of docs/ble_gatt.md 4.4, little-endian */
 	zassert_equal(pkt[0], 0xEF);
 	zassert_equal(pkt[1], 0xBE);
-	zassert_equal(pkt[2] | (pkt[3] << 8), 6667);
+	zassert_equal(pkt[2] | (pkt[3] << 8), 7680);
 	zassert_equal(pkt[4], 0x04);
 	zassert_equal(pkt[7], 0x01);
 	zassert_equal(pkt[8], 0xD0);
@@ -133,9 +134,8 @@ static void run_continuity(enum pod_mode mode, uint32_t mhz, uint32_t dur_us)
 	memset(&got, 0, sizeof(got));
 	vib_cap_start(&c, mode, 2, false, 244);
 	zassert_equal(c.max, VIB_MAX_SAMPLES);
-	/* polls 3 ms apart plus the burst time, drains whenever a watermark is in. At 6667 Hz
-	 * the bus falls behind (40 words per 6 ms burst of 36), so that run stays short of the
-	 * 3 kB FIFO */
+	/* polls 3 ms apart plus the burst time, drains whenever a watermark is in. At 7680 Hz
+	 * the bus falls behind (46 words per 6 ms burst of 36), so that run stays short */
 	while (t < m.t0_us + dur_us) {
 		t += 3000 + (t / 7) % 900;
 		while (t < m.t0_us + dur_us && taken(&m, t) - m.taken_read >= VIB_WTM) {
@@ -169,14 +169,14 @@ static void run_continuity(enum pod_mode mode, uint32_t mhz, uint32_t dur_us)
 
 ZTEST(vibcap, test_continuity_across_fifo_bursts)
 {
-	run_continuity(MODE_RESEARCH_VIB3K3, 3333333, 2000000);
-	run_continuity(MODE_RESEARCH_VIB6K7, 6666667, 500000);
+	run_continuity(MODE_RESEARCH_VIB3K3, 3840000, 2000000);
+	run_continuity(MODE_RESEARCH_VIB6K7, 7680000, 800000);
 }
 
 ZTEST(vibcap, test_fifo_full_gap_is_flagged)
 {
 	struct vib_cap c;
-	struct imu_sim m = {.mhz = 6666667, .t0_us = 1000000};
+	struct imu_sim m = {.mhz = 7680000, .t0_us = 1000000};
 	uint64_t t = m.t0_us + 20000;
 
 	memset(&got, 0, sizeof(got));
@@ -228,9 +228,9 @@ static void burst(struct imu_sim *m, struct vib_cap *c, uint16_t level, size_t n
  * packets keep their true times (vib_cap_clock), not the read time. */
 ZTEST(vibcap, test_stopped_fifo_keeps_true_time)
 {
-	const uint16_t cap = 438; /* 3 kB / 7 B [VERIFY DS12814 FIFO size] */
+	const uint16_t cap = 438; /* the LSM6DSOX's 3 kB / 7 B, kept [VERIFY the LSM6DSV16BX FIFO depth] */
 	struct vib_cap c;
-	struct imu_sim m = {.mhz = 6666667, .t0_us = 1000000};
+	struct imu_sim m = {.mhz = 7680000, .t0_us = 1000000};
 	uint64_t t = m.t0_us + 20000;
 
 	memset(&got, 0, sizeof(got));
@@ -343,7 +343,8 @@ ZTEST(vibcap, test_status_parse)
 	zassert_true(vib_parse_status((const uint8_t[]){0, 0x40}).stopped);
 	zassert_true(vib_parse_status((const uint8_t[]){0, 0x08}).stopped);
 	zassert_false(vib_parse_status((const uint8_t[]){0, 0x20}).stopped);
-	zassert_equal(vib_parse_status((const uint8_t[]){0xFF, 0x03}).level, 1023);
+	/* DIFF_FIFO is 9 bits: FIFO_STATUS2 bit 0 only */
+	zassert_equal(vib_parse_status((const uint8_t[]){0xFF, 0x03}).level, 511);
 }
 
 /* ---- register writes: in and out of the vibration modes ---- */
@@ -359,12 +360,13 @@ static void apply(struct imu_regs *s, const struct vib_reg *w, size_t n)
 	}
 }
 
-/* The Zephyr driver's part of imu_apply: ODR_XL by read-modify-write, nothing else. */
+/* The Zephyr driver's part of imu_apply: CTRL1 written whole (drivers/lsm6dsv16bx). */
 static void driver_odr(struct imu_regs *s, uint32_t mhz)
 {
-	uint8_t code = mhz == 0 ? 0 : mhz <= 12500 ? 1 : mhz <= 104000 ? 4 : 0xF;
+	int c1 = lsm6dsv16bx_ctrl1(mhz, 15000);
 
-	s->r[VIB_REG_CTRL1_XL] = (uint8_t)((s->r[VIB_REG_CTRL1_XL] & 0x0F) | (code << 4));
+	zassert_true(c1 >= 0, "%u mHz is a chip rate", mhz);
+	s->r[VIB_REG_CTRL1] = (uint8_t)c1;
 }
 
 static void set_mode(struct imu_regs *s, enum pod_mode from, enum pod_mode to)
@@ -375,7 +377,7 @@ static void set_mode(struct imu_regs *s, enum pod_mode from, enum pod_mode to)
 	zassert_true(n <= VIB_MAX_WRITES);
 	if (n) {
 		/* the accelerometer is powered down before anything else changes */
-		zassert_equal(w[0].reg, VIB_REG_CTRL1_XL, "%d -> %d", from, to);
+		zassert_equal(w[0].reg, VIB_REG_CTRL1, "%d -> %d", from, to);
 		zassert_equal(w[0].val, 0);
 	} else {
 		zassert_false(mode_is_vibration(from) || mode_is_vibration(to));
@@ -388,20 +390,24 @@ static void set_mode(struct imu_regs *s, enum pod_mode from, enum pod_mode to)
 
 static void check_mode(const struct imu_regs *s, enum pod_mode m)
 {
-	uint8_t odr = s->r[VIB_REG_CTRL1_XL] >> 4;
+	uint8_t odr = s->r[VIB_REG_CTRL1] & 0x0F;
+	uint8_t op = (s->r[VIB_REG_CTRL1] >> 4) & 0x07;
 
 	if (mode_is_vibration(m)) {
 		zassert_equal(odr, vib_odr_code(m), "%s", mode_get(m)->name);
-		zassert_equal(s->r[VIB_REG_CTRL1_XL] & 0x0E, 0, "+-2 g, LPF2 off");
-		zassert_equal(s->r[VIB_REG_CTRL6_C] & VIB_CTRL6_LP_NORMAL, 0, "high-performance");
+		zassert_equal(op, 0, "high-performance");
+		zassert_equal(s->r[VIB_REG_CTRL8] & 0x03, 0, "+-2 g");
+		zassert_equal(s->r[VIB_REG_CTRL9] & 0x08, 0, "LPF2 off");
 		zassert_equal(s->r[VIB_REG_FIFO_CTRL3], vib_odr_code(m), "accelerometer only");
 		zassert_equal(s->r[VIB_REG_FIFO_CTRL4] & 0x07, VIB_FIFO_FIFO_MODE);
 		zassert_equal(s->r[VIB_REG_FIFO_CTRL1], VIB_WTM);
+		zassert_equal(s->r[VIB_REG_FIFO_CTRL2], 0, "no compression");
 		return;
 	}
-	/* never left at a kHz rate, in high-performance, or batching */
-	zassert_true(odr <= 4, "%s: ODR code %u", mode_get(m)->name, odr);
-	zassert_equal(s->r[VIB_REG_CTRL6_C] & VIB_CTRL6_LP_NORMAL, VIB_CTRL6_LP_NORMAL, "%s",
+	/* never left at a kHz rate or batching; 15 Hz in low-power, 120 Hz in high-performance */
+	zassert_equal(lsm6dsv16bx_odr_mhz(odr), mode_get(m)->imu_mhz, "%s", mode_get(m)->name);
+	zassert_true(odr <= 6, "%s: ODR code %u", mode_get(m)->name, odr);
+	zassert_equal(op, mode_get(m)->imu_mhz && mode_get(m)->imu_mhz <= 15000 ? 4 : 0, "%s",
 		      mode_get(m)->name);
 	zassert_equal(s->r[VIB_REG_FIFO_CTRL4] & 0x07, 0, "%s: bypass", mode_get(m)->name);
 	zassert_equal(s->r[VIB_REG_FIFO_CTRL3], 0, "%s", mode_get(m)->name);
@@ -414,8 +420,7 @@ ZTEST(vibcap, test_mode_switch_in_and_out)
 		for (int b = 0; b < MODE_COUNT; b++) {
 			struct imu_regs s;
 
-			memset(&s, 0, sizeof(s));
-			s.r[VIB_REG_CTRL6_C] = VIB_CTRL6_LP_NORMAL; /* after the driver's init */
+			memset(&s, 0, sizeof(s)); /* after the driver's init: CTRL1 0 */
 			set_mode(&s, MODE_SMART, a);
 			check_mode(&s, a);
 			set_mode(&s, a, b);
@@ -438,7 +443,7 @@ ZTEST(vibcap, test_stream_size)
 		enum pod_mode mode;
 		uint16_t hz;
 		uint16_t bps;
-	} v[] = {{MODE_RESEARCH_VIB3K3, 3333, 6667}, {MODE_RESEARCH_VIB6K7, 6667, 13333}};
+	} v[] = {{MODE_RESEARCH_VIB3K3, 3840, 7680}, {MODE_RESEARCH_VIB6K7, 7680, 15360}};
 
 	for (size_t i = 0; i < ARRAY_SIZE(v); i++) {
 		const struct mode_cfg *m = mode_get(v[i].mode);
@@ -450,6 +455,6 @@ ZTEST(vibcap, test_stream_size)
 		/* with 115 samples and a 14-byte header per notification */
 		uint32_t pkts = (m->imu_mhz + VIB_MAX_SAMPLES * 1000 - 1) / (VIB_MAX_SAMPLES * 1000);
 
-		zassert_true(m->stream_bps + pkts * VIB_HDR_LEN < (i ? 14200 : 7100));
+		zassert_true(m->stream_bps + pkts * VIB_HDR_LEN < (i ? 16400 : 8200));
 	}
 }

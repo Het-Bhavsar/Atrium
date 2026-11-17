@@ -5,7 +5,8 @@
  * Measurement modes and their current budgets, EVT pod (MAXM86161A). The
  * module runs all of a mode's LEDs at one sample rate, and each LED at most
  * once per sample. Slots, rates and duty follow the ML data contract (green at
- * 25 Hz in every worn mode, accelerometer at 12.5 Hz), except the research modes. Budgets are uA at the
+ * 25 Hz in every worn mode; the contract's accelerometer rate is 12.5 Hz, which the
+ * LSM6DSV16BX does not have, so it runs at 15 Hz), except the research modes. Budgets are uA at the
  * cell: the s4 model's non-optical currents (hardware/simulation/s4_power_energy.py),
  * plus MAXM86161 figures from its data sheet (see modes.c). Plain C, no Zephyr.
  */
@@ -43,7 +44,7 @@ enum pod_mode {
 	MODE_SLEEP,
 	MODE_DOCKED_IDLE, /* on the dock: no optics, no IMU */
 	MODE_OFFBODY,     /* wear detection: slow green probe only (FEATURES.md #18) */
-	/* research only (depth study): green, IR, red and direct ambient, IMU at 104 Hz. Set
+	/* research only (depth study): green, IR, red and direct ambient, IMU at 120 Hz. Set
 	 * from the Mode characteristic for one connection, never stored, never the default */
 	MODE_RESEARCH_100,
 	MODE_RESEARCH_200,
@@ -51,8 +52,8 @@ enum pod_mode {
 	MODE_RESEARCH_AVG50,
 	MODE_RESEARCH_AVG25,
 	/* research only (bone-conducted voice and jaw vibration, bench capture): accelerometer
-	 * alone in high-performance mode at 3.33 or 6.66 kHz, one axis streamed on Vibration Data;
-	 * no LEDs, no gyroscope (src/vibcap.h) */
+	 * alone in high-performance mode at 3.84 or 7.68 kHz, one axis streamed on Vibration Data;
+	 * no LEDs, no gyroscope (src/vibcap.h). The names keep the LSM6DSOX's 3.3 and 6.7 kHz */
 	MODE_RESEARCH_VIB3K3,
 	MODE_RESEARCH_VIB6K7,
 	MODE_COUNT,
@@ -82,8 +83,9 @@ struct mode_cfg {
 
 /* The on-pod pulse, HRV and fit filters run at this rate; faster modes are averaged down. */
 #define MODE_ALGO_HZ      25
-/* The step rhythm and MLC timing run at this accelerometer rate; faster modes decimate. */
-#define MODE_ALGO_IMU_MHZ 12500
+/* The step rhythm and motion level run at this accelerometer rate; faster modes decimate.
+ * 15 Hz: the LSM6DSV16BX has no 12.5 Hz, so the windows are kept in seconds (mlc.h). */
+#define MODE_ALGO_IMU_MHZ 15000
 
 const struct mode_cfg *mode_get(enum pod_mode m);
 
@@ -103,7 +105,7 @@ uint16_t mode_sample_hz(const struct mode_cfg *m);
 /* PPG samples averaged into one for the 25 Hz filters: hz / 25 when that is whole, else 1. */
 uint8_t mode_algo_decim(const struct mode_cfg *m);
 
-/* Accelerometer samples per step-rhythm sample: about imu_mhz / 12.5 Hz, 1 to 255. */
+/* Accelerometer samples per step-rhythm sample: about imu_mhz / 15 Hz, 1 to 255. */
 uint8_t mode_imu_decim(const struct mode_cfg *m);
 
 /* FIFO tag of a LED's slot in the stream (slot index + 1, MAXM86161 Table 3); 0 if absent. */

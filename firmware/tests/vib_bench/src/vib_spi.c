@@ -48,7 +48,7 @@ int vib_spi_start(struct vib_spi *s)
 	size_t n = vib_transition(MODE_FULL, MODE_RESEARCH_VIB6K7, w);
 	int ret = 0;
 
-	ret |= vib_spi_write(s, VIB_SPI_CTRL4_C, VIB_SPI_CTRL4_RUN);
+	ret |= vib_spi_write(s, VIB_SPI_IF_CFG, VIB_SPI_IF_CFG_RUN);
 	ret |= vib_spi_write(s, VIB_SPI_CTRL3_C, VIB_SPI_CTRL3_RUN);
 	for (size_t i = 0; i < n; i++) {
 		ret |= vib_spi_write(s, w[i].reg, w[i].val);

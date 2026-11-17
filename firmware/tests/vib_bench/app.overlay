@@ -2,8 +2,9 @@
  * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
- * nRF52 DK (PCA10040): the LSM6DSOX adapter on the Arduino SPI pins, SPIM2 with EasyDMA at
- * 8 MHz (the nRF52832 SPIM's top rate; the chip allows 10 MHz), SPI mode 3, chip-select D10.
+ * nRF52 DK (PCA10040): an LSM6DSV16BX adapter on the Arduino SPI pins, SPIM2 with EasyDMA at
+ * 8 MHz (the nRF52832 SPIM's top rate; the chip's limit is [VERIFY DS13771]), SPI mode 3,
+ * chip-select D10.
  * Wiring: docs/ble_gatt.md 4.5. The virtual COM port runs at 1 Mbaud, no flow control.
  */
 &uart0 {
@@ -15,8 +16,10 @@
 	status = "okay";
 	cs-gpios = <&gpio0 22 GPIO_ACTIVE_LOW>; /* D10 */
 
-	vib_imu: lsm6dsox@0 {
-		compatible = "st,lsm6dso";
+	/* the LSM6DSV16X SPI binding, only for the SPI settings: its driver is not built (no
+	 * CONFIG_SENSOR); vib_spi.c talks to the chip itself */
+	vib_imu: lsm6dsv16bx@0 {
+		compatible = "st,lsm6dsv16x";
 		reg = <0>;
 		spi-max-frequency = <8000000>;
 	};

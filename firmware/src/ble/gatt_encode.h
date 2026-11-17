@@ -36,7 +36,7 @@ size_t gatt_encode_oxygen(const struct app_status *s, uint8_t out[GATT_OXYGEN_LE
 /* 4.2 Fit Quality: the fit guide's live bar (FEATURES.md #24) */
 size_t gatt_encode_fit_quality(const struct app_status *s, uint8_t out[GATT_FIT_QUALITY_LEN]);
 /* 4.2 Motion Data rate field: mHz up to 32767; above it bit 15 set and bits 0-14 in 10 mHz
- * (104 Hz = 0xA8A0), saturating at 327.67 Hz */
+ * (120 Hz = 0xAEE0), saturating at 327.67 Hz */
 uint16_t gatt_motion_rate(uint32_t rate_mhz);
 /* 7 */
 size_t gatt_encode_log_info(uint32_t oldest, uint32_t head, uint32_t pages,

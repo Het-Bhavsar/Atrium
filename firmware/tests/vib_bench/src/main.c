@@ -2,7 +2,7 @@
  * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
- * Vibration bench rig (docs/ble_gatt.md 4.5): nRF52 DK, LSM6DSOX on SPIM2 at 8 MHz, printing
+ * Vibration bench rig (docs/ble_gatt.md 4.5): nRF52 DK, LSM6DSV16BX on SPIM2 at 8 MHz, printing
  * one Vibration Data packet per line, "0207 <hex>", on the J-Link virtual COM port at 1 Mbaud.
  * After the banner nothing else goes out until button 1 stops the capture and prints one
  * "stats" line. LED 1: streaming. LED 2: the FIFO filled at least once (a gap).
@@ -151,7 +151,7 @@ int main(void)
 
 	vs.xfer = xfer;
 	vs.now_us = now_us;
-	k_msleep(20); /* the chip's boot time, 10 ms [DS12814] */
+	k_msleep(20); /* the chip's boot time [VERIFY DS13771] */
 	if (!spi_is_ready_dt(&imu)) {
 		halt("vib_bench: SPI not ready\n");
 	}
@@ -160,11 +160,11 @@ int main(void)
 	(void)vib_spi_read(&vs, VIB_SPI_WHO_AM_I, &id, 1);
 	if (id != VIB_SPI_WHO_AM_I_ID) {
 		snprintf(msg, sizeof(msg),
-			 "vib_bench: WHO_AM_I 0x%02x, expected 0x6c: check wiring and power\n", id);
+			 "vib_bench: WHO_AM_I 0x%02x, expected 0x71: check wiring and power\n", id);
 		halt(msg);
 	}
 	snprintf(msg, sizeof(msg),
-		 "vib_bench: LSM6DSOX on SPI %u Hz, 6667 Hz, +-2 g, chip +Z, mode 11 packets "
+		 "vib_bench: LSM6DSV16BX on SPI %u Hz, 7680 Hz, +-2 g, chip +Z, mode 11 packets "
 		 "follow as '0207 <hex>'; button 1 stops\n",
 		 (unsigned int)imu.config.frequency);
 	say(msg);
@@ -180,7 +180,7 @@ int main(void)
 			gpio_pin_set_dt(&led_gap, 1);
 		}
 		if (n <= 0) {
-			k_usleep(1000); /* under 7 new words; the watermark is 36 (5.4 ms) */
+			k_usleep(1000); /* under 8 new words; the watermark is 36 (4.7 ms) */
 		}
 	}
 

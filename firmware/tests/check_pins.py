@@ -19,7 +19,7 @@ BOARD = os.path.join(FW, 'boards', 'atrium', 'atrium_pod')
 
 # board-file pattern -> the net it must land on
 GPIO_PROPS = {'ntc-en-gpios': 'NTC_EN', 'int-gpios': 'PPG_INT', 'ldo-en-gpios': 'PPG_LDO_EN',
-              'irq-gpios': 'IMU_INT1', 'pg-gpios': 'CHG_PG'}
+              'int1-gpios': 'IMU_INT1', 'pg-gpios': 'CHG_PG'}
 PSELS = {'TWIM_SDA': 'I2C_SDA', 'TWIM_SCL': 'I2C_SCL'}
 AIN = {'NRF_SAADC_AIN1': 'TH1_SENSE', 'NRF_SAADC_AIN0': 'TH4_SENSE', 'NRF_SAADC_AIN4': 'VSYS_SENSE'}
 # nRF52832 analog inputs: AINn -> P0.xx

@@ -2,9 +2,9 @@
  * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
- * The bench rig's SPI drain (vib_spi.c) against a simulated LSM6DSOX: register file, FIFO of
- * 438 words (3 kB / 7 B [VERIFY DS12814 FIFO size]) filled at 6667 Hz in FIFO mode (stops when
- * full), burst reads that roll from 0x7E back to 0x78, and SPI time at 8 MHz plus a fixed
+ * The bench rig's SPI drain (vib_spi.c) against a simulated LSM6DSV16BX: register file, FIFO of
+ * 438 words (the LSM6DSOX's 3 kB / 7 B, kept as the smaller, harder case [VERIFY the LSM6DSV16BX
+ * FIFO depth in DS13771]) filled at 7680 Hz in FIFO mode (stops when full), burst reads that roll from 0x7E back to 0x78, and SPI time at 8 MHz plus a fixed
  * per-transfer overhead. The drain runs as main.c runs it: poll, sleep 1 ms when idle.
  */
 #include <zephyr/ztest.h>
@@ -15,7 +15,7 @@
 #include "vib_spi.h"
 
 #define CAP          438
-#define PERIOD_NS    150000ULL /* 1e12 / 6666667 mHz, the mode table's rate */
+#define PERIOD_NS    130208ULL /* 1e12 / 7680000 mHz, truncated as vib_cap does */
 #define BYTE_NS      1000ULL   /* 8 MHz SPI */
 #define XFER_OVH_NS  40000ULL  /* driver call, chip-select and DMA set-up [ASSUMED, generous] */
 #define IDLE_NS      1000000ULL
@@ -48,7 +48,7 @@ static void sim_run_to(uint64_t t)
 {
 	while (sim.gen_on && sim.gen_next_ns <= t) {
 		bool running = (sim.regs[VIB_REG_FIFO_CTRL4] & 7) == VIB_FIFO_FIFO_MODE &&
-			       (sim.regs[VIB_REG_FIFO_CTRL3] & 0x0F) == 0x0A;
+			       (sim.regs[VIB_REG_FIFO_CTRL3] & 0x0F) == 0x0C;
 
 		if (running && !sim.stopped && sim.count < CAP) {
 			sim.fifo[(sim.head + sim.count) % CAP] = sim.k;
@@ -72,7 +72,7 @@ static uint8_t sim_read(uint8_t a)
 		return (uint8_t)sim.count;
 	}
 	if (a == VIB_REG_FIFO_STATUS1 + 1) {
-		uint8_t v = (uint8_t)((sim.count >> 8) & 3);
+		uint8_t v = (uint8_t)((sim.count >> 8) & 1);
 
 		v |= sim.count >= sim.regs[VIB_REG_FIFO_CTRL1] ? 0x80 : 0;
 		v |= sim.stopped ? 0x40 : 0;
@@ -91,7 +91,8 @@ static uint8_t sim_read(uint8_t a)
 			return sim.cur_valid ? (uint8_t)(VIB_TAG_XL_NC << 3) : 0;
 		}
 		int16_t z = z_of(sim.cur);
-		int16_t v[3] = {(int16_t)-z, (int16_t)(sim.cur & 0xFF), z};
+		/* z, y, x: the chip's +Z first, x carries -z */
+		int16_t v[3] = {z, (int16_t)(sim.cur & 0xFF), (int16_t)-z};
 		uint8_t i = a - VIB_REG_FIFO_OUT - 1;
 		uint16_t u = (uint16_t)v[i / 2];
 
@@ -107,8 +108,8 @@ static void sim_write(uint8_t a, uint8_t v)
 		sim.count = 0; /* bypass empties the FIFO */
 		sim.stopped = false;
 	}
-	if (a == VIB_REG_CTRL1_XL) {
-		bool on = (v >> 4) == 0x0A;
+	if (a == VIB_REG_CTRL1) {
+		bool on = (v & 0x0F) == 0x0C && (v >> 4) == 0; /* 7680 Hz, high-performance */
 
 		if (on && !sim.gen_on) {
 			sim.gen_t0_ns = sim.t_ns + PERIOD_NS;
@@ -190,7 +191,7 @@ static void on_packet(const uint8_t *pkt, size_t len, void *user)
 		return;
 	}
 	rl.bad += h.seq != rl.next_seq || h.index != rl.next_index || h.mode != 11 ||
-		  h.rate_hz != 6667;
+		  h.rate_hz != 7680;
 	rl.gap_pkts += (h.flags & VIB_FLAG_GAP) != 0;
 	rl.skipped_pkts += (h.flags & VIB_FLAG_SKIPPED) != 0;
 	if (h.flags & VIB_FLAG_GAP) {
@@ -229,7 +230,6 @@ static void start(void)
 	memset(&vs, 0, sizeof(vs));
 	sim.t_ns = 30000000; /* 30 ms after boot */
 	sim.regs[VIB_SPI_WHO_AM_I] = VIB_SPI_WHO_AM_I_ID;
-	sim.regs[VIB_REG_CTRL6_C] = 0x00;
 	vs.xfer = sim_xfer;
 	vs.now_us = sim_now_us;
 	zassert_ok(vib_spi_probe(&vs));
@@ -260,14 +260,15 @@ static void drain(uint64_t dur_ns, uint64_t stall_ns, uint64_t every_ns)
 ZTEST(vib_spi, test_setup_is_mode_11)
 {
 	start();
-	zassert_equal(sim.regs[VIB_SPI_CTRL4_C], 0x04, "I2C off");
+	zassert_equal(sim.regs[VIB_SPI_IF_CFG], 0x01, "I2C and I3C off");
 	zassert_equal(sim.regs[VIB_SPI_CTRL3_C], 0x04, "auto-increment on");
-	zassert_equal(sim.regs[VIB_REG_CTRL6_C], 0x00, "high-performance");
 	zassert_equal(sim.regs[VIB_REG_FIFO_CTRL1], VIB_WTM);
 	zassert_equal(sim.regs[VIB_REG_FIFO_CTRL2], 0x00);
-	zassert_equal(sim.regs[VIB_REG_FIFO_CTRL3], 0x0A, "accelerometer only at 6667 Hz");
+	zassert_equal(sim.regs[VIB_REG_FIFO_CTRL3], 0x0C, "accelerometer only at 7680 Hz");
 	zassert_equal(sim.regs[VIB_REG_FIFO_CTRL4], VIB_FIFO_FIFO_MODE);
-	zassert_equal(sim.regs[VIB_REG_CTRL1_XL], 0xA0, "6667 Hz, +-2 g, LPF2 off");
+	zassert_equal(sim.regs[VIB_REG_CTRL1], 0x0C, "7680 Hz, high-performance");
+	zassert_equal(sim.regs[VIB_REG_CTRL8], 0x00, "+-2 g");
+	zassert_equal(sim.regs[VIB_REG_CTRL9], 0x00, "LPF2 off");
 	zassert_equal(sim.regs[0x11], 0x00, "gyro off");
 	zassert_equal(vs.cap.max, VIB_MAX_SAMPLES);
 	zassert_equal(vs.cap.axis, 2);
@@ -275,7 +276,7 @@ ZTEST(vib_spi, test_setup_is_mode_11)
 	zassert_equal(sim.short_xfers, 0, "no 1-byte transfer (anomaly 58)");
 }
 
-ZTEST(vib_spi, test_gap_free_6667hz_60s)
+ZTEST(vib_spi, test_gap_free_7680hz_60s)
 {
 	start();
 	/* a 3 ms hold-off every 17 ms on top of the 1 ms idle sleep */
@@ -296,7 +297,7 @@ ZTEST(vib_spi, test_gap_free_6667hz_60s)
 	zassert_equal(rl.bad, 0, "seq, index, mode and rate continuous");
 	zassert_equal(rl.value_err, 0, "chip +Z, unnegated, in order");
 	zassert_equal(rl.samples + vs.cap.n + sim.count, made, "every sample out or in flight");
-	zassert_true(made >= 6666 * 60);
+	zassert_true(made >= 7679 * 60);
 	zassert_true(abs(rl.worst_t_err_us) <= 1200, "%d", rl.worst_t_err_us);
 	zassert_true(vs.st.max_level < CAP / 4, "%u", vs.st.max_level);
 	zassert_equal(sim.short_xfers, 0);
@@ -305,7 +306,7 @@ ZTEST(vib_spi, test_gap_free_6667hz_60s)
 ZTEST(vib_spi, test_50ms_hold_off_still_gap_free)
 {
 	start();
-	/* the FIFO holds 438 words, 65.7 ms: a 50 ms hold-off once a second loses nothing */
+	/* the FIFO holds 438 words, 57 ms: a 50 ms hold-off once a second loses nothing */
 	drain(5ULL * 1000000000ULL, 50000000, 1000000000);
 	zassert_equal(sim.lost, 0);
 	zassert_equal(rl.gap_pkts, 0);
@@ -335,7 +336,7 @@ ZTEST(vib_spi, test_line_format)
 	uint8_t pkt[VIB_MAX_PKT];
 	char line[VIB_LINE_MAX];
 	int16_t s[VIB_MAX_SAMPLES];
-	struct vib_hdr h = {.seq = 0xBEEF, .rate_hz = 6667, .t_ms = 0x01020304,
+	struct vib_hdr h = {.seq = 0xBEEF, .rate_hz = 7680, .t_ms = 0x01020304,
 			    .index = 0xA0B0C0D0, .mode = 11, .flags = 0};
 
 	for (int i = 0; i < VIB_MAX_SAMPLES; i++) {
@@ -345,8 +346,8 @@ ZTEST(vib_spi, test_line_format)
 	size_t n = vib_line(pkt, len, line);
 
 	zassert_equal(len, 244);
-	zassert_equal(n, 494, "about 58 lines/s, 28.6 kB/s at 6667 Hz");
-	zassert_mem_equal(line, "0207 efbe0b1a04030201d0c0b0a00b00", 33);
+	zassert_equal(n, 494, "about 67 lines/s, 33.0 kB/s at 7680 Hz");
+	zassert_mem_equal(line, "0207 efbe001e04030201d0c0b0a00b00", 33);
 	for (size_t i = 5; i < n - 1; i++) {
 		zassert_true((line[i] >= '0' && line[i] <= '9') || (line[i] >= 'a' && line[i] <= 'f'),
 			     "lowercase hex only");

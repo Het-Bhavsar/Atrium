@@ -2,9 +2,9 @@
  * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
- * mlc.c against app/python/atrium_ml/mlc.py on the mlc_* vectors from make_test_vectors.py:
- * the register program byte for byte, the tree thresholds, the ladder on each window's
- * variance, and the step rhythm and class per 3-window record. Tolerances [ASSUMED, from
+ * mlc.c against app/python/atrium_ml/mlc.py on the mlc_* vectors from make_test_vectors.py
+ * (12.5 Hz): the tree thresholds, the ladder on each window's variance, the on-pod window
+ * (mlc_win_*) against that, and the step rhythm and class per 3-window record. Tolerances [ASSUMED, from
  * the ML hand-over]: variance within 1 %, classes equal.
  */
 #include <math.h>
@@ -13,10 +13,6 @@
 
 #include "mlc.h"
 #include "vec_csv.h"
-
-static const char cfg_csv[] = {
-#include "vectors/mlc_config.inc"
-	0};
 
 static const char still_in[] = {
 #include "vectors/mlc_still_input.inc"
@@ -96,39 +92,14 @@ static int class_of(const char *line)
 
 ZTEST_SUITE(mlc, NULL, NULL, NULL, NULL, NULL);
 
-ZTEST(mlc, test_program_matches_reference)
+ZTEST(mlc, test_window_lengths)
 {
-	const char *p = next_line(cfg_csv);
-	size_t i = 0;
-
-	for (; p && *p; p = next_line(p), i++) {
-		zassert_true(i < mlc_program_len);
-		zassert_equal(mlc_program[i].reg, (uint8_t)strtol(p, NULL, 16), "write %u", i);
-		zassert_equal(mlc_program[i].val, (uint8_t)strtol(strchr(p, ',') + 1, NULL, 16),
-			      "write %u", i);
-	}
-	zassert_equal(i, 97);
-	zassert_equal(mlc_program_len, 97);
-	/* it leaves the accelerometer at 12.5 Hz, +-2 g, and the gyroscope off */
-	zassert_equal(mlc_program[95].reg, 0x10);
-	zassert_equal(mlc_program[95].val, 0x10);
-	zassert_equal(mlc_program[96].reg, 0x11);
-	zassert_equal(mlc_program[96].val, 0x00);
-
-	/* routed to INT2: MD2_CFG on the main page, MLC_INT2 on the embedded page */
-	bool md2 = false, int2 = false, emb = false;
-
-	for (size_t k = 0; k < mlc_program_len; k++) {
-		if (mlc_program[k].reg == MLC_REG_FUNC_CFG_ACCESS) {
-			emb = mlc_program[k].val & 0x80;
-		} else if (!emb && mlc_program[k].reg == 0x5F) {
-			md2 = mlc_program[k].val == 0x02;
-		} else if (emb && mlc_program[k].reg == 0x11) {
-			int2 = mlc_program[k].val == 0x01;
-		}
-		zassert_false(!emb && mlc_program[k].reg == 0x5E, "nothing on INT1");
-	}
-	zassert_true(md2 && int2);
+	/* the reference's 39 and 100 samples at 12.5 Hz; the same seconds at 15 Hz */
+	zassert_equal(mlc_window_len(12500), 39);
+	zassert_equal(mlc_rhythm_len(12500), 100);
+	zassert_equal(mlc_window_len(15000), 47);
+	zassert_equal(mlc_rhythm_len(15000), 120);
+	zassert_true(mlc_rhythm_len(120000) <= MLC_RHYTHM_MAX);
 }
 
 ZTEST(mlc, test_thresholds)
@@ -146,29 +117,40 @@ ZTEST(mlc, test_thresholds)
 
 static void check_case(const char *name, const char *in, const char *lv_csv, const char *cl_csv)
 {
-	uint8_t lv[16];
-	int n_lv = 0;
+	const int win = mlc_window_len(12500), rhythm = mlc_rhythm_len(12500);
+	uint8_t lv[16], on_pod[16];
+	int n_lv = 0, n_pod = 0;
 	double f[MAXF];
+	struct mlc_win pw;
 
 	load_norm(in);
+	/* the pod's streaming window over the same samples */
+	mlc_win_init(&pw, (uint8_t)win);
+	for (int i = 0; i < n_in && n_pod < 16; i++) {
+		if (mlc_win_push(&pw, norm_g[i], &on_pod[n_pod])) {
+			n_pod++;
+		}
+	}
 	for (const char *p = next_line(lv_csv); p && *p; p = next_line(p)) {
 		zassert_true(fields(p, f) >= 3);
 		int w = (int)f[0];
 		double mean = 0, var = 0;
 
-		for (int i = 0; i < MLC_WINDOW; i++) {
-			mean += (double)norm_g[w * MLC_WINDOW + i];
+		for (int i = 0; i < win; i++) {
+			mean += (double)norm_g[w * win + i];
 		}
-		mean /= MLC_WINDOW;
-		for (int i = 0; i < MLC_WINDOW; i++) {
-			double d = (double)norm_g[w * MLC_WINDOW + i] - mean;
+		mean /= win;
+		for (int i = 0; i < win; i++) {
+			double d = (double)norm_g[w * win + i] - mean;
 
 			var += d * d;
 		}
-		var /= MLC_WINDOW;
+		var /= win;
 		zassert_within(var, f[1], fabs(f[1]) * 0.01 + 1e-9, "%s window %d variance", name, w);
 		lv[n_lv] = mlc_level_of((float)var);
 		zassert_equal(lv[n_lv], (uint8_t)f[2], "%s window %d level", name, w);
+		zassert_true(w < n_pod, "%s window %d on the pod", name, w);
+		zassert_equal(on_pod[w], lv[n_lv], "%s window %d: the pod's level", name, w);
 		n_lv++;
 	}
 	for (const char *p = next_line(cl_csv); p && *p; p = next_line(p)) {
@@ -177,13 +159,13 @@ static void check_case(const char *name, const char *in, const char *lv_csv, con
 
 		zassert_true(fields(p, f) >= 3);
 		int k = (int)f[0];
-		int end = (k + 3) * MLC_WINDOW;
+		int end = (k + 3) * win;
 
 		mlc_record_reset(&r);
 		for (int i = k; i < k + 3; i++) {
 			mlc_record_add(&r, lv[i]);
 		}
-		bool ok = mlc_step_rhythm(&norm_g[end - MLC_RHYTHM_N], MLC_RHYTHM_N, 12.5f, &spm, &share);
+		bool ok = mlc_step_rhythm(&norm_g[end - rhythm], rhythm, 12.5f, &spm, &share);
 
 		if (!isnan(f[1])) {
 			zassert_true(ok, "%s record %d", name, k);

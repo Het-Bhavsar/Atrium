@@ -1,8 +1,15 @@
-# Atrium pod: BLE GATT interface (rev 16, pod EVT)
+# Atrium pod: BLE GATT interface (rev 17, pod EVT)
 
 This is the contract between the pod firmware (`firmware/src/ble/`) and the app. Atrium is a wellness and research device. Nothing here is a medical measurement.
 
 Feature numbers (#n) refer to [`FEATURES.md`](FEATURES.md).
+
+**Rev 17** follows the IMU change: U11 is the LSM6DSV16BX (owner decision 2026-11-17; it was the LSM6DSOX). No field, UUID or length changes, but some values do. An app that reads the rate fields, as the spec has always said, keeps working:
+- The accelerometer runs at 15 Hz in modes 0 to 3, not 12.5 Hz: the new chip has no 12.5 Hz. Motion Data's rate field reads 15000.
+- Research modes 6 to 9 run it at 120 Hz, not 104 Hz: rate field 0xAEE0.
+- Vibration modes 10 and 11 run at 3840 and 7680 Hz, not 3333 and 6667 Hz. Vibration Data's rate field says so; the mode numbers stay. Mode 11 now needs 16.3 kB/s on the link.
+- The motion level (Live Epoch and log byte 5) is worked out on the pod from the same 3.12 s windows and thresholds, not in the IMU; the step rhythm uses 8 s as before.
+- TDM audio and Qvar are not available on EVT: their pins are tied on the board.
 
 **Rev 16** adds two research-only vibration modes for a bench study of bone-conducted voice and jaw vibration; nothing earlier changes, so a rev 15 app still works:
 - Mode (0x0601) takes 10 (accelerometer at 3.33 kHz) and 11 (6.66 kHz). The LEDs and the gyroscope are off. Like modes 6 to 9 they are not stored, last one connection and never run on the Plinth (§4.4).
@@ -129,10 +136,10 @@ The SIG service, so standard fitness apps can read the pulse estimate.
 | PPG Control | 0x0201 | W | `u8`: bit 0 raw PPG stream, bit 1 raw accelerometer stream, bit 2 fit mode (0 stops all). Streams and fit mode stop on disconnect; fit mode also after 180 s |
 | PPG Data | 0x0202 | N | Header, then FIFO words (below) |
 | Pulse Detail | 0x0203 | R, N | `u8` bpm (0 = none), `u8` confidence of the motion-weighted spectrum (0 to 255 = 0 to 1), `u16` window in s (8), `u8` sample rate in Hz |
-| Motion Data | 0x0204 | N | `u16` sequence, `u16` rate, `u32` uptime ms of the first sample, then 12 × (`i16` x, y, z in mg), 80 bytes, sent only with an ATT MTU of 83 or more. None in docked idle, off-body or modes 10 and 11. Rate: bit 15 clear, mHz (12500 = 12.5 Hz); bit 15 set, bits 0–14 in 10 mHz (0xA8A0 = 104 Hz, research modes) (`gatt_motion_rate`) |
+| Motion Data | 0x0204 | N | `u16` sequence, `u16` rate, `u32` uptime ms of the first sample, then 12 × (`i16` x, y, z in mg), 80 bytes, sent only with an ATT MTU of 83 or more. None in docked idle, off-body or modes 10 and 11. Rate: bit 15 clear, mHz (15000 = 15 Hz); bit 15 set, bits 0–14 in 10 mHz (0xAEE0 = 120 Hz, research modes) (`gatt_motion_rate`). Read it: it was 12.5 and 104 Hz before rev 17 |
 | Oxygen Ratio | 0x0205 | R, N | Relative red/IR ratio, research only (#8): `u32` time, `u16` R × 1000 (0 = no good window), `u8` confidence (0–255 = 0–1), `u8` good windows of 12. Notified at the end of each 30 s burst. No percentage: the app shows the change against the last 14 nights |
 | Fit Quality | 0x0206 | R, N | Fit guide (#24), below. Notified once a second while subscribed, off the Plinth |
-| Vibration Data | 0x0207 | N | Research modes 10 and 11 only: the accelerometer's skin-normal axis at 3.33 or 6.66 kHz (§4.4) |
+| Vibration Data | 0x0207 | N | Research modes 10 and 11 only: the accelerometer's skin-normal axis at 3.84 or 7.68 kHz (§4.4) |
 
 **PPG Data payload:**
 
@@ -161,9 +168,9 @@ Research only: for the depth study's ambient and timing questions (E1), never a 
 | Module sample rate (PPG_SR) | 100 Hz | 200 Hz | 200 Hz | 200 Hz |
 | Averaged on the module (SMP_AVE) | none | none | 4 | 8 |
 | PPG Data rate (header byte 2) | 100 Hz | 200 Hz | 50 Hz | 25 Hz |
-| Accelerometer | 104 Hz, rate field 0xA8A0 | same | same | same |
+| Accelerometer | 120 Hz, rate field 0xAEE0 (104 Hz, 0xA8A0, on the LSM6DSOX before rev 17) | same | same | same |
 | PPG Data | 1200 B/s of FIFO words + 100 B/s of headers (12.5 notifications/s of 32 words) | 2400 + 200 B/s (25/s) | 600 + 50 B/s (6.25/s) | 300 + 25 B/s (3.1/s) |
-| Motion Data | 624 B/s of samples + 69 B/s of headers (8.7 notifications/s) | same | same | same |
+| Motion Data | 720 B/s of samples + 80 B/s of headers (10 notifications/s) | same | same | same |
 | Connection interval | 30 ms | 30 ms | 100 ms | 100 ms |
 | LED current at the cell [ASSUMED] | 524 µA | 1049 µA | 1049 µA: LEDs fire at 200 Hz, as in mode 7 | 1049 µA, as in mode 7 |
 | Module (4 exposures per sample) [ASSUMED], typ / worst | 533 / 800 µA | 1067 / 1600 µA | 1067 / 1600 µA, as in mode 7 | 1067 / 1600 µA, as in mode 7 |
@@ -180,7 +187,7 @@ Research only: for the depth study's ambient and timing questions (E1), never a 
   - Timing: a word stands for the centre of its window, (avg − 1) / 2 samples before its last one. That is 7.5 ms (mode 8) or 17.5 ms (mode 9), the same for every slot, so it cancels in IR–green lag. The header time stamp follows the other modes [ASSUMED within one output sample].
   - Current [ASSUMED]: averaging does not cut the optics. The LEDs and the module still run at 200 Hz, so their current is mode 7's (1049 and 1067 µA typ); only the BLE data and the radio's share drop, by 263 µA (mode 8) or 298 µA (mode 9) typ. Against full at 25 Hz (437 µA typ), modes 8 and 9 draw about 5.5 times as much.
   - Burst mode would idle between bursts, but its rates are 8, 32, 84 and 256 Hz, so it gives no 25 or 50 Hz output.
-- On the pod, the pulse, HRV and fit filters still run at 25 Hz: each takes the mean of 4 or 8 green samples (2 in mode 8, 1 in mode 9). Step rhythm and the MLC count take every 8th accelerometer sample (13 Hz). Log records stay valid, but steps/min reads about 4 % high [ASSUMED].
+- On the pod, the pulse, HRV and fit filters still run at 25 Hz: each takes the mean of 4 or 8 green samples (2 in mode 8, 1 in mode 9). Step rhythm and the motion level take every 8th accelerometer sample (15 Hz, the everyday rate), so log records keep their meaning.
 - Budget (`modes.c`): the module (4 exposures per sample), the LEDs (35 mA per sample) and the non-optical s4 terms for the interval and the stream. A 30 mAh cell lasts about 20 h (mode 6) or 11 to 12 h (modes 7 to 9): sessions, not daily wear.
 - [VERIFY on the bench]: no FIFO overflow at 200 Hz (the FIFO is drained every 64 items, 80 ms); no dropped notifications at a 30 ms interval (watch the sequence numbers); SMP_AVE read back from 0x12 in modes 8 and 9, with words at 50 and 25 Hz; the measured current.
 
@@ -190,53 +197,53 @@ Research only: a feasibility capture of whether the pod's accelerometer, pressed
 
 | | Mode 10 | Mode 11 |
 |---|---|---|
-| Accelerometer (LSM6DSOX) | 3333 Hz, high-performance, ±2 g | 6667 Hz, same |
-| Output filter | LPF1 only (CTRL1_XL LPF2_XL_EN = 0): −3 dB at about ODR/2 = 1.67 kHz | same: about 3.33 kHz |
-| Noise, 70 µg/√Hz × √bandwidth | 2.9 mg RMS | 4.0 mg RMS |
-| Gyroscope, LEDs, MAXM86161A | off | off |
-| Samples | 6667 B/s + 406 B/s of headers (29 notifications/s of 115) | 13333 B/s + 812 B/s (58/s), while capturing |
-| I²C at 400 kHz | 0.56 s of every second | the whole bus: windows with gaps (below) |
+| Accelerometer (LSM6DSV16BX) | 3840 Hz, high-performance, ±2 g | 7680 Hz, same |
+| Output filter | LPF1 only (CTRL9 LPF2_XL_EN = 0): −3 dB at about ODR/2 = 1.92 kHz [VERIFY DS13771] | same: about 3.84 kHz |
+| Noise, 70 µg/√Hz × √bandwidth | 3.1 mg RMS | 4.3 mg RMS |
+| Gyroscope, LEDs, MAXM86161A, TDM, Qvar | off | off |
+| Samples | 7680 B/s + 467 B/s of headers (33 notifications/s of 115) | 15360 B/s + 935 B/s (67/s), while capturing |
+| I²C at 400 kHz | 0.65 s of every second | the whole bus: windows with gaps (below) |
 | Connection interval | 15 ms | 15 ms |
-| Current at the cell [ASSUMED], typ / worst | 1235 / 1518 µA | 1898 / 2587 µA |
+| Current at the cell [ASSUMED, worked for the LSM6DSOX; re-run s4], typ / worst | 1235 / 1518 µA | 1898 / 2587 µA |
 
 **Vibration Data payload** (`firmware/src/vibcap.h`, `vib_encode`), little-endian:
 
 | Offset | Type | Field |
 |---|---|---|
 | 0 | u16 | sequence number, +1 per notification |
-| 2 | u16 | nominal rate, Hz: 3333 or 6667 |
+| 2 | u16 | nominal rate, Hz: 3840 or 7680 (3333 or 6667 before rev 17) |
 | 4 | u32 | uptime ms of the first sample, the same clock as PPG Data and Motion Data [ASSUMED within one sample] |
 | 8 | u32 | index of the first sample: the count of samples from the FIFO since the mode started, from 0 |
 | 12 | u8 | mode, 10 or 11 |
 | 13 | u8 | flags: bit 0 gap (the FIFO filled and restarted just before this packet's first sample), bit 1 a FIFO word that was not an accelerometer sample was skipped |
-| 14 | i16 × n | samples, 0.061 mg per count at ±2 g (DS12814 Table 2). n is up to 115, (ATT MTU − 3 − 14) / 2 |
+| 14 | i16 × n | samples, 0.061 mg per count at ±2 g (ST lsm6dsv16bx_from_fs2_to_mg). n is up to 115, (ATT MTU − 3 − 14) / 2 |
 
 - **Axis.** The chip axis along the pod's z, out of the top face and so normal to the skin, with the pod's sign. In `atrium_pod.dts` (`imu-to-pod`) that is chip +Z. It follows that line if the layout changes [VERIFY: the gravity test of bring-up, and the mech drawing].
 - **Select:** write `u8` 10 or 11 to Mode (0x0601) off the Plinth and subscribe to Vibration Data. No PPG Control bit is needed. On the Plinth the write fails with Value Not Allowed (0x13). Mode reads back the value while it runs. Packets are sized for the link's MTU at the Mode write. Request a 247-byte MTU before it.
-- **Ends:** as §4.3: on disconnect, on the Plinth, at reboot, or when 0 to 3 is written. Night gives sleep, low battery gives lite, and off the body gives the probe. Going back powers the accelerometer down, empties its FIFO and sets low-power mode before the next mode's rate (`vib_transition`).
+- **Ends:** as §4.3: on disconnect, on the Plinth, at reboot, or when 0 to 3 is written. Night gives sleep, low battery gives lite, and off the body gives the probe. Going back powers the accelerometer down, empties its FIFO and stops batching; the next mode's rate call then sets the rate and power mode together (`vib_transition`).
 - **No optics, no wear check.** With the LEDs off the pod cannot test wear, so it keeps the wear state it had at the Mode write. Start the capture while worn. The green headroom limit does not apply. PPG Data, Motion Data, the pulse and HRV have no new data. Log records hold no pulse or motion for these minutes.
-- **FIFO.** Accelerometer only, batched at the ODR (FIFO_CTRL3), in FIFO mode (stops when full), watermark 36 words. A thread reads FIFO_STATUS1/2 every 3 ms and reads 36 words (252 B, the nRF52832 TWIM's 255-byte limit) at a time, while the watermark is up. Each word is a tag and x, y, z. The pod keeps the one axis.
+- **FIFO.** Accelerometer only, batched at the ODR (FIFO_CTRL3), in FIFO mode (stops when full), watermark 36 words. A thread reads FIFO_STATUS1/2 every 3 ms and reads 36 words (252 B, the nRF52832 TWIM's 255-byte limit) at a time, while the watermark is up. Each word is a tag and z, y, x (the LSM6DSV16BX order). The pod keeps the one axis.
 - **Gaps.** The sample index counts every sample that came out of the FIFO, so:
   - a notification lost on the link (no BLE buffer: at most 2 queued) shows as a sequence and index jump, and the index says exactly how many samples were lost;
   - when the FIFO fills, the pod drains it, restarts it and sets the gap flag on the next packet. The index runs on with no jump, and the uptime field gives the gap's length (± 1 ms).
   - The uptime field is correct across a FIFO stop. FIFO mode stops when full, so the words drained after the stop were made before it; their packets carry the time their first sample was made, worked out from the last running FIFO read and the sample period (`vib_cap_clock`), not the time they were read. So the last packets before a gap match the index time within 1 ms, and the gap's length is the uptime jump less the expected step.
-- **Why mode 11 has gaps.** Each sample costs 7 bytes on I²C (the FIFO word holds all three axes). At 400 kHz, 9 bits per byte, the bus carries about 6000 words/s with the burst overhead. Mode 10 needs 3333/s, and mode 11 needs 6667/s, more than the bus has. In mode 11 the FIFO fills about 600 to 1700 words/s faster than it empties. It runs for roughly 0.3 to 0.8 s, stops when full, and the pod drains its 3 kB (about 90 ms) and restarts it [ASSUMED, bench]. Within a window the samples are contiguous. The nRF52832's TWIM tops out at 400 kHz, so no setting removes this. IMA-ADPCM would not help, because the limit is the I²C bus, not the radio. Gap-free 6.66 kHz needs SPI or the later IMU.
+- **Why mode 11 has gaps.** Each sample costs 7 bytes on I²C (the FIFO word holds all three axes). At 400 kHz, 9 bits per byte, the bus carries about 6000 words/s with the burst overhead. Mode 10 needs 3840/s, and mode 11 needs 7680/s, more than the bus has. In mode 11 the FIFO fills about 1700 to 2700 words/s faster than it empties. It runs for roughly 0.15 to 0.3 s, stops when full, and the pod drains it (about 75 ms for 438 words) and restarts it [ASSUMED, bench; the LSM6DSV16BX FIFO depth is VERIFY DS13771]. Within a window the samples are contiguous. The nRF52832's TWIM tops out at 400 kHz, so no setting removes this. IMA-ADPCM would not help, because the limit is the I²C bus, not the radio. Gap-free 7.68 kHz needs SPI, or the TDM output that the next board revision is to wire to the nRF's I²S pins.
 - **Link.** The pod asks for DLE (251-byte link packets) and 2M PHY when the mode starts. The build does neither on connect. A central that cannot do them keeps what it has.
   - At most 2 notifications are queued (`VIB_INFLIGHT_MAX`), leaving one TX buffer for the rest. That allows 2 × 244 B per connection event: 32.5 kB/s at 15 ms, or 16.3 kB/s if the phone holds 30 ms.
-  - Mode 11 needs 14.1 kB/s, and mode 10 needs 7.1 kB/s. Both fit with DLE, on 1M or 2M PHY.
+  - Mode 11 needs 16.3 kB/s, and mode 10 needs 8.1 kB/s. Both fit with DLE at 15 ms; at a 30 ms interval mode 11 is right at the 16.3 kB/s limit, so expect lost notifications there.
   - Without DLE the 244-byte notification splits into ten 27-byte link packets. Then mode 11 does not fit, and mode 10 may not.
   - iOS (DLE from iPhone 7 and iOS 10, 2M from iPhone 8) and Android 8 or later with a BT 5 radio should qualify [VERIFY with the target phones: watch the index for jumps].
   - If notifications are lost at a 30 ms interval, the fix is more buffers. Raise `CONFIG_BT_BUF_ACL_TX_COUNT` and `CONFIG_BT_ATT_TX_COUNT` to 6 and `VIB_INFLIGHT_MAX` to 4, at about 1.6 kB of RAM.
-- **Anti-aliasing.** With LPF2 off the output is LPF1, whose cutoff the data sheet puts at ODR/2 in high-performance mode (DS12814 6.4.1). That is the Nyquist frequency itself, so the digital filter does not stop aliasing. The analog anti-aliasing filter in front of the ADC has no stated corner. Content near 1.67 kHz (mode 10) or 3.33 kHz (mode 11) may fold back [VERIFY on the bench with a swept shaker or tone]. If it does, LPF2 at ODR/4 (LPF2_XL_EN 1, HPCF_XL 000) gives about 833 Hz or 1.67 kHz, with real attenuation at Nyquist.
+- **Anti-aliasing.** With LPF2 off the output is LPF1, taken to cut off at ODR/2 in high-performance mode as on the LSM6DSOX (DS12814 6.4.1) [VERIFY DS13771]. That is the Nyquist frequency itself, so the digital filter does not stop aliasing. The analog anti-aliasing filter in front of the ADC has no stated corner. Content near 1.92 kHz (mode 10) or 3.84 kHz (mode 11) may fold back [VERIFY on the bench with a swept shaker or tone]. If it does, LPF2 (CTRL9 LPF2_XL_EN 1, bandwidth in CTRL8 HP_LPF2_XL_BW) gives real attenuation at Nyquist [VERIFY the bandwidth codes in DS13771].
 - **Current [ASSUMED]** (`modes.c`, s4 terms):
-  - accelerometer high-performance: 170 µA on the 1.8 V rail, the same at any ODR (DS12814 Table 3), so 89 µA at the cell;
+  - accelerometer high-performance: 170 µA on the 1.8 V rail for the LSM6DSOX (DS12814 Table 3), so 89 µA at the cell; the LSM6DSV16BX figure is [VERIFY DS13771], and these totals are kept until s4 is re-run;
   - I²C, with HFCLK, EasyDMA, TWIM and the 4.7 kΩ pull-ups: 565 µA in mode 10, 933 / 989 µA in mode 11;
   - BLE at a 15 ms interval: 452 / 678 µA in mode 10, 651 / 1187 µA in mode 11;
   - CPU: 117 / 175 µA in mode 10, 214 / 310 µA in mode 11;
   - typ means 2M PHY; worst means 1M PHY, more CPU and, in mode 11, no gaps;
   - a 30 mAh cell lasts about 24 h (mode 10) or 16 h (mode 11).
 - **Bench checks [VERIFY]:**
-  - the burst read rolls the FIFO address back from 0x7E to 0x78, so one transfer carries many words (the data sheet does not say; bit 1 of the flags sets on a bad tag);
+  - the burst read rolls the FIFO address back from 0x7E to 0x78, so one transfer carries many words (ST's own driver reads one word per transfer; bit 1 of the flags sets on a bad tag);
   - FIFO mode stays stopped once full until the restart (inside a window, index against time is a straight line);
   - the measured window and gap lengths in mode 11;
   - the axis and its sign;
@@ -246,9 +253,9 @@ Research only: a feasibility capture of whether the pod's accelerometer, pressed
 
 ### 4.5 Vibration bench rig (SPI, nRF52 DK; not the pod)
 
-Before the EVT pod exists, the voice study (rig A) records mode 11 from an LSM6DSOX on an nRF52 DK. SPI removes the I²C limit that gives the pod's mode 11 its gaps (§4.4). The app is `firmware/tests/vib_bench` and uses `vibcap.c` unchanged.
+Before the EVT pod exists, the voice study (rig A) records mode 11 from an LSM6DSV16BX on an nRF52 DK. SPI removes the I²C limit that gives the pod's mode 11 its gaps (§4.4). The app is `firmware/tests/vib_bench` and uses `vibcap.c` unchanged.
 
-- **Board.** nRF52 DK (PCA10040, nRF52832), on the bench. The DK's chip and toolchain match the pod's, so the packet code is the pod's own. LSM6DSOX on the ST STEVAL-MKI197V1 DIL24 adapter (LSM6DSOX and two 100 nF supply capacitors; [ST product page](https://www.st.com/en/evaluation-tools/steval-mki197v1.html)), hand-fitted. Any adapter with the bare chip works with the same signals.
+- **Board.** nRF52 DK (PCA10040, nRF52832), on the bench. The DK's chip and toolchain match the pod's, so the packet code is the pod's own. The LSM6DSV16BX on an ST DIL24 adapter board [VERIFY the part number and its pinout: the LSM6DSOX rig used the STEVAL-MKI197V1, whose pins the table below follows]. Any adapter with the bare chip works with the same signals. Leave the adapter's TDM and Qvar pins as the pod has them: TDMout, BCLK, AH1 and AH2 to GND.
 - **Wiring.** Seven wires, under 10 cm. Pins from the adapter schematic (DB3721 Rev 1, Figure 1) and the DK's Arduino header (Zephyr `nrf52dk_nrf52832.dts`):
 
   | Signal | DK pin | nRF52832 | Adapter DIL24 pin |
@@ -261,20 +268,20 @@ Before the EVT pod exists, the voice study (rig A) records mode 11 from an LSM6D
   | CS | D10 | P0.22 | 19 (CS) |
   | INT1 | not used | | 14, leave open |
 
-  - **3.0 V, one rail.** The DK's VDD is 3.0 V [VERIFY with a meter]; the LSM6DSOX takes 1.71 to 3.6 V on VDD and 1.62 to 3.6 V on VDDIO (DS12814 Table 3), so it runs from the DK directly with no level shifting. The pod runs it at 1.8 V; the accelerometer's noise and sensitivity are specified the same across the supply range [ASSUMED].
-  - CS low selects SPI. The firmware also sets I2C_disable (CTRL4_C bit 2), so SCL/SDA activity cannot be taken as I²C.
-- **SPI.** SPIM2 with EasyDMA at 8 MHz, the nRF52832 SPIM's highest rate (the chip allows 10 MHz [VERIFY: DS12814 SPI timing table]). Mode 3 (clock idles high, data captured on the rising edge). A burst is the address byte and 36 FIFO words, 253 B, under the SPIM's 255-byte MAXCNT. Every transfer is 2 bytes or more, so nRF52832 anomaly 58 (an extra byte on 1-byte reads) cannot occur; Zephyr's workaround for it stays on as well.
-- **Accelerometer.** Mode 11 exactly: `vib_transition(…, 11)` writes 6667 Hz, high-performance, ±2 g, LPF2 off, accelerometer-only FIFO in FIFO mode, watermark 36. Chip +Z, not negated, the pod's rule (§4.4 Axis). Mount the adapter with the chip's top face away from the skin, as on the pod. The gyroscope stays off.
+  - **3.0 V, one rail.** The DK's VDD is 3.0 V [VERIFY with a meter]; the LSM6DSV16BX supply range is [VERIFY DS13771] (the LSM6DSOX took 1.71 to 3.6 V on VDD and 1.62 to 3.6 V on VDDIO). The pod runs it at 1.8 V; the accelerometer's noise and sensitivity are specified the same across the supply range [ASSUMED].
+  - CS low selects SPI. The firmware also sets I2C_I3C_disable (IF_CFG bit 0), so SCL/SDA activity cannot be taken as I²C.
+- **SPI.** SPIM2 with EasyDMA at 8 MHz, the nRF52832 SPIM's highest rate (the chip's limit is [VERIFY: DS13771 SPI timing table]). Mode 3 (clock idles high, data captured on the rising edge). A burst is the address byte and 36 FIFO words, 253 B, under the SPIM's 255-byte MAXCNT. Every transfer is 2 bytes or more, so nRF52832 anomaly 58 (an extra byte on 1-byte reads) cannot occur; Zephyr's workaround for it stays on as well.
+- **Accelerometer.** Mode 11 exactly: `vib_transition(…, 11)` writes 7680 Hz, high-performance, ±2 g, LPF2 off, accelerometer-only FIFO in FIFO mode, watermark 36. Chip +Z, not negated, the pod's rule (§4.4 Axis). Mount the adapter with the chip's top face away from the skin, as on the pod. The gyroscope stays off.
 - **Output.** USB virtual COM port of the DK's interface MCU, **1,000,000 baud**, 8N1, no flow control. 1 Mbaud is that port's top rate, and the nRF52832 UARTE makes it exactly (921,600 comes out at 941,176 baud). Record with any serial logger at 1,000,000 baud.
-  - First a banner line starting `vib_bench:`. Then only packet lines: `0207 `, the packet as lowercase hex (the §4.4 payload: mode byte 11, rate 6667, index from 0 at start, uptime ms of the first sample, gap flag), `\n`. 115 samples a packet, 244 B, 494 characters a line; 58 lines/s, 28.6 kB/s, 29 % of the port.
+  - First a banner line starting `vib_bench:`. Then only packet lines: `0207 `, the packet as lowercase hex (the §4.4 payload: mode byte 11, rate 7680, index from 0 at start, uptime ms of the first sample, gap flag), `\n`. 115 samples a packet, 244 B, 494 characters a line; 67 lines/s, 33.0 kB/s, 33 % of the port.
   - Button 1 stops the capture, powers the accelerometer down and prints one `stats …` line: samples, bursts, the deepest FIFO level seen, gaps, SPI errors, dropped lines and the fewest free line buffers. A bench recorder should ignore both lines.
-  - A line that finds no free buffer (16 lines, about 280 ms) is dropped and shows as an index jump, as a lost notification does on the pod.
+  - A line that finds no free buffer (16 lines, about 240 ms) is dropped and shows as an index jump, as a lost notification does on the pod.
   - LED 1 lights while streaming. LED 2 lights if the FIFO ever filled (a gap). LED 2 blinking means a set-up failure: the banner line says which.
-- **Gap-free margin (simulated, `tests/vib_bench/host`).** A burst of 36 words costs about 0.3 ms of SPI (253 B at 1 µs each, plus up to 40 µs of driver and chip-select time [ASSUMED]) and carries 5.4 ms of samples, so the drain can move about 16 times the 6667 words/s it needs. With the 1 ms status polls the bus is busy about 9 % of the time. The FIFO holds 438 words, 65.7 ms at 6667 Hz [VERIFY: DS12814, FIFO size taken as 3 kB]. In the 60 s simulation, with a 3 ms hold-off every 17 ms, the FIFO never held more than 62 words (9.3 ms), and a 50 ms hold-off once a second still lost nothing. **Measured margin: none yet.** It is the stats line's `max_fifo_words` on the bench: 438 minus it, at 0.15 ms a word.
+- **Gap-free margin (simulated, `tests/vib_bench/host`).** A burst of 36 words costs about 0.3 ms of SPI (253 B at 1 µs each, plus up to 40 µs of driver and chip-select time [ASSUMED]) and carries 4.7 ms of samples, so the drain can move about 14 times the 7680 words/s it needs. With the 1 ms status polls the bus is busy about 10 % of the time. The simulation keeps the LSM6DSOX's 438-word FIFO, 57 ms at 7680 Hz, as the harder case [VERIFY the LSM6DSV16BX FIFO depth, DS13771]. In the 60 s simulation, with a 3 ms hold-off every 17 ms, the FIFO never held more than 67 words (8.7 ms); a 50 ms hold-off once a second still lost nothing, but peaked at 423 of the 438 words, so that margin is thin. **Measured margin: none yet.** It is the stats line's `max_fifo_words` on the bench: the FIFO depth minus it, at 0.13 ms a word.
 - **If the FIFO does fill** (the gap flag, LED 2), the words drained after it stopped carry their true times, as on the pod (§4.4 Gaps, `vib_cap_clock`), so the uptime field still gives the gap's length to about 1 ms.
 - **Build and flash** (from the repo root): `firmware/tests/fw.sh bench` writes `firmware/build/vib_bench/zephyr/zephyr.hex`. Flash it with `nrfjprog --program firmware/build/vib_bench/zephyr/zephyr.hex --chiperase --verify --reset`, or copy it to the DK's JLINK drive.
 - **Before recording:** turn the interface MCU's mass-storage drive off once (J-Link Commander: `MSDDisable`, then power-cycle the DK). With it on, the virtual COM port can lose or corrupt data at high rates on some hosts (SEGGER J-Link OB notes).
-- **Bench checks [VERIFY]:** WHO_AM_I reads 0x6C (the banner says so); `gaps 0` and `lines_dropped 0` in the stats line after a 10-minute run; the FIFO burst rolls from 0x7E back to 0x78 (flag bit 1 never set); index against host time is a straight line at 6667 Hz; the axis sign (gravity +1 g when the chip's top faces up).
+- **Bench checks [VERIFY]:** WHO_AM_I reads 0x71 (the banner says so); `gaps 0` and `lines_dropped 0` in the stats line after a 10-minute run; the FIFO burst rolls from 0x7E back to 0x78 (flag bit 1 never set); index against host time is a straight line at 7680 Hz; the axis sign (gravity +1 g when the chip's top faces up).
 
 ## 5. Skin temperature (0x0300): #3
 
@@ -372,7 +379,7 @@ Stored in internal flash (Zephyr settings on the 8 KB `storage` partition, with 
 
 | Characteristic | UUID | Props | Value |
 |---|---|---|---|
-| Mode | 0x0601 | R, W | `u8`: 0 full (green, IR, red), 1 smart (default, green), 2 lite (green, optics 30 s in every 120 s: a pulse every 2 min, no HRV), 3 sleep (green). All at 25 Hz (ML data contract). Research only: 6 (100 Hz), 7 (200 Hz), 8 (200 Hz averaged to 50 Hz) and 9 (200 Hz averaged to 25 Hz), green, IR, red and direct ambient (§4.3); 10 (3.33 kHz) and 11 (6.66 kHz), accelerometer only (§4.4). Not stored, for one connection |
+| Mode | 0x0601 | R, W | `u8`: 0 full (green, IR, red), 1 smart (default, green), 2 lite (green, optics 30 s in every 120 s: a pulse every 2 min, no HRV), 3 sleep (green). All at 25 Hz (ML data contract). Research only: 6 (100 Hz), 7 (200 Hz), 8 (200 Hz averaged to 50 Hz) and 9 (200 Hz averaged to 25 Hz), green, IR, red and direct ambient (§4.3); 10 (3.84 kHz) and 11 (7.68 kHz), accelerometer only (§4.4). Not stored, for one connection |
 | Time | 0x0602 | R, W | `u32` Unix seconds |
 | Sleep Window | 0x0603 | R, W | `u16` start, `u16` end (minutes after local midnight), `i16` UTC offset in minutes. Inside the window the pod uses sleep mode. Default 23:00 to 07:00 |
 | Log Interval | 0x0604 | R | `u16` seconds: the fixed 30 s epoch |

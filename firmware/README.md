@@ -1,6 +1,6 @@
 # Firmware
 
-Firmware for the EVT pod (baseline 20.9 × 11 × 5.3 mm, approved 2026-11-07): an nRF52832 (WLCSP, nRF52832-CIAA) on Zephyr v4.4.2 with MCUboot, a MAXM86161A optical module, an LSM6DSOX and a BQ21061 charger.
+Firmware for the EVT pod (baseline 20.9 × 11 × 5.3 mm, approved 2026-11-07): an nRF52832 (WLCSP, nRF52832-CIAA) on Zephyr v4.4.2 with MCUboot, a MAXM86161A optical module, an LSM6DSV16BX IMU (U11 since 2026-11-17; it was the LSM6DSOX) and a BQ21061 charger.
 
 <p align="center">
   <img src="../docs/images/plates/firmware_architecture.jpg" alt="Firmware architecture: sensors, nRF52832 modules, the app over BLE, flash map, case firmware and tests" width="100%">
@@ -12,11 +12,11 @@ It builds for the custom board `atrium_pod`, and the host unit tests pass on `na
 | Folder | Contents |
 |---|---|
 | `boards/atrium/atrium_pod/` | Board: pin map, clocks, DC/DC mode, flash map, cell and supply constants |
-| `drivers/` | MAXM86161A driver and binding (`maxm86161`, `adi,maxm86161`; it also runs the MAXM86161); BQ21061 register logic and binding (no in-tree drivers for these parts) |
+| `drivers/` | MAXM86161A driver and binding (`maxm86161`, `adi,maxm86161`; it also runs the MAXM86161); LSM6DSV16BX accelerometer driver and binding (`lsm6dsv16bx`, `st,lsm6dsv16bx`); BQ21061 register logic and binding (Zephyr has no drivers for these parts: its LSM6DSV16X driver wants ID 0x70, the LSM6DSV16BX reads 0x71) |
 | `src/power/` | Cut-off, charge policy, dock detection, charging-case VIN patterns, battery estimate, wear detection, LED headroom, modes, NTC, power state machine. Plain C |
-| `src/hw/` | Hardware glue: ADC (VSYS, two NTCs), System OFF, the charger on I²C and /PG, the IMU (MLC load and reads, vibration FIFO drain), oxygen bursts, and the PPG interface (`ppg.h`) with its MAXM86161A backend (`ppg_maxm86161.c`) |
+| `src/hw/` | Hardware glue: ADC (VSYS, two NTCs), System OFF, the charger on I²C and /PG, the IMU (rates, motion level, vibration FIFO drain), oxygen bursts, and the PPG interface (`ppg.h`) with its MAXM86161A backend (`ppg_maxm86161.c`) |
 | `src/ble/` | GATT services of [`docs/ble_gatt.md`](../docs/ble_gatt.md), and pairing on lift |
-| `src/` | Main loop, pulse and HRV estimates, fit quality, MLC activity class, oxygen trend, activity and posture, vibration capture, the 30 s epoch, its log and the log download, shared state, settings, DFU health. The Zephyr app build files are here too: `CMakeLists.txt`, `Kconfig`, `prj.conf`, `VERSION`, `debug.conf`, `debug.overlay`, `sysbuild.conf`, `sysbuild/mcuboot.conf`, `sample.yaml`, `west.yml` |
+| `src/` | Main loop, pulse and HRV estimates, fit quality, motion level and activity class, oxygen trend, activity and posture, vibration capture, the 30 s epoch, its log and the log download, shared state, settings, DFU health. The Zephyr app build files are here too: `CMakeLists.txt`, `Kconfig`, `prj.conf`, `VERSION`, `debug.conf`, `debug.overlay`, `sysbuild.conf`, `sysbuild/mcuboot.conf`, `sample.yaml`, `west.yml` |
 | `case/` | The charging case MCU (CH32V003F4U6, C, no RTOS): its own project, [`case/README.md`](case/README.md) |
 | `tests/` | ztest suites on `native_sim` (`power/`, `app/` with the ML reference vectors in `app/vectors/`, and `vib_bench/host/`), the vibration bench rig (`vib_bench/`), the build image (`Dockerfile`) and the helper scripts below |
 
@@ -31,7 +31,7 @@ Mapped to [`docs/FEATURES.md`](../docs/FEATURES.md). EVT features must work end 
 | 3 | Skin temperature | EVT | Skin NTC TH1 logged per epoch; TH1 and the top NTC TH4 live | Skin Temperature 0x0301, log byte 6 |
 | 4 | Sleep | V1 | Inputs only: pulse, HRV, activity and posture in the log. Staging is app-side | Log |
 | 5 | Sleep position | V1 | Head pitch and roll from the mean gravity vector, per epoch, in the pod frame (worn upright, window and antenna end up; #26). The board's `imu-to-pod` matrix turns the chip axes into it (`src/activity.c`) | Log bytes 8–9 |
-| 6 | Activity and effort | V1 | Activity index per minute and per epoch (`src/activity.c`). LSM6DSOX machine-learning core motion level 0–7 every 3.12 s, and per epoch still, walk, run or other with steps (`src/mlc.c`, port of the ML reference model). Accelerometer only: the gyro stays off | Activity 0x0401, log bytes 3–5, 7 |
+| 6 | Activity and effort | V1 | Activity index per minute and per epoch (`src/activity.c`). Motion level 0–7 every 3.12 s, worked out on the nRF from the accelerometer (the LSM6DSOX did it in its machine-learning core), and per epoch still, walk, run or other with steps (`src/mlc.c`, port of the ML reference model). Accelerometer only: the gyro stays off | Activity 0x0401, log bytes 3–5, 7 |
 | 8 | Oxygen trend | EVT | 30 s red/IR bursts at 25 Hz: sleep every 5 min, smart every 30 min, only after 60 s still with a pulse. Relative red/IR ratio R with a confidence; no percentage on the pod (`src/spo2.c`, port of the ML reference model). Research only | Oxygen Ratio 0x0205, log bytes 10–11 |
 | 7, 13 | Recovery, daily summary | V1 | None: app-side from the log | — |
 | 15 | Pairing | EVT | LE Secure Connections only, 16-byte keys, bonding; unencrypted links dropped after 30 s. New pairings only for 60 s after a lift from the Plinth (and after boot); bonded phones reconnect at any time | 1, 8 |
@@ -86,10 +86,10 @@ From the EVT baseline netlist (`hardware/design-data/netlist/atrium_nets.yaml`) 
 
 | Net | U1 ball | nRF pin | Use |
 |---|---|---|---|
-| I2C_SDA / I2C_SCL | H4 / H3 | P0.15 / P0.16 | I²C 400 kHz at 1.8 V, R1 / R2 4.7 kΩ: MAXM86161A 0x62, LSM6DSOX 0x6A, BQ21061 0x6B (the charger only on the Plinth) |
+| I2C_SDA / I2C_SCL | H4 / H3 | P0.15 / P0.16 | I²C 400 kHz at 1.8 V, R1 / R2 4.7 kΩ: MAXM86161A 0x62, LSM6DSV16BX 0x6A, BQ21061 0x6B (the charger only on the Plinth) |
 | PPG_INT | H2 | P0.18 | MAXM86161A INTB, open drain; internal pull-up |
 | PPG_LDO_EN | G2 | P0.20 | MAXM86161A LDO_EN: low when no optics run (0.05 µA); R5 1 MΩ pull-down |
-| IMU_INT1 | H6 | P0.12 | LSM6DSOX data ready, push-pull, no pull (INT1 must be low or floating at IMU power-up). INT2 is not connected; firmware polls MLC0_SRC every 39 samples |
+| IMU_INT1 | H6 | P0.12 | LSM6DSV16BX accelerometer data ready, pulsed, push-pull, no pull (INT1 must be low or floating at IMU power-up). INT2 is not connected. TDMout, BCLK, AH1/Qvar1 and AH2/Qvar2 are tied to GND and WCLK is open, so TDM and Qvar are not used on EVT |
 | CHG_PG | H5 | P0.14 | BQ21061 /PG, open drain, R3 100 kΩ pull-up. Low on the Plinth: dock state, and the System OFF wake source |
 | NTC_EN | G3 | P0.17 | High only during the NTC conversions |
 | TH1_SENSE | D6 | P0.03 / AIN1 | Skin NTC. NCP03XH103F05RL 0201 10 kΩ 1 %, B 3380 K, under R10 10 kΩ 0.1 %; ratiometric against VDD/4; temperature from Murata's R-T table (`src/power/ntc.c`) |
@@ -114,12 +114,12 @@ From the EVT baseline netlist (`hardware/design-data/netlist/atrium_nets.yaml`) 
 | `green-min-mv` | 3100 | MAXM86161A green on the 31 mA range, on VLED = VSYS. With the 2 Ω sag the limit is 3.13 V, under the 3.30 V cut-off [VERIFY Vf against current, O-16] |
 | `cell-resistance-mohm` | 2000 | [ASSUMED] end of life and cold; no cell data sheet yet. Set it from the bench |
 | `vsys-sense-top-ohm`, `vsys-sense-bottom-ohm` | 2.2 MΩ, 1 MΩ | R40, R41 |
-| `imu-to-pod` | `0 1 0, −1 0 0, 0 0 1` | LSM6DSOX axes to the pod frame (pod = M × chip): U11 top side, pin 1 at the pod +x/+y corner, against ST's axis figure (chip +Y = pod +x). Checked to be a rotation at boot; [VERIFY] by the bring-up gravity test on all six faces |
+| `imu-to-pod` | `0 1 0, −1 0 0, 0 0 1` | IMU axes to the pod frame (pod = M × chip): U11 top side, pin 1 at the pod +x/+y corner, against ST's axis figure for the LSM6DSOX (chip +Y = pod +x); the LSM6DSV16BX on the same land is taken to match [VERIFY DS13771 axis figure]. Checked to be a rotation at boot; [VERIFY] by the bring-up gravity test on all six faces |
 
 | Flash (internal, 512 KB) | Offset | Size |
 |---|---|---|
 | MCUboot | 0x00000 | 32 KB (26.2 KB used) |
-| Slot 0, app | 0x08000 | 220 KB (213.8 KB of the 216.9 KB the linker allows with swap-move) |
+| Slot 0, app | 0x08000 | 220 KB (211.2 KB of the 216.9 KB the linker allows with swap-move) |
 | Slot 1, update image | 0x3F000 | 220 KB |
 | Settings and bonds (NVS) | 0x76000 | 8 KB, the two-sector minimum |
 | Log | 0x78000 | 32 KB, 8 pages |
@@ -182,11 +182,11 @@ All of it is plain C in `src/power/`, stepped once a second by `src/main.c`.
 | Wear detection (#18) | Port of the ML reference models. Off-body when any of these holds:<br>- dark (DC below 0.15 of the active LED's on-skin reference) for 4 s;<br>- no pulse for 60 s while still and cool (TH1 below 30 °C or falling 0.1 °C/min);<br>- no pulse for 300 s below 32 °C.<br>Worn again when lit for 2 s and then a pulse within 15 s. One reference per LED, learned in the first pulse-present minute while worn, both cleared on the dock and at off-body. Without a reference for the active LED, the dark path is skipped and a pulse alone puts the pod back on. The worn state carries over the green-to-IR swap. Thresholds are the same for both LEDs and [ASSUMED] | `test_wear.c`, `test_ml_vectors.c` |
 | Pair on lift | /PG rising opens 60 s for new pairings; the pod advertises throughout (every 1 s worn, every 2 s on the Plinth and off the body), so bonded phones reconnect at any time | `test_ble_policy.c` (the window and the link rules); the link itself needs a phone |
 | Docked idle | Optics unpowered (LDO_EN low), IMU off, NTCs at 1 Hz on the Plinth, advertising every 2 s | `test_modes.c` |
-| Modes | The ML data contract: green at 25 Hz, accelerometer at 12.5 Hz, lite optics 30 s in every 120 s. Each LED at most once (MAXM86161A) | `test_modes.c`, `test_maxm86161.c` |
-| Research modes | Mode 6 / 7 (depth study, research only): green, IR, red and direct ambient (tag 0x04) at 100 / 200 Hz; modes 8 / 9 sample at 200 Hz and average 4 / 8 on the module (SMP_AVE) to 50 / 25 Hz; accelerometer at 104 Hz; connection interval 30 ms in modes 6 / 7 and 100 ms in modes 8 / 9. One connection only, never stored; docked idle on the Plinth, full below the green limit. In modes 6 / 7 the 25 Hz filters get means of 4 / 8 samples, in mode 8 means of 2 (`docs/ble_gatt.md` 4.3) | `test_modes.c`, `test_power_sm.c`, `test_maxm86161.c`, `test_gatt_encode.c` |
-| Vibration modes | Mode 10 / 11 (bench capture of bone-conducted voice and jaw vibration, research only): the LSM6DSOX accelerometer alone, high-performance, ±2 g, LPF2 off, at 3333 / 6667 Hz; LEDs, MAXM86161A and gyro off. FIFO mode, watermark 36 words, drained in 252-byte I²C bursts by a thread; the skin-normal axis (pod z) streams on Vibration Data 0x0207 with sequence, uptime and sample index. I²C at 400 kHz carries mode 10 but not mode 11 continuously, so mode 11 captures in windows with flagged gaps. 15 ms interval; asks for DLE and 2M. The same session rules as modes 6–9 (`src/vibcap.c`, `docs/ble_gatt.md` 4.4) | `test_vibcap.c`, `test_modes.c`, `test_power_sm.c` |
-| Vibration bench rig | Not the pod: an nRF52 DK with the LSM6DSOX on SPI at 8 MHz runs mode 11 gap-free and prints each Vibration Data packet as `0207 <hex>` on the USB serial port at 1 Mbaud, for the voice study before EVT. `vibcap.c` unchanged; button 1 stops and prints a stats line (`tests/vib_bench`, `docs/ble_gatt.md` 4.5) | `tests/vib_bench/host` |
-| Motion level and activity class | Port of the ML reference models. The LSM6DSOX program (97 register writes, ST's BSD-3 motion_intensity tree with Atrium's 7 thresholds) goes in after the driver's init and leaves the accelerometer at 12.5 Hz, ±2 g. Per epoch: still when every level is 0; walk at median level 4–5 with a step rhythm of 70–150 steps/min; run at level ≥ 6 and 140–200 steps/min; else other. Thresholds [ASSUMED] | `test_mlc.c` |
+| Modes | The ML data contract: green at 25 Hz, accelerometer at 12.5 Hz (15 Hz on the LSM6DSV16BX, which has no 12.5 Hz; the motion windows keep their length in seconds), lite optics 30 s in every 120 s. Each LED at most once (MAXM86161A) | `test_modes.c`, `test_maxm86161.c` |
+| Research modes | Mode 6 / 7 (depth study, research only): green, IR, red and direct ambient (tag 0x04) at 100 / 200 Hz; modes 8 / 9 sample at 200 Hz and average 4 / 8 on the module (SMP_AVE) to 50 / 25 Hz; accelerometer at 120 Hz; connection interval 30 ms in modes 6 / 7 and 100 ms in modes 8 / 9. One connection only, never stored; docked idle on the Plinth, full below the green limit. In modes 6 / 7 the 25 Hz filters get means of 4 / 8 samples, in mode 8 means of 2 (`docs/ble_gatt.md` 4.3) | `test_modes.c`, `test_power_sm.c`, `test_maxm86161.c`, `test_gatt_encode.c` |
+| Vibration modes | Mode 10 / 11 (bench capture of bone-conducted voice and jaw vibration, research only): the LSM6DSV16BX accelerometer alone, high-performance, ±2 g, LPF2 off, at 3840 / 7680 Hz (the chip's rates nearest the LSM6DSOX's 3333 / 6667 Hz; the mode names keep the old numbers); LEDs, MAXM86161A and gyro off. FIFO mode, watermark 36 words, drained in 252-byte I²C bursts by a thread; the skin-normal axis (pod z) streams on Vibration Data 0x0207 with sequence, uptime and sample index. I²C at 400 kHz carries mode 10 but not mode 11 continuously, so mode 11 captures in windows with flagged gaps. 15 ms interval; asks for DLE and 2M. The same session rules as modes 6–9 (`src/vibcap.c`, `docs/ble_gatt.md` 4.4) | `test_vibcap.c`, `test_modes.c`, `test_power_sm.c` |
+| Vibration bench rig | Not the pod: an nRF52 DK with an LSM6DSV16BX on SPI at 8 MHz runs mode 11 gap-free and prints each Vibration Data packet as `0207 <hex>` on the USB serial port at 1 Mbaud, for the voice study before EVT. `vibcap.c` unchanged; button 1 stops and prints a stats line (`tests/vib_bench`, `docs/ble_gatt.md` 4.5) | `tests/vib_bench/host` |
+| Motion level and activity class | Port of the ML reference models. The level is the variance of \|a\| over 3.12 s (47 samples at 15 Hz) through Atrium's 7 thresholds, kept bit for bit from the LSM6DSOX tree, worked out on the nRF from the samples it already reads; the step rhythm uses the last 8 s (120 samples). Per epoch: still when every level is 0; walk at median level 4–5 with a step rhythm of 70–150 steps/min; run at level ≥ 6 and 140–200 steps/min; else other. Thresholds [ASSUMED] | `test_mlc.c` |
 | Oxygen trend bursts | Port of the ML reference models. IR 10 mA and red 10 mA join the mode's green slot for 30 s at 25 Hz; green stays slot 0, so pulse and HRV run on. Gates [ASSUMED] | `test_spo2.c` |
 | Pulse and HRV algorithms | Port of the ML reference models: spectral HR, 8 s, 256-point FFT, accelerometer subtraction; max-slope HRV at 25 Hz, RMSSD needs at least 5 clean differences | `test_pulse.c`, `test_hrv.c`, `test_ml_vectors.c` |
 
@@ -204,8 +204,8 @@ All of it is plain C in `src/power/`, stepped once a second by `src/main.c`.
 | research 7 | the same | 200 Hz | always | 2706 | 3286 |
 | research 8 | the same | 200 Hz, averaged to 50 Hz | always | 2443 | 3010 |
 | research 9 | the same | 200 Hz, averaged to 25 Hz | always | 2408 | 2973 |
-| research 10 | none (accelerometer 3333 Hz, high-performance) | — | off | 1235 | 1518 |
-| research 11 | none (accelerometer 6667 Hz, high-performance) | — | off | 1898 | 2587 |
+| research 10 | none (accelerometer 3840 Hz, high-performance) | — | off | 1235 | 1518 |
+| research 11 | none (accelerometer 7680 Hz, high-performance) | — | off | 1898 | 2587 |
 
 ## Log
 
@@ -224,8 +224,7 @@ All of it is plain C in `src/power/`, stepped once a second by `src/main.c`.
 |---|---|
 | MAXM86161A | `drivers/maxm86161/` (`adi,maxm86161`; the MAXM86161 has the same register map and part ID 0x36, so either part runs). LDO_EN power gating, part ID 0x36 checked at each power-up, up to 3 LED slots and one direct-ambient slot at one rate, with optional on-chip averaging (SMP_AVE), FIFO drained on A_FULL, low-power mode between samples |
 | BQ21061 | `drivers/bq21061/bq21061_regs.c` (register logic, `ti,bq21061`) and `src/hw/charger.c` (I²C and /PG) |
-| LSM6DSOX | Zephyr `st,lsm6dso` (same register set), data-ready trigger on INT1, `gyro-odr` off in the devicetree. `accel-pm` low-power/normal (XL_HM_MODE = 1): low-power at 12.5 Hz, normal at 104 Hz, 1.8 mg RMS at ±2 g; the power-up high-performance mode is 170 µA at any rate (DS12814 Table 3). Modes 10 and 11 bypass the driver: data-ready off, raw writes for high-performance, FIFO and ODR, and back to low-power on the way out (`src/vibcap.c`) |
-| LSM6DSOX MLC | `src/mlc.c` program, written over I²C after the driver's init; MLC0_SRC read on the embedded page, under a bus lock against the driver's ODR calls |
+| LSM6DSV16BX | `drivers/lsm6dsv16bx/` (`st,lsm6dsv16bx`), accelerometer only: WHO_AM_I 0x71 checked at boot, software reset, BDU, ±2 g, pulsed data-ready on INT1, x, y, z in m/s² (the chip's output registers run z, y, x). Rates must be ones the chip has (1.875 Hz to 7.68 kHz): 15 Hz in low-power mode with 2 averages, 120 Hz and up in high-performance (`low-power-max-mhz` in the devicetree). Gyroscope, TDM, Qvar and the embedded functions stay off. Modes 10 and 11 bypass the driver: data-ready off, raw writes for the FIFO, ±2 g, LPF2 off and the ODR; on the way out the driver's rate call rewrites CTRL1 whole (`src/vibcap.c`). Register facts from ST's lsm6dsv16bx-pid register driver and DS13771 |
 | NTCs, VSYS | SAADC, `src/hw/power_hw.c` |
 
 ## What needs hardware
@@ -252,17 +251,17 @@ All of it is plain C in `src/power/`, stepped once a second by `src/main.c`.
    - Pulse against a chest-strap reference, at rest and moving.
    - RMSSD against an ECG at night. Research mode 6 gives green at 100 Hz on the stream for O-18 [VERIFY against the O-18 protocol].
    - The PPG polarity: `src/hrv.c` inverts the counts and times each beat at the steepest upstroke.
-   - The accelerometer in low-power mode at 12.5 Hz and normal mode at 104 Hz: its current at each (the data sheet gives 26 µA at 50 Hz only), and the MLC levels and activity index against high-performance on the same motion (1.8 mg RMS against 70 µg/√Hz).
+   - The LSM6DSV16BX in low-power mode (2 averages) at 15 Hz and high-performance at 120 Hz: its current at each [VERIFY DS13771], and the motion levels and activity index against high-performance on the same motion (70 µg/√Hz).
    - Research modes 6 and 7: no FIFO overflow at 200 Hz, no sequence gaps at the 30 ms interval on an iPhone and an Android phone, the direct-ambient level under room light and in the dark, and the current.
-   - Vibration modes 10 and 11: the FIFO burst read rolls over from 0x7E to 0x78 (no skipped-word flag); mode 11's window and gap lengths; no index jumps on an iPhone and an Android phone; the analog anti-aliasing corner with a swept tone; the skin-normal axis and sign; the current.
+   - Vibration modes 10 and 11: the FIFO burst read rolls over from 0x7E to 0x78 on the LSM6DSV16BX (no skipped-word flag) [VERIFY: ST's own driver reads one word per transfer]; the FIFO depth (the tests assume the LSM6DSOX's 438 words) [VERIFY DS13771]; mode 11's window and gap lengths; no index jumps on an iPhone and an Android phone; the analog anti-aliasing corner with a swept tone; the skin-normal axis and sign; the current.
    - The `imu-to-pod` matrix: rest the pod on each of its six faces and check +1 g on the pod axis pointing up (antenna end up reads +x).
    - These are wellness estimates only.
 9. **Log.** A full night logged and downloaded, decoded with the log decoder; a reset during writing; the ring wrap after 22 h. With the app on an iPhone and an Android phone: the 15–30 ms interval granted during a read, the 0x90 end indication after the last Log Data packet, the time for 8 pages in sleep mode, and a Live Epoch every 30 s while worn.
 10. **MCUboot.** A swap-move update over BLE end to end, and the revert of an unhealthy image.
 11. **Radio.** Advertising and connection current, range on the head, MTU 247 and DLE with the app's phones; pairing only in the window after a lift.
 12. **LFRC.** The calibrated LFRC holds 500 ppm across temperature, and BLE stays connected through a night.
-13. **MLC.**
-    - MLC0_SRC (0x70) on the embedded page [VERIFY].
+13. **IMU and motion level.**
+    - WHO_AM_I reads 0x71, and the gravity test above passes with the LSM6DSV16BX.
     - Bench check: still on a table level 0, shaken 5–7, walking on the head 4–5.
 14. **Oxygen trend.** R against a reference oximeter overnight. No calibration and no percentage on the pod.
 15. **Charging case.**

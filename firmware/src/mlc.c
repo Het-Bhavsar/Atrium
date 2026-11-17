@@ -1,30 +1,6 @@
 /*
  * Copyright (c) 2026 Het Bhavsar
- * SPDX-License-Identifier: Apache-2.0 AND BSD-3-Clause
- *
- * mlc_program below is ST's motion_intensity example for the LSM6DSOX
- * (st-mems-machine-learning-core, examples/motion_intensity/lsm6dsox), with Atrium's
- * seven thresholds in the tree and the interrupt routed to INT2 (atrium_ml/mlc.py
- * atrium_config()). ST's notice for that program:
- *
- * Copyright (c) 2025, STMicroelectronics. All rights reserved.
- * Redistribution and use in source and binary forms, with or without modification, are
- * permitted provided that the following conditions are met: 1. Redistributions of source
- * code must retain the above copyright notice, this list of conditions and the following
- * disclaimer. 2. Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation and/or other
- * materials provided with the distribution. 3. Neither the name of the copyright holder nor
- * the names of its contributors may be used to endorse or promote products derived from this
- * software without specific prior written permission. THIS SOFTWARE IS PROVIDED BY THE
- * COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,
- * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
- * PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
- * (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
- * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
- * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
- * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
- * DAMAGE.
+ * SPDX-License-Identifier: Apache-2.0
  */
 #include "mlc.h"
 
@@ -33,26 +9,10 @@
 
 #define PI_F 3.14159265358979f
 
-const struct mlc_write mlc_program[] = {
-	{0x10, 0x00}, {0x11, 0x00}, {0x01, 0x80}, {0x04, 0x00}, {0x05, 0x00}, {0x17, 0x40},
-	{0x02, 0x11}, {0x08, 0xEA}, {0x09, 0x46}, {0x09, 0x03}, {0x09, 0x50}, {0x09, 0x03},
-	{0x09, 0x00}, {0x09, 0x00}, {0x09, 0x0A}, {0x02, 0x11}, {0x08, 0xF2}, {0x09, 0x27},
-	{0x02, 0x11}, {0x08, 0xFA}, {0x09, 0x3C}, {0x09, 0x03}, {0x09, 0x52}, {0x09, 0x03},
-	{0x09, 0x5E}, {0x09, 0x03}, {0x02, 0x31}, {0x08, 0x3C}, {0x09, 0x3F}, {0x09, 0x00},
-	{0x09, 0x01}, {0x09, 0x10}, {0x09, 0x00}, {0x09, 0x00}, {0x09, 0x00}, {0x09, 0x00},
-	{0x09, 0x1F}, {0x09, 0x00}, {0x02, 0x31}, {0x08, 0x52}, {0x09, 0x00}, {0x09, 0x00},
-	{0x09, 0x00}, {0x09, 0x00}, {0x09, 0x00}, {0x09, 0x00}, {0x09, 0x00}, {0x09, 0x00},
-	{0x09, 0x00}, {0x09, 0x00}, {0x09, 0x00}, {0x01, 0x00}, {0x01, 0x80}, {0x17, 0x40},
-	{0x02, 0x31}, {0x08, 0x5E}, {0x09, 0x8E}, {0x09, 0x06}, {0x09, 0x10}, {0x09, 0xC0},
-	{0x09, 0x19}, {0x09, 0x14}, {0x09, 0x21}, {0x09, 0xC0}, {0x09, 0x19}, {0x09, 0x1C},
-	{0x09, 0x32}, {0x09, 0xC0}, {0x09, 0x1F}, {0x09, 0x21}, {0x09, 0x43}, {0x09, 0xC0},
-	{0x09, 0xAE}, {0x09, 0x27}, {0x09, 0x54}, {0x09, 0xC0}, {0x09, 0x1F}, {0x09, 0x2D},
-	{0x09, 0x65}, {0x09, 0xC0}, {0x09, 0x00}, {0x09, 0x34}, {0x09, 0x76}, {0x09, 0xE0},
-	{0x01, 0x80}, {0x17, 0x00}, {0x04, 0x00}, {0x05, 0x10}, {0x02, 0x01}, {0x01, 0x00},
-	{0x5F, 0x02}, {0x01, 0x80}, {0x11, 0x01}, {0x60, 0x05}, {0x01, 0x00}, {0x10, 0x10},
-	{0x11, 0x00},
-};
-const size_t mlc_program_len = sizeof(mlc_program) / sizeof(mlc_program[0]);
+/* The seven thresholds of Atrium's tree, as the half floats the LSM6DSOX program carried
+ * (atrium_ml/mlc.py atrium_config()): 1e-4, 1e-3, 4e-3, 1e-2, 3e-2, 8e-2 and 0.25 g^2 at half
+ * precision. Kept bit for bit, so the levels match the ones the IMU gave. */
+static const uint16_t thresholds_half[7] = {0x068E, 0x1419, 0x1C19, 0x211F, 0x27AE, 0x2D1F, 0x3400};
 
 /* ClassConfig defaults [ASSUMED, bench V2] */
 #define PERIODIC_SHARE 0.65f
@@ -69,18 +29,6 @@ const size_t mlc_program_len = sizeof(mlc_program) / sizeof(mlc_program[0]);
 #define BAND_HI 3.5f
 #define NEAR_HZ 0.15f
 
-/* the 28 page writes after PAGE_SEL 0x31, PAGE_ADDRESS 0x5E hold the 7 nodes, threshold first */
-static int tree_start(void)
-{
-	for (size_t i = 0; i + 1 < mlc_program_len; i++) {
-		if (mlc_program[i].reg == 0x02 && mlc_program[i].val == 0x31 &&
-		    mlc_program[i + 1].reg == 0x08 && mlc_program[i + 1].val == 0x5E) {
-			return (int)i + 2;
-		}
-	}
-	return -1;
-}
-
 static float half_to_float(uint16_t h)
 {
 	int e = (h >> 10) & 0x1F;
@@ -92,13 +40,10 @@ static float half_to_float(uint16_t h)
 
 float mlc_threshold(int k)
 {
-	int s = tree_start();
-
-	if (s < 0 || k < 0 || k > 6) {
+	if (k < 0 || k > 6) {
 		return NAN;
 	}
-	return half_to_float((uint16_t)(mlc_program[s + 4 * k].val |
-					(mlc_program[s + 4 * k + 1].val << 8)));
+	return half_to_float(thresholds_half[k]);
 }
 
 uint8_t mlc_level_of(float variance_g2)
@@ -109,6 +54,49 @@ uint8_t mlc_level_of(float variance_g2)
 		n += mlc_threshold(k) < variance_g2;
 	}
 	return n;
+}
+
+static uint8_t len_at(uint32_t fs_mhz, uint32_t ms, uint32_t max)
+{
+	uint32_t n = (uint32_t)(((uint64_t)fs_mhz * ms + 500000U) / 1000000U);
+
+	return (uint8_t)(n < 1 ? 1 : n > max ? max : n);
+}
+
+uint8_t mlc_window_len(uint32_t fs_mhz)
+{
+	return len_at(fs_mhz, MLC_WINDOW_MS, UINT8_MAX);
+}
+
+uint8_t mlc_rhythm_len(uint32_t fs_mhz)
+{
+	return len_at(fs_mhz, MLC_RHYTHM_MS, MLC_RHYTHM_MAX);
+}
+
+void mlc_win_init(struct mlc_win *w, uint8_t len)
+{
+	memset(w, 0, sizeof(*w));
+	w->len = len ? len : 1;
+}
+
+bool mlc_win_push(struct mlc_win *w, float norm_g, uint8_t *level)
+{
+	if (w->n == 0) {
+		w->x0 = norm_g;
+	}
+	float d = norm_g - w->x0;
+
+	w->s += d;
+	w->s2 += d * d;
+	if (++w->n < w->len) {
+		return false;
+	}
+	float m = w->s / w->n;
+	float var = w->s2 / w->n - m * m; /* population variance, as np.var */
+
+	*level = mlc_level_of(var > 0.0f ? var : 0.0f);
+	mlc_win_init(w, w->len);
+	return true;
 }
 
 void mlc_record_reset(struct mlc_record *r)

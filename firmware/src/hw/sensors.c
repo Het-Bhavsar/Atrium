@@ -30,8 +30,8 @@ BUILD_ASSERT(DT_PROP_LEN(DT_PATH(zephyr_user), imu_to_pod) == 9, "imu-to-pod: 9 
 static const struct i2c_dt_spec imu_i2c = I2C_DT_SPEC_GET(DT_ALIAS(imu0));
 
 static K_MUTEX_DEFINE(lock);
-/* the MLC read switches the IMU to its embedded register page: nothing else may talk to the
- * IMU in between, so the driver's ODR and trigger calls take this too */
+/* the vibration drain's status-then-FIFO reads and the register writes between modes must not
+ * interleave with the driver's rate and trigger calls, so all of them take this */
 static K_MUTEX_DEFINE(imu_bus);
 static struct pulse_est pulse;
 static struct sigq sq; /* fit-guide signal quality (sigq.h) */
@@ -45,7 +45,7 @@ static uint32_t green_n;
 static int32_t green_dc;
 static int64_t g_sum[3];
 static uint32_t g_n;
-/* latest accelerometer sample, held for each PPG sample (12.5 Hz against 25 Hz).
+/* latest accelerometer sample, held for each PPG sample (15 Hz against 25 Hz).
  * The hold matches interpolation on the 44 walk and run records (ML_PLAN.md 4). */
 static int16_t acc_now[3];
 static bool acc_valid;
@@ -62,13 +62,14 @@ static int64_t algo_acc;
 static uint8_t imu_k = 1;
 static uint8_t imu_i;
 
-/* MLC motion level (mlc.h): read every MLC_WINDOW samples, the IMU's own update period */
-static bool mlc_ok;
-static uint8_t mlc_count;
+/* motion level (mlc.h), worked out here from |a| at the step-rhythm rate, one level per
+ * 3.12 s window (the LSM6DSOX's machine-learning core did this on the IMU) */
+static struct mlc_win mlc_w;
 static uint8_t mlc_latest;
 static bool mlc_new;
 static struct mlc_record mlc_rec;
-static float norm_ring[MLC_RHYTHM_N];
+static float norm_ring[MLC_RHYTHM_MAX];
+static uint8_t norm_len = 1; /* samples in 8 s at the rhythm rate (mlc_rhythm_len) */
 static uint8_t norm_head;
 static uint8_t norm_n;
 
@@ -148,28 +149,6 @@ static void ppg_sample(uint8_t slot, uint8_t channel, int32_t v)
 	k_mutex_unlock(&lock);
 }
 
-static void mlc_read(void)
-{
-	uint8_t lv = 0;
-	int ret;
-
-	k_mutex_lock(&imu_bus, K_FOREVER);
-	ret = i2c_reg_write_byte_dt(&imu_i2c, MLC_REG_FUNC_CFG_ACCESS, 0x80);
-	ret = ret ? ret : i2c_reg_read_byte_dt(&imu_i2c, MLC_REG_MLC0_SRC, &lv);
-	/* always back to the main page */
-	int ret2 = i2c_reg_write_byte_dt(&imu_i2c, MLC_REG_FUNC_CFG_ACCESS, 0x00);
-
-	k_mutex_unlock(&imu_bus);
-	if (ret || ret2 || lv >= MLC_LEVELS) {
-		return;
-	}
-	k_mutex_lock(&lock, K_FOREVER);
-	mlc_latest = lv;
-	mlc_new = true;
-	mlc_record_add(&mlc_rec, lv);
-	k_mutex_unlock(&lock);
-}
-
 static void imu_ready(const struct device *dev, const struct sensor_trigger *trig)
 {
 	struct sensor_value a[3];
@@ -195,21 +174,20 @@ static void imu_ready(const struct device *dev, const struct sensor_trigger *tri
 	g_n++;
 	activity_push(&act, mg[0], mg[1], mg[2]);
 	activity_push(&act_epoch, mg[0], mg[1], mg[2]);
-	/* the step rhythm and the MLC count run at about 12.5 Hz: 104 Hz keeps every 8th */
-	bool algo_due = ++imu_i >= imu_k;
-	bool mlc_due = false;
+	/* the step rhythm and the motion level run at 15 Hz: 120 Hz keeps every 8th */
+	if (++imu_i >= imu_k) {
+		float norm = sqrtf((float)(mg[0] * mg[0] + mg[1] * mg[1] + mg[2] * mg[2])) / 1000.0f;
+		uint8_t lv;
 
-	if (algo_due) {
 		imu_i = 0;
-		norm_ring[norm_head] =
-			sqrtf((float)(mg[0] * mg[0] + mg[1] * mg[1] + mg[2] * mg[2])) / 1000.0f;
-		norm_head = (uint8_t)((norm_head + 1) % MLC_RHYTHM_N);
-		norm_n = (uint8_t)MIN(norm_n + 1, MLC_RHYTHM_N);
-		mlc_due = mlc_ok && ++mlc_count >= MLC_WINDOW;
-	}
-
-	if (mlc_due) {
-		mlc_count = 0;
+		norm_ring[norm_head] = norm;
+		norm_head = (uint8_t)((norm_head + 1) % norm_len);
+		norm_n = (uint8_t)MIN(norm_n + 1, norm_len);
+		if (mlc_win_push(&mlc_w, norm, &lv)) {
+			mlc_latest = lv;
+			mlc_new = true;
+			mlc_record_add(&mlc_rec, lv);
+		}
 	}
 
 	sensors_motion_sink_t sink = motion_sink;
@@ -226,9 +204,6 @@ static void imu_ready(const struct device *dev, const struct sensor_trigger *tri
 	if (flush) {
 		sink((const int16_t (*)[3])mbuf, mbuf_n, mbuf_t0, imu_rate_mhz);
 		mbuf_n = 0;
-	}
-	if (mlc_due) {
-		mlc_read();
 	}
 }
 
@@ -416,23 +391,12 @@ int sensors_init(void)
 	if (!ppg_ready()) {
 		LOG_ERR("PPG front end not ready");
 	}
-	if (!device_is_ready(imu)) {
-		LOG_ERR("LSM6DSOX not ready");
-		return 0;
-	}
-	/* the MLC program, after the driver's init. It leaves the accelerometer at 12.5 Hz,
-	 * +-2 g; the modes set only the ODR (12.5 Hz worn, off docked) */
-	int ret = 0;
-
-	for (size_t i = 0; i < mlc_program_len && !ret; i++) {
-		ret = i2c_reg_write_byte_dt(&imu_i2c, mlc_program[i].reg, mlc_program[i].val);
-	}
-	mlc_ok = ret == 0;
-	if (ret) {
-		(void)i2c_reg_write_byte_dt(&imu_i2c, MLC_REG_FUNC_CFG_ACCESS, 0x00);
-		LOG_ERR("MLC program %d", ret);
-	}
+	mlc_win_init(&mlc_w, mlc_window_len(MODE_ALGO_IMU_MHZ));
+	norm_len = mlc_rhythm_len(MODE_ALGO_IMU_MHZ);
 	mlc_record_reset(&mlc_rec);
+	if (!device_is_ready(imu)) {
+		LOG_ERR("LSM6DSV16BX not ready (WHO_AM_I 0x71)");
+	}
 	return 0;
 }
 
@@ -452,7 +416,13 @@ int sensors_set_mode(enum pod_mode mode, bool green_ok, bool optics_on)
 		k_mutex_lock(&lock, K_FOREVER);
 		imu_k = mode_imu_decim(m);
 		imu_i = 0;
-		norm_n = 0; /* the rhythm window holds one rate */
+		/* the rhythm window and the level window hold one rate */
+		uint32_t algo_mhz = m->imu_mhz ? m->imu_mhz / imu_k : MODE_ALGO_IMU_MHZ;
+
+		norm_n = 0;
+		norm_head = 0;
+		norm_len = mlc_rhythm_len(algo_mhz);
+		mlc_win_init(&mlc_w, mlc_window_len(algo_mhz));
 		k_mutex_unlock(&lock);
 	}
 	imu_rate_mhz = m->imu_mhz;
@@ -471,7 +441,7 @@ int sensors_set_mode(enum pod_mode mode, bool green_ok, bool optics_on)
 	applied_valid = true;
 	if (m->imu_mhz == 0) {
 		norm_n = 0;
-		mlc_count = 0;
+		mlc_win_init(&mlc_w, mlc_w.len);
 	}
 	k_mutex_unlock(&lock);
 	int a = ppg_mode(m);
@@ -611,25 +581,26 @@ bool sensors_mlc_poll(uint8_t *level)
 
 struct sensors_motion sensors_motion_close(void)
 {
-	float norm[MLC_RHYTHM_N];
+	float norm[MLC_RHYTHM_MAX];
 	struct mlc_record r;
 	struct sensors_motion out = {0};
 	uint8_t n;
 
 	k_mutex_lock(&lock, K_FOREVER);
-	/* 12.5 Hz, or 104 / 8 = 13 Hz in the research modes */
-	uint32_t rhythm_mhz = imu_rate_mhz ? imu_rate_mhz / imu_k : MLC_FS_MHZ;
+	/* 15 Hz, and 120 / 8 = 15 Hz in the research modes */
+	uint32_t rhythm_mhz = imu_rate_mhz ? imu_rate_mhz / imu_k : MODE_ALGO_IMU_MHZ;
+	uint8_t len = norm_len;
 
 	r = mlc_rec;
 	mlc_record_reset(&mlc_rec);
 	n = norm_n;
 	for (uint8_t i = 0; i < n; i++) {
-		norm[i] = norm_ring[(norm_head + MLC_RHYTHM_N - n + i) % MLC_RHYTHM_N];
+		norm[i] = norm_ring[(norm_head + len - n + i) % len];
 	}
 	k_mutex_unlock(&lock);
 
 	float spm = 0.0f, share = 0.0f;
-	bool ok = n == MLC_RHYTHM_N &&
+	bool ok = n == len &&
 		  mlc_step_rhythm(norm, n, (float)rhythm_mhz / 1000.0f, &spm, &share);
 
 	out.max = mlc_record_max(&r);

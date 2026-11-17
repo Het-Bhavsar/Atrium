@@ -87,13 +87,13 @@ ZTEST(modes, test_every_mode_fits_the_maxm86161)
 ZTEST(modes, test_ml_contract_rates)
 {
 	/* ML data contract: green at 25 Hz in every worn mode (best tested for HR and HRV),
-	 * accelerometer at 12.5 Hz */
+	 * accelerometer at 15 Hz (the LSM6DSV16BX's rate nearest the contract's 12.5 Hz) */
 	for (int i = MODE_FULL; i <= MODE_SLEEP; i++) {
 		const struct mode_cfg *m = mode_get(i);
 
 		zassert_equal(m->hz, 25, "%s", m->name);
 		zassert_equal(m->slot[0].led, LED_GREEN, "%s: pulse source is the first slot", m->name);
-		zassert_equal(m->imu_mhz, 12500, "%s", m->name);
+		zassert_equal(m->imu_mhz, 15000, "%s", m->name);
 	}
 }
 
@@ -149,12 +149,12 @@ ZTEST(modes, test_research_slot_table_and_stream)
 			zassert_equal(m->slot[s].ma, mode_get(MODE_FULL)->slot[s].ma, "%s", m->name);
 		}
 		zassert_equal(m->hz, r[i].hz, "%s", m->name);
-		zassert_equal(m->imu_mhz, 104000, "%s: LSM6DSOX at 104 Hz", m->name);
+		zassert_equal(m->imu_mhz, 120000, "%s: LSM6DSV16BX at 120 Hz", m->name);
 		zassert_equal(m->optics_period_s, 0, "%s: no duty cycle", m->name);
 		/* 3-byte FIFO words, 4 per sample */
 		zassert_equal(m->stream_bps, r[i].bps, "%s", m->name);
 		zassert_equal(m->stream_bps, 3 * 4 * m->hz, "%s", m->name);
-		/* the 25 Hz filters get whole means of 4 or 8; the rhythm about 12.5 Hz */
+		/* the 25 Hz filters get whole means of 4 or 8; the rhythm 15 Hz */
 		zassert_equal(mode_algo_decim(m) * MODE_ALGO_HZ, m->hz, "%s", m->name);
 		zassert_equal(mode_imu_decim(m), 8, "%s", m->name);
 		/* the only modes above 1 mA, and the green current sets no new headroom limit */
@@ -208,7 +208,7 @@ ZTEST(modes, test_averaged_research_modes)
 		zassert_equal(m->stream_bps, r[i].bps, "%s", m->name);
 		zassert_equal(m->stream_bps * r[i].avg, m7->stream_bps, "%s: 1/avg of mode 7", m->name);
 		zassert_equal(mode_algo_decim(m) * MODE_ALGO_HZ, m->hz, "%s", m->name);
-		zassert_equal(m->imu_mhz, 104000, "%s", m->name);
+		zassert_equal(m->imu_mhz, 120000, "%s", m->name);
 		/* the same exposures as mode 7, so about its optical current; less radio */
 		zassert_true(m->budget_typ_ua < m7->budget_typ_ua, "%s", m->name);
 		zassert_true(m->budget_typ_ua > 2000, "%s", m->name);
@@ -229,7 +229,7 @@ ZTEST(modes, test_vibration_modes)
 		enum pod_mode mode;
 		uint32_t imu_mhz;
 		uint16_t typ;
-	} v[] = {{MODE_RESEARCH_VIB3K3, 3333333, 1235}, {MODE_RESEARCH_VIB6K7, 6666667, 1898}};
+	} v[] = {{MODE_RESEARCH_VIB3K3, 3840000, 1235}, {MODE_RESEARCH_VIB6K7, 7680000, 1898}};
 
 	zassert_equal(MODE_RESEARCH_VIB3K3, 10, "the GATT value");
 	zassert_equal(MODE_RESEARCH_VIB6K7, 11);

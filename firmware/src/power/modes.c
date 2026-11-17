@@ -32,7 +32,7 @@
  * 0.1 Hz and advertising every 2 s (3 x 0.4 ms TX).
  *
  * Research modes (depth study, app/python/depth_study): green 15, IR 10 and red 10 mA as in
- * full, plus a direct-ambient (DA) exposure, at 100 or 200 Hz; accelerometer at 104 Hz. All
+ * full, plus a direct-ambient (DA) exposure, at 100 or 200 Hz; accelerometer at 120 Hz. All
  * budgets [ASSUMED] until measured on the bench:
  *  - module: 4 exposures per sample (DA counted as one [ASSUMED]) x 1.33 / 2.0 uA:
  *    533 / 800 uA at 100 Hz, 1067 / 1600 uA at 200 Hz;
@@ -40,12 +40,13 @@
  *  - non-optical: full's 206 typ / 236 wc, plus the s4 model's difference for a 30 ms
  *    connection interval, 2.0 / 3.3 kB/s of notifications (PPG 1200 / 2400 B/s, PPG headers
  *    100 / 200 B/s, motion 693 B/s), CPU 10 / 14 ms/s [ASSUMED], 1.8 / 3.0 kB/s of I2C and the
- *    IMU at 104 Hz: +248 / +256 uA at 100 Hz, +385 / +401 uA at 200 Hz.
+ *    IMU at 104 Hz (LSM6DSOX; now 120 Hz): +248 / +256 uA at 100 Hz, +385 / +401 uA at 200 Hz.
  *    Totals: 1512 / 1816 uA at 100 Hz, 2706 / 3286 uA at 200 Hz.
- *  The LSM6DSOX accelerometer runs in low-power mode at 12.5 Hz and normal mode at 104 Hz
- *  (accel-pm in atrium_pod.dts; high-performance would be 170 uA at any rate, DS12814 Table 3).
- *  The data sheet gives 26 uA at 50 Hz and 4.5 uA at 1.6 Hz in low-power, and no figure at
- *  12.5 or 104 Hz [VERIFY on the bench]; the IMU terms here are s4's 7 and 17 uA.
+ *  IMU (U11 is the LSM6DSV16BX since 2026-11-17): the accelerometer runs at 15 Hz in
+ *  low-power mode (2 averages) and at 120 Hz in high-performance mode (low-power-max-mhz in
+ *  atrium_pod.dts). The chip has no 12.5 or 104 Hz: these are its nearest rates. The IMU
+ *  terms here are still s4's 7 and 17 uA, worked for the LSM6DSOX at 12.5 and 104 Hz
+ *  [VERIFY against DS13771 and on the bench; re-run s4 with the new part].
  * Stream: 3 bytes x 4 slots x rate = 1200 / 2400 B/s of FIFO words, 8-byte header per
  * notification (32 FIFO items each, so 12.5 / 25 per second). A 30 mAh cell lasts about
  * 20 h / 11 h [ASSUMED]: sessions, not daily wear.
@@ -63,14 +64,18 @@
  *    the stream to a quarter or an eighth of mode 7's, not the current: about 5.5 x full's 437.
  *
  * Vibration modes 10 and 11 (bone-conducted voice and jaw vibration, bench capture): no LEDs
- * and the MAXM86161 shut down; the LSM6DSOX accelerometer alone in high-performance mode at
- * 3333 or 6667 Hz, +-2 g, LPF2 off (bandwidth ODR/2, DS12814 6.4.1), batched in its FIFO and
- * read in bursts of 36 words over I2C at 400 kHz (src/vibcap.h). Stream: the chip Z axis
- * (pod z, normal to the skin) as i16, 2 B per sample: 6667 / 13333 B/s, plus 14 B of header
- * per 115 samples. Budgets [ASSUMED], s4 terms (hardware/simulation/s4_power_energy.py) at the
- * cell, typ (2M PHY) / worst (1M PHY, more CPU):
- *  - accelerometer high-performance 170 uA on the 1.8 V rail (DS12814 Table 3, LA_IddHP, the
- *    same at any ODR): 89 uA at the cell;
+ * and the MAXM86161 shut down; the LSM6DSV16BX accelerometer alone in high-performance mode
+ * at 3840 or 7680 Hz (the chip's rates nearest the LSM6DSOX's 3333 and 6667 Hz), +-2 g, LPF2
+ * off, batched in its FIFO and read in bursts of 36 words over I2C at 400 kHz (src/vibcap.h).
+ * Stream: the pod z axis (normal to the skin) as i16, 2 B per sample: 7680 / 15360 B/s, plus
+ * 14 B of header per 115 samples. The budgets below were worked for the LSM6DSOX at 3333 and
+ * 6667 Hz and are kept until s4 is re-run for the LSM6DSV16BX [VERIFY]: its rates are 15 %
+ * higher, so I2C and BLE take about 15 % more, and mode 11 now needs 53.8 kB/s of I2C against
+ * the bus's 44.4, so it has more gaps. Budgets [ASSUMED], s4 terms
+ * (hardware/simulation/s4_power_energy.py) at the cell, typ (2M PHY) / worst (1M PHY, more CPU):
+ *  - accelerometer high-performance 170 uA on the 1.8 V rail (LSM6DSOX DS12814 Table 3,
+ *    LA_IddHP, the same at any ODR; the LSM6DSV16BX figure is [VERIFY DS13771]): 89 uA at the
+ *    cell;
  *  - I2C: 7 B per FIFO word, 3 B per burst and 5 B per status poll, 9 bits per byte at 400 kHz:
  *    0.56 s/s at 3333 Hz; 6667 Hz needs more than the bus has (46.7 kB/s against 44.4), so it
  *    runs flat out, 0.92 / 0.98 s/s: 565 uA (mode 10), 933 / 989 uA (mode 11), with s4's
@@ -85,26 +90,26 @@ static const struct mode_cfg modes[MODE_COUNT] = {
 	[MODE_FULL] = {
 		.name = "full",
 		.slot = {S(LED_GREEN, 15), S(LED_IR, 10), S(LED_RED, 10)},
-		.n_slots = 3, .hz = 25, .imu_mhz = 12500, .tmp_period_s = 1, .stream_bps = 225,
+		.n_slots = 3, .hz = 25, .imu_mhz = 15000, .tmp_period_s = 1, .stream_bps = 225,
 		.ci_ms = 200, .budget_typ_ua = 437, .budget_wc_ua = 517,
 	},
 	[MODE_SMART] = {
 		.name = "smart",
 		.slot = {S(LED_GREEN, 15)},
-		.n_slots = 1, .hz = 25, .imu_mhz = 12500, .tmp_period_s = 1, .stream_bps = 75,
+		.n_slots = 1, .hz = 25, .imu_mhz = 15000, .tmp_period_s = 1, .stream_bps = 75,
 		.ci_ms = 400, .budget_typ_ua = 215, .budget_wc_ua = 247,
 	},
 	[MODE_LITE] = {
 		.name = "lite",
 		.slot = {S(LED_GREEN, 10)},
 		.n_slots = 1, .hz = 25, .optics_on_s = 30, .optics_period_s = 120,
-		.imu_mhz = 12500, .tmp_period_s = 1, .stream_bps = 75, .ci_ms = 1000,
+		.imu_mhz = 15000, .tmp_period_s = 1, .stream_bps = 75, .ci_ms = 1000,
 		.budget_typ_ua = 70, .budget_wc_ua = 80,
 	},
 	[MODE_SLEEP] = {
 		.name = "sleep",
 		.slot = {S(LED_GREEN, 10)},
-		.n_slots = 1, .hz = 25, .imu_mhz = 12500, .tmp_period_s = 10, .stream_bps = 0,
+		.n_slots = 1, .hz = 25, .imu_mhz = 15000, .tmp_period_s = 10, .stream_bps = 0,
 		.ci_ms = 4000, .budget_typ_ua = 129, .budget_wc_ua = 154,
 	},
 	[MODE_DOCKED_IDLE] = {
@@ -122,36 +127,36 @@ static const struct mode_cfg modes[MODE_COUNT] = {
 	[MODE_RESEARCH_100] = {
 		.name = "research-100",
 		.slot = {S(LED_GREEN, 15), S(LED_IR, 10), S(LED_RED, 10), S(LED_AMBIENT, 0)},
-		.n_slots = 4, .hz = 100, .imu_mhz = 104000, .tmp_period_s = 1, .stream_bps = 1200,
+		.n_slots = 4, .hz = 100, .imu_mhz = 120000, .tmp_period_s = 1, .stream_bps = 1200,
 		.ci_ms = 30, .budget_typ_ua = 1512, .budget_wc_ua = 1816,
 	},
 	[MODE_RESEARCH_200] = {
 		.name = "research-200",
 		.slot = {S(LED_GREEN, 15), S(LED_IR, 10), S(LED_RED, 10), S(LED_AMBIENT, 0)},
-		.n_slots = 4, .hz = 200, .imu_mhz = 104000, .tmp_period_s = 1, .stream_bps = 2400,
+		.n_slots = 4, .hz = 200, .imu_mhz = 120000, .tmp_period_s = 1, .stream_bps = 2400,
 		.ci_ms = 30, .budget_typ_ua = 2706, .budget_wc_ua = 3286,
 	},
 	[MODE_RESEARCH_AVG50] = {
 		.name = "research-avg50",
 		.slot = {S(LED_GREEN, 15), S(LED_IR, 10), S(LED_RED, 10), S(LED_AMBIENT, 0)},
-		.n_slots = 4, .hz = 50, .avg = 4, .imu_mhz = 104000, .tmp_period_s = 1,
+		.n_slots = 4, .hz = 50, .avg = 4, .imu_mhz = 120000, .tmp_period_s = 1,
 		.stream_bps = 600, .ci_ms = 100, .budget_typ_ua = 2443, .budget_wc_ua = 3010,
 	},
 	[MODE_RESEARCH_AVG25] = {
 		.name = "research-avg25",
 		.slot = {S(LED_GREEN, 15), S(LED_IR, 10), S(LED_RED, 10), S(LED_AMBIENT, 0)},
-		.n_slots = 4, .hz = 25, .avg = 8, .imu_mhz = 104000, .tmp_period_s = 1,
+		.n_slots = 4, .hz = 25, .avg = 8, .imu_mhz = 120000, .tmp_period_s = 1,
 		.stream_bps = 300, .ci_ms = 100, .budget_typ_ua = 2408, .budget_wc_ua = 2973,
 	},
 	/* accelerometer only; .hz is 0 because no PPG runs, imu_mhz is the nominal ODR */
 	[MODE_RESEARCH_VIB3K3] = {
 		.name = "research-vib3k3",
-		.n_slots = 0, .hz = 0, .imu_mhz = 3333333, .tmp_period_s = 1, .stream_bps = 6667,
+		.n_slots = 0, .hz = 0, .imu_mhz = 3840000, .tmp_period_s = 1, .stream_bps = 7680,
 		.ci_ms = 15, .budget_typ_ua = 1235, .budget_wc_ua = 1518,
 	},
 	[MODE_RESEARCH_VIB6K7] = {
 		.name = "research-vib6k7",
-		.n_slots = 0, .hz = 0, .imu_mhz = 6666667, .tmp_period_s = 1, .stream_bps = 13333,
+		.n_slots = 0, .hz = 0, .imu_mhz = 7680000, .tmp_period_s = 1, .stream_bps = 15360,
 		.ci_ms = 15, .budget_typ_ua = 1898, .budget_wc_ua = 2587,
 	},
 };

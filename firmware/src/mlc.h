@@ -2,16 +2,18 @@
  * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
- * Motion level from the LSM6DSOX machine-learning core, and the activity class
- * built on it (port of app/python/atrium_ml/mlc.py, FEATURES.md #6).
+ * Motion level, and the activity class built on it (port of app/python/atrium_ml/mlc.py,
+ * FEATURES.md #6).
  *
- * On the IMU: the variance of |a| over 39 samples at 12.5 Hz (3.12 s) goes through
- * a 7-node ladder; level k (0..7) lands in MLC0_SRC. The register program is
- * mlc_program, written after the driver's init. It ends with the accelerometer at
- * 12.5 Hz, +-2 g: the MLC needs that rate and full scale while it runs.
+ * The level: the variance of |a| over one 3.12 s window goes through a 7-node ladder; level k
+ * (0..7) is the number of thresholds below it. On the LSM6DSOX this ran in the IMU's
+ * machine-learning core at 12.5 Hz (39 samples). The LSM6DSV16BX (U11 since 2026-11-17) has no
+ * 12.5 Hz and a different core, so the pod now works it out itself from the samples it already
+ * reads (mlc_win_*), with the same thresholds and the same window in seconds: 47 samples at
+ * 15 Hz. The reference vectors stay at 12.5 Hz; the lengths come from the rate (mlc_*_len).
  *
- * On the MCU, once per log record: the record's levels plus the step rhythm of
- * the last 100 |a| samples (8 s) give still, walk, run or other. Every threshold
+ * On the MCU, once per log record: the record's levels plus the step rhythm of the last 8 s of
+ * |a| (100 samples at 12.5 Hz, 120 at 15 Hz) give still, walk, run or other. Every threshold
  * is [ASSUMED] until bench test V2. Wellness estimate only. Plain C, no Zephyr.
  */
 #ifndef ATRIUM_MLC_H_
@@ -25,26 +27,36 @@
 extern "C" {
 #endif
 
-#define MLC_FS_MHZ   12500
-#define MLC_WINDOW   39  /* accelerometer samples per level */
-#define MLC_LEVELS   8
-#define MLC_RHYTHM_N 100 /* |a| samples for the step rhythm */
+#define MLC_WINDOW_MS  3120 /* one level */
+#define MLC_LEVELS     8
+#define MLC_RHYTHM_MS  8000 /* |a| for the step rhythm */
+#define MLC_RHYTHM_MAX 128  /* samples: the DFT length */
 
-#define MLC_REG_FUNC_CFG_ACCESS 0x01 /* 0x80: embedded-function page */
-#define MLC_REG_MLC0_SRC        0x70 /* embedded page */
+/* Samples per level window at fs (mHz): round(fs x 3.12 s), 39 at 12.5 Hz, 47 at 15 Hz. */
+uint8_t mlc_window_len(uint32_t fs_mhz);
 
-struct mlc_write {
-	uint8_t reg;
-	uint8_t val;
+/* Samples of |a| for the step rhythm at fs: round(fs x 8 s), at most MLC_RHYTHM_MAX:
+ * 100 at 12.5 Hz, 120 at 15 Hz. */
+uint8_t mlc_rhythm_len(uint32_t fs_mhz);
+
+/* One level window, fed |a| in g one sample at a time. */
+struct mlc_win {
+	float x0; /* the window's first sample: the sums are taken about it, for float precision */
+	float s;
+	float s2;
+	uint8_t n;
+	uint8_t len;
 };
 
-extern const struct mlc_write mlc_program[];
-extern const size_t mlc_program_len;
+void mlc_win_init(struct mlc_win *w, uint8_t len);
 
-/* Threshold k (0..6) of the tree in mlc_program, g^2, decoded from its half floats. */
+/* Adds a sample; at the window's end returns true with the level, and starts the next window. */
+bool mlc_win_push(struct mlc_win *w, float norm_g, uint8_t *level);
+
+/* Threshold k (0..6), g^2: the half floats of the LSM6DSOX tree, kept bit for bit. */
 float mlc_threshold(int k);
 
-/* The IMU's ladder on one window variance (g^2): the number of thresholds below it. */
+/* The ladder on one window variance (g^2): the number of thresholds below it. */
 uint8_t mlc_level_of(float variance_g2);
 
 /* Levels seen during one log record. */

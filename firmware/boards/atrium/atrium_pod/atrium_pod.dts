@@ -18,7 +18,6 @@
 #include <zephyr/dt-bindings/adc/adc.h>
 #include <zephyr/dt-bindings/adc/nrf-saadc.h>
 #include <zephyr/dt-bindings/regulator/nrf5x.h>
-#include <zephyr/dt-bindings/sensor/lsm6dso.h>
 #include "atrium_pod-pinctrl.dtsi"
 
 / {
@@ -62,12 +61,14 @@
 		vsys-sense-top-ohm = <2200000>;
 		vsys-sense-bottom-ohm = <1000000>;
 
-		/* LSM6DSOX (U11) axes to the pod frame: pod = M x chip, rows pod x, y, z.
+		/* IMU (U11) axes to the pod frame: pod = M x chip, rows pod x, y, z.
 		 * Pod frame (mechanical, worn vertically): +x along the long axis to the antenna
 		 * end (up when worn), +z out of the top face (away from the head), +y = z x x.
 		 * U11 on the top side, EasyEDA rot 270, pin 1 at the pod +x/+y corner, pins 1-4
-		 * along the +y edge toward -x (PCB session, 2026-11-07). ST DS12814 figure 4 puts
-		 * pin 1 at the chip's -X/+Y corner, pins 1-4 down the -X edge toward -Y (top view).
+		 * along the +y edge toward -x (PCB session, 2026-11-07). For the LSM6DSOX, ST DS12814
+		 * figure 4 put pin 1 at the chip's -X/+Y corner, pins 1-4 down the -X edge toward -Y
+		 * (top view). The LSM6DSV16BX takes the same land; its axes against pin 1 are taken
+		 * as the same [VERIFY DS13771 pin and axis figure].
 		 * So chip +Y = pod +x, chip +X = pod -y, Z = z [VERIFY by the bring-up gravity test,
 		 * the pod resting on each of its six faces]. A layout change edits this one line. */
 		imu-to-pod = <0 1 0  (-1) 0 0  0 0 1>;
@@ -153,20 +154,18 @@
 		ldo-en-gpios = <&gpio0 20 GPIO_ACTIVE_HIGH>;
 	};
 
-	/* U11 LSM6DSOX (LSM6DSO register set), power island. INT2 not connected. */
-	imu: lsm6dsox@6a {
-		compatible = "st,lsm6dso";
+	/* U11 LSM6DSV16BX (owner decision 2026-11-17; was the LSM6DSOX), power island, same land
+	 * and position. WHO_AM_I 0x71. Driver: firmware/drivers/lsm6dsv16bx, accelerometer only.
+	 * Tied on EVT (DS13771 Table 1): TDMout, BCLK, AH1/Qvar1 and AH2/Qvar2 to GND; WCLK and
+	 * INT2 open. So TDM and Qvar are not available and the firmware never enables them. */
+	imu: lsm6dsv16bx@6a {
+		compatible = "st,lsm6dsv16bx";
 		reg = <0x6a>;
 		/* IMU_INT1 P0.12, push-pull, no pull: INT1 must be low or floating at IMU power-up */
-		irq-gpios = <&gpio0 12 GPIO_ACTIVE_HIGH>;
-		int-pin = <1>;
-		/* accelerometer only; the modes set its rate */
-		accel-odr = <LSM6DSO_DT_ODR_OFF>;
-		/* XL_HM_MODE = 1: low-power at 12.5 Hz, normal at 104 Hz (DS12814 6.2). Power-up
-		 * high-performance is 170 uA at any rate; low-power is 26 uA at 50 Hz, with 1.8 mg RMS
-		 * noise at +-2 g against 70 ug/sqrt(Hz) (Table 3, Table 2). Not ultra-low-power: 5.5 mg */
-		accel-pm = <LSM6DSO_DT_XL_LP_NORMAL_MODE>;
-		gyro-odr = <LSM6DSO_DT_ODR_OFF>;
+		int1-gpios = <&gpio0 12 GPIO_ACTIVE_HIGH>;
+		/* 15 Hz in low-power mode (2 averages); 120 Hz and the vibration rates in
+		 * high-performance mode, 70 ug/sqrt(Hz) [VERIFY currents against DS13771] */
+		low-power-max-mhz = <15000>;
 	};
 
 	/* U10 BQ21061, power island. /LP low: I2C only while on the Plinth. */

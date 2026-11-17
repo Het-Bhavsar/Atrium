@@ -2,12 +2,13 @@
  * Copyright (c) 2026 Het Bhavsar
  * SPDX-License-Identifier: Apache-2.0
  *
- * Vibration capture, research modes 10 and 11 (docs/ble_gatt.md 4.4): the LSM6DSOX
- * accelerometer alone in high-performance mode at 3333 or 6667 Hz, +-2 g, LPF2 off, batched in
+ * Vibration capture, research modes 10 and 11 (docs/ble_gatt.md 4.4): the LSM6DSV16BX
+ * accelerometer alone in high-performance mode at 3840 or 7680 Hz, +-2 g, LPF2 off, batched in
  * its FIFO and read in bursts; one axis goes out on Vibration Data (0x0207). Register writes,
  * FIFO parsing and the packet layout are here, in plain C, so the host tests pin them; the I2C
- * and the drain thread are in hw/sensors.c. Register facts: DS12814 Rev 3, sections 6.4.1, 6.6
- * and 9.
+ * and the drain thread are in hw/sensors.c. Register facts: ST's lsm6dsv16bx-pid register
+ * driver (lsm6dsv16bx_reg.h) and its FIFO example, data sheet DS13771. The FIFO is read with
+ * the TDM path off: TDMout is tied to GND on EVT.
  */
 #ifndef ATRIUM_VIBCAP_H_
 #define ATRIUM_VIBCAP_H_
@@ -18,17 +19,17 @@
 
 #include "modes.h"
 
-/* LSM6DSOX main-page registers */
+/* LSM6DSV16BX main-page registers */
 #define VIB_REG_FIFO_CTRL1   0x07 /* WTM[7:0] */
-#define VIB_REG_FIFO_CTRL2   0x08 /* WTM8 and compression: all 0 */
-#define VIB_REG_FIFO_CTRL3   0x09 /* BDR_GY[7:4], BDR_XL[3:0] */
+#define VIB_REG_FIFO_CTRL2   0x08 /* compression and stop-on-watermark: all 0 */
+#define VIB_REG_FIFO_CTRL3   0x09 /* BDR_XL[3:0], BDR_GY[7:4] */
 #define VIB_REG_FIFO_CTRL4   0x0A /* FIFO_MODE[2:0]: 000 bypass, 001 FIFO (stop when full) */
-#define VIB_REG_CTRL1_XL     0x10 /* ODR_XL[7:4], FS_XL[3:2], LPF2_XL_EN[1] */
-#define VIB_REG_CTRL6_C      0x15 /* XL_HM_MODE[4]: 0 high-performance, 1 low-power/normal */
-#define VIB_REG_FIFO_STATUS1 0x3A /* DIFF_FIFO[7:0], then FIFO_STATUS2 */
-#define VIB_REG_FIFO_OUT     0x78 /* FIFO_DATA_OUT_TAG, then X, Y, Z little-endian */
+#define VIB_REG_CTRL1        0x10 /* ODR_XL[3:0], OP_MODE_XL[6:4]: 000 high-performance */
+#define VIB_REG_CTRL8        0x17 /* FS_XL[1:0]: 00 = +-2 g; HP_LPF2_XL_BW[7:5] */
+#define VIB_REG_CTRL9        0x18 /* LPF2_XL_EN[3] */
+#define VIB_REG_FIFO_STATUS1 0x1B /* DIFF_FIFO[7:0], then FIFO_STATUS2 */
+#define VIB_REG_FIFO_OUT     0x78 /* FIFO_DATA_OUT_TAG, then Z, Y, X little-endian */
 
-#define VIB_CTRL6_LP_NORMAL 0x10 /* accel-pm = LSM6DSO_DT_XL_LP_NORMAL_MODE in atrium_pod.dts */
 #define VIB_FIFO_FIFO_MODE  0x01
 
 /* One FIFO word is a tag byte and 6 data bytes; a burst is 36 words, 252 B, because the
@@ -36,7 +37,7 @@
 #define VIB_WORD        7
 #define VIB_BURST_WORDS 36
 #define VIB_WTM         VIB_BURST_WORDS
-#define VIB_TAG_XL_NC   0x02 /* accelerometer, not compressed (Table 196) */
+#define VIB_TAG_XL_NC   0x02 /* accelerometer, not compressed (lsm6dsv16bx_fifo_tag_t) */
 
 /* Vibration Data notification: 14-byte header, then up to 115 samples (a 247-byte ATT MTU) */
 #define VIB_HDR_LEN     14
@@ -53,18 +54,18 @@ struct vib_reg {
 
 #define VIB_MAX_WRITES 12
 
-/* CTRL1_XL ODR_XL and FIFO_CTRL3 BDR_XL code: 9 (3333 Hz) or 10 (6667 Hz); 0 for other modes */
+/* CTRL1 ODR_XL and FIFO_CTRL3 BDR_XL code: 0xB (3840 Hz) or 0xC (7680 Hz); 0 for other modes */
 uint8_t vib_odr_code(enum pod_mode m);
 
-/* Nominal rate for the header, Hz: 3333 or 6667; 0 for other modes */
+/* Nominal rate for the header, Hz: 3840 or 7680; 0 for other modes */
 uint16_t vib_rate_hz(enum pod_mode m);
 
 /*
  * The writes that take the accelerometer from mode `from` to mode `to`. Leaving a vibration
- * mode powers the accelerometer down, empties the FIFO and puts it back in low-power/normal
- * mode, so the Zephyr driver's ODR call for the next mode starts from there; entering one
- * powers down, sets high-performance, the watermark and the batch rate, starts FIFO mode and
- * then sets the ODR, +-2 g and LPF2 off. Other pairs need no writes. Returns the count.
+ * mode powers the accelerometer down, empties the FIFO and stops batching; the driver's rate
+ * call for the next mode then writes CTRL1 whole (rate and power mode). Entering one powers
+ * down, sets the watermark and the batch rate, starts FIFO mode, sets +-2 g and LPF2 off, and
+ * then the ODR in high-performance mode. Other pairs need no writes. Returns the count.
  */
 size_t vib_transition(enum pod_mode from, enum pod_mode to, struct vib_reg out[VIB_MAX_WRITES]);
 
@@ -96,7 +97,7 @@ typedef void (*vib_emit_t)(const uint8_t *pkt, size_t len, void *user);
 
 struct vib_cap {
 	uint8_t mode;
-	uint8_t axis; /* chip axis, 0 x, 1 y, 2 z */
+	uint8_t axis; /* chip axis, 0 x, 1 y, 2 z (the FIFO word holds z, y, x) */
 	bool neg;     /* pod axis = -chip axis */
 	uint8_t max;  /* samples per notification */
 	uint16_t hz;

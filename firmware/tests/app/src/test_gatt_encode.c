@@ -150,10 +150,12 @@ ZTEST(gatt_encode, test_live_epoch)
 ZTEST(gatt_encode, test_motion_rate_field)
 {
 	/* mHz as before up to 32.767 Hz; above it bit 15 and 10 mHz steps */
+	zassert_equal(gatt_motion_rate(15000), 15000, "15 Hz in the everyday modes");
 	zassert_equal(gatt_motion_rate(12500), 12500);
 	zassert_equal(gatt_motion_rate(0), 0);
 	zassert_equal(gatt_motion_rate(32767), 32767);
-	zassert_equal(gatt_motion_rate(104000), 0xA8A0, "104 Hz in the research modes");
+	zassert_equal(gatt_motion_rate(120000), 0xAEE0, "120 Hz in the research modes");
+	zassert_equal(gatt_motion_rate(104000), 0xA8A0, "104 Hz, the LSM6DSOX's");
 	zassert_equal(gatt_motion_rate(104000) & 0x7FFF, 10400);
 	zassert_equal(gatt_motion_rate(10000000), 0xFFFF, "saturates");
 }
