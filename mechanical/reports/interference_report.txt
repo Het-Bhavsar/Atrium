@@ -13,6 +13,7 @@ atrium_pod.py check(), 20.9 x 11.0 x 5.45 mm
   [PASS] contact holes >= 1.5 from the window: closest GND_B 2.16 mm
   [PASS] skin NTC (TH1) boss gap: 0.10 mm (gel)
   [PASS] pod rests on its base in the Plinth, module clear (window relief, both ways round): base to nest floor 0.000, module to Plinth 0.20 mm
+  [PASS] Plinth clips hold the pod against the pogo lift (no reliance on the magnets): hook 0.050 over the top round (contact 30.1 deg); beam 0.8 x 3.0 x 4.58, strain 1.14 %; PLA: push in 10.4 N, pull out 6.0 N; SLA resin: push in 7.4 N, pull out 4.3 N; against 0.6 N of pogo lift
   [PASS] skin pad inside the pod footprint (nothing shows from the front): pad 18.80 x 8.90, 1.05 mm inside the outline
   [PASS] skin pad is a full pad, not a ring (largest hole < 15 %): 150 mm2, 130 mm2 bonded, largest hole 13.3 %
   [PASS] module face 0.05 proud of the pad's skin face (optics review 2026-11-17): module -0.10, pad face -0.05

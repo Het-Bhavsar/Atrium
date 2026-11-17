@@ -17,14 +17,22 @@ Plate model: free edges, point supports at the pins only (flex, tape and cell ig
 
 ## Plinth magnets against the pogo lift (estimate, bench-verify)
 
-| Magnet | Steel | Gap | Pull, ideal | Pull, thin-steel limited | Two magnets | Plinth pogo lift | Net |
+| Magnet | Steel | Gap | Pull, ideal | Pull, thin-steel limited | Two magnets | Plinth pogo lift | Magnets alone |
 |---|---|---:|---:|---:|---:|---:|---:|
 | D2.5 x 1.5 N52 (design) | 0.10 SUS430 | 0.82 | 0.23 N | 0.20 N | 0.39 N | 0.60 N | pod floats |
 | D3 x 2 N52 | 0.10 SUS430 | 0.82 | 0.48 N | 0.20 N | 0.39 N | 0.60 N | pod floats |
 | D2.5 x 1.5, floor 0.3 thinner | 0.10 SUS430 | 0.52 | 0.45 N | 0.20 N | 0.39 N | 0.60 N | pod floats |
 
+## Plinth retention with the snap clips (2026-11-17 fix)
+
+| Clip material | Pull-out (two clips) | + magnets (thin-steel limited) | Pogo lift | Margin |
+|---|---:|---:|---:|---:|
+| SLA resin (E 2.5 GPa) | 4.3 N | 4.6 N | 0.6 N | 7.7x |
+| PLA (E 3.5 GPa) | 6.0 N | 6.4 N | 0.6 N | 10.6x |
+
 ## Reading it
 
 - The stiffener is stiff enough: tens of microns of deflection at the pads against about 1 mm of pogo travel, and stress well below yield.
 - Each glued pin carries about a quarter of the pogo load; glue and resin both have several times that strength.
-- The magnets are the weak link. A 0.10 mm steel sheet saturates near a small magnet, so two D2.5 x 1.5 discs at 0.82 mm probably pull less than two 0.3 N pogos push. In the Plinth the pod could float on its pins instead of seating. Fix before the Plinth is built: pogo pins of about 0.1 N, or stronger magnets / a thinner nest floor, and measure the pull on the bench. If JLC's steel is SUS304 rather than SUS430, the pull is close to zero. The charging case is not affected: its clips and lid hold the pod.
+- Magnets alone can't hold the pod: a 0.10 mm steel sheet saturates near a small magnet, so two D2.5 x 1.5 discs pull about 0.4 N against 0.6 N of Plinth pogo lift (and close to nothing if the steel is SUS304).
+- Fixed: the Plinth now has the charging case's two snap clips. They hold about 4-6 N against 0.6 N, whatever the steel grade; the magnets only centre the pod. Push-in is about 7-10 N, the same as the case.

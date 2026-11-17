@@ -43,6 +43,7 @@ Every check below passes on the current CAD.
 | Plinth magnets from the antenna zone | 7.06 mm (rule ≥ 5) |
 | Stiffener over the magnets, either way round | ≥ 65 % of each magnet face |
 | Pod rests on its frame in the Plinth, module clear | Base on the nest floor, module 0.20 clear |
+| Plinth clips hold the pod against the pogo lift | Hook 0.05 over the top round; pull-out 4.3 N (resin) vs 0.6 N |
 | Skin pad inside the footprint, full pad not a ring | 18.8 × 8.9, 1.05 inside the outline; 130 mm² bonded, largest hole 13.3 % |
 | Pad in the bed, behind the frame; module 0.05 proud of the pad | Edge 0.25 inside the lip; pad face 0.05 and module 0.10 below the frame |
 | Base floor under the bed | 0.30 mm |
@@ -188,10 +189,10 @@ Desk charger. CAD in `mechanical/plinth/`.
 
 - Ø28 × 8 mm puck. The pod nest is the outline + 0.15, 1.6 mm deep, so the pod sits either way round. A 0.3 mm window relief, both ways round, keeps the pod resting on its base and not on the optical module, which stands 0.1 mm proud.
 - **Pins:** two pogos, VIN at the nest centre and GND at GND_B, +2.2 mm (Ø2 mm SMD class [VERIFY stroke vs the pad recess]).
-- **Retention:** two Ø2.5 × 1.5 N52 discs under a 0.3 mm skin of the nest floor, ±2.55 mm across the pod from the centre pin.
-  - They pull on the SUS430 stiffener 0.8 mm away. With the magnets symmetric about the pod centre, a 180° turn keeps them under steel.
+- **Retention (2026-11-17): two snap clips, as in the charging case.** 0.8 × 3.0 mm beams rise from the nest floor at the middle of the pod's long sides, with hooks 0.20 mm over the pod's top round (contact 30° up the R1.8). Pull-out about 4.3 N in SLA resin (6.0 N in PLA) against 0.6 N of pogo lift; push-in about 7–10 N; beam strain 1.14 %. They hold the pod whatever the steel grade.
+  - Why: the stiffness check ([mech_stiffness.md](../hardware/simulation/mech_stiffness.md)) shows the 0.1 mm steel saturates, so the two magnets pull only about 0.4 N, less than the 0.6 N the two pogos push, and close to nothing if JLC's steel is SUS304.
+  - The two Ø2.5 × 1.5 N52 discs stay under a 0.3 mm skin of the nest floor, ±2.55 mm across the pod from the centre pin: they pull the pod into the nest and centre it. A 180° turn keeps them under steel.
   - There is no magnet in the pod; the antenna zone is about 7 mm away and the IMU has no magnetometer.
-  - Pull on a 0.1 mm sheet saturates early: estimate 0.3–0.6 N total [EST, measure]. That must beat both pogo forces, so use pins of ≤ 0.3 N at working stroke. If the bench says no, fall back to a flip-down lid.
 - **Light line:** a 0.8 mm ring groove for a light-pipe ring, the only light in the system.
 - **Other:** the USB-C cut-out is in the side. The Plinth electronics are not designed yet.
 
