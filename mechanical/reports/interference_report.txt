@@ -23,7 +23,7 @@ atrium_pod.py check(), 20.9 x 11.0 x 5.45 mm
   [PASS] pad covers every contact hole while worn (it comes off before charging): covered: VIN, GND_A, GND_B, SWDIO, SWDCLK
   [PASS] Plinth magnets >= 5.0 mm from the antenna zone: 7.06 mm
   [PASS] magnet pockets clear of the pin bores (>= 0.2 wall): 0.22 mm
-  [PASS] stiffener pins: holes >= 0.25 inside flex and steel, flex body = stiffener footprint, pin clearance in the holes: hole edge to edge 0.27 mm; flex y 1.45-9.55 vs steel 1.45-9.55; radial pin clearance 0.075 mm; pin top z 0.620 = steel top
+  [PASS] stiffener pins: flex holes >= 0.25 inside the flex, steel on the body (JLC 0.1 inset, U-slots), pin clearance: flex hole edge to edge 0.27 mm; flex y 1.45-9.55 vs steel 1.55-9.45 x 4.85-13.2 (U-slots); radial pin clearance 0.075 mm; pin top z 0.620 = steel top
   [PASS] stiffener over both magnets, either way round: min 100 % of a magnet face under steel; magnet to steel 0.82 mm [VERIFY pull]
   -- routed boards: EasyEDA exports in mechanical/boards/ --
   [PASS] routed boards: no part body clashes with the shell, base, gasket, cell, stiffener, flex or the other board: none

@@ -1,17 +1,17 @@
 # Contact-stack mechanics under the pogo pins
 
-Stiffener 8.55 x 8.10 x 0.1 mm SUS430 (E 200 GPa), on four pins at (5.7, 2.025), (5.7, 8.975), (12.35, 2.025), (12.35, 8.975). Pogo 0.3 N per pin at working stroke.
+Stiffener 8.35 x 7.90 x 0.1 mm SUS430 (E 200 GPa), on four pins at (5.7, 2.025), (5.7, 8.975), (12.35, 2.025), (12.35, 8.975). Pogo 0.3 N per pin at working stroke.
 Plate model: free edges, point supports at the pins only (flex, tape and cell ignored: conservative).
 
 | Load case | Max deflection | At the pads | Peak stress | Stress / yield | Max pin pull |
 |---|---:|---|---:|---:|---:|
-| Plinth (VIN + GND_B) | 52.1 um | VIN 37.8 um, GND_B 48.0 um | 127 MPa | 62 % | 0.264 N |
-| Case / jig (VIN, GND_B, SWDIO, SWDCLK) | 55.8 um | VIN 54.1 um, GND_B 54.5 um, SWDIO 28.3 um, SWDCLK 28.3 um | 143 MPa | 70 % | 0.309 N |
+| Plinth (VIN + GND_B) | 54.3 um | VIN 39.1 um, GND_B 50.4 um | 135 MPa | 66 % | 0.264 N |
+| Case / jig (VIN, GND_B, SWDIO, SWDCLK) | 58.6 um | VIN 56.0 um, GND_B 57.2 um, SWDIO 29.4 um, SWDCLK 29.4 um | 151 MPa | 74 % | 0.309 N |
 
 ## Pins, glue and base
 
 - Pin D0.45 in a D0.6 hole: 0.075 mm radial glue gap over 0.21 mm (flex + steel).
-- Glue: 0.297 mm2 per pin x 5 MPa = 1.48 N per pin against 0.309 N: safety 4.8x.
+- Glue: 0.321 mm2 per pin x 5 MPa = 1.61 N per pin against 0.309 N: safety 5.2x.
 - Pin root (SLA resin, 30 MPa derated): 4.77 N per pin: safety 15.4x.
 - Base strip 2.0 mm wide x 0.35 mm, 1.47 mm from pin to rim: stress 11.2 MPa (resin flexural ~60 MPa), deflection 18.5 um.
 
